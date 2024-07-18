@@ -2,10 +2,10 @@ Package: drivesR
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Author: person("Katherine","Muller",,"katherine.muller@usda.gov", role = c("aut","cre"), comment = c(ORCID = "MYORCID"))
+Maintainer: The package maintainer <katherine.muller@usda.gov>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
