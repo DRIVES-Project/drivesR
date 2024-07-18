@@ -10,6 +10,7 @@
 #' temp1 <- F_to_C(50);
 #' temp2 <- F_to_C(c(50,63,23))
 F_to_C <- function(F_temp){
+  if(!is.numeric(F_temp))stop("F_temp must be a number or numeric vector.")
   C_temp <- (F_temp - 32) * 5/9;
   return(C_temp);
 }
@@ -26,6 +27,7 @@ F_to_C <- function(F_temp){
 #' temp1 <- C_to_F(22);
 #' temp2 <- C_to_F( c(-2, 12, 23));
 C_to_F <- function(C_temp){
+  if(!is.numeric(C_temp))stop("C_temp must be a number or numeric vector.")
   F_temp <- (C_temp * 9/5) + 32;
   return(F_temp);
 }
