@@ -65,7 +65,6 @@ kg_to_lb <- function(kg_wt){
 #' @return a value or numeric vector of the same area in hectares
 #' @export
 #'
-#' @examples
 acre_to_hectare <- function(acres){
   haPerAcre = 0.4046856
   hectares = acres * haPerAcre
@@ -79,7 +78,6 @@ acre_to_hectare <- function(acres){
 #' @return A value or numeric  vector in the equivalent per-hectare unit, e.g., seeds/ha
 #' @export
 #'
-#' @examples
 unitacre_to_unithectare <- function(unitacre){
   acresPerHa = 2.471054
   unithectare = unitacre*acresPerHa
