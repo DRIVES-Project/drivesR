@@ -94,18 +94,18 @@ lbacre_to_kghectare <- function(lbacre){
 }
 #TODO----------
 
-bushel_to_kg <- function(bushels, bushelwt = "USDA"){
-  
-}
-
-
-bushelPerAcre_to_kgPerHectare <- function(bua, testwt = "USDA"){
-  
-}
-
-getDryWt <- function(inputwt, percent_moisture){
-  
-}
-
+# bushel_to_kg <- function(bushels, bushelwt = "USDA"){
+#   
+# }
+# 
+# 
+# bushelPerAcre_to_kgPerHectare <- function(bua, testwt = "USDA"){
+#   
+# }
+# 
+# getDryWt <- function(inputwt, percent_moisture){
+#   
+# }
+# 
 
 
