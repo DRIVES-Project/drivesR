@@ -16,6 +16,6 @@
 #' df2 <- df1[,colsIWant]
 #' 
 print_stringvec_as_commasep <- function(mystringvec){
-  output <- cat(paste(shQuote(mystringvec,type="cmd"), collapse=" ,"))
-  print(output)
+  cat(paste(shQuote(mystringvec), collapse=" ,"))
+  
 }
