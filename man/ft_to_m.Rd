@@ -16,6 +16,6 @@ Length in meters
 Convert length from feet to meters
 }
 \examples{
-ft_len(8);
-ft_len(c(8,9,10))
+ft_to_m(8);
+ft_to_m(c(8,9,10))
 }

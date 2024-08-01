@@ -7,8 +7,8 @@
 #' @export
 #'
 #' @examples
-#' ft_len(8);
-#' ft_len(c(8,9,10))
+#' ft_to_m(8);
+#' ft_to_m(c(8,9,10))
 ft_to_m <- function(ft_len){
  return(ft_len * 0.3048) 
 }

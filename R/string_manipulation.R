@@ -9,7 +9,7 @@
 #' 
 #' @examples 
 #' df1 <- as.data.frame(matrix(1:26, nrow = 1, ncol = 26, dimnames = list(NULL,LETTERS)));
-#' print_stringvec(LETTERS);
+#' print_stringvec_as_commasep(LETTERS);
 #' # Copy the output into the script, remove a handful of values I don't want
 #' # for whatever arbitrary, difficult-to-code reason.
 #' colsIWant <- c("A" ,"B" ,"C" ,"D" ,"M"  ,"S" ,"T" ,"U" ,"V" ,"W" ,"X" ,"Y" ,"Z");
