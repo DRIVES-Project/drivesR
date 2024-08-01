@@ -13,7 +13,7 @@ is.ISOdate(d)
 \item{d}{a vector of dates in character format}
 }
 \value{
-a vector of TRUE and FALSE indicating whether each date is in ISO format.
+a vector of TRUE and FALSE indicating whether each date is in ISO format. NAs are returns as NA.
 }
 \description{
 Check if dates are in ISO format.
@@ -22,6 +22,6 @@ recognizable YYYY-MM-DD format. This works with - or / separators.
 It Also works with single digit month or day.
 }
 \examples{
-myd = c("2024-01-01","2022-01-01","6/23/22","24-01-01")
+myd = c("2024-01-01","2022-01-01","6/23/22","24-01-01", NA,"jbs")
 is.ISOdate(myd)
 }
