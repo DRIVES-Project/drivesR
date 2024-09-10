@@ -41,42 +41,6 @@ date_formats <- list(
 #save(date_formats,file= "data/date_formats.rda")
 
 
-#' Identify date formats
-#'
-#' @param date Single string containing a date.  
-#' For a vector of dates, use lapply or sapply. 
-#' @return a vector of date formats that match the input date (including MDY and DMY). 
-#' If the date does not match any in date_formats, returns "Unknown Format". This also applies if date is missing any component of day, month, and year.
-#' @export
-#'
-#' @examples
-#' identify_date_format(")
-identify_date_format <- function(date, type = c("us","euro")[1]){
-  #require(lubridate)
-  #require(dplyr)
-  if(type=="us"){
-    datevec <- c(date_formats$yyyymd, date_formats$mdy, date_formats$bmo)
-  }
-  if(type == "euro"){
-    datevec <- c(date_formats$yyyymd, date_formats$dmy, date_formats$bmo)
-  }
-  parsevec <- c()
-  for(fmt in datevec){
-    parsed_date <- as.Date(date, format = fmt)
-    if(!is.na(parsed_date)){
-      ## prevent one-or two-digit number from being converted to 
-      # a four-digit year. 
-      if(substr(parsed_date,1,1)!=0){
-      parsevec <- c(parsevec, fmt)
-      }
-      }
-  }
-  if(is.null(parsevec)){
-    return("Unknown Format")
-  }else{
-    return(parsevec)
-  }
-}
 
 
 #' Check if dates are in ISO format.
