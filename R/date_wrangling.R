@@ -1,30 +1,42 @@
-date_formats <- c(
-  "%Y-%m-%d",	# 2024-08-01
-  "%d-%m-%Y",	# 01-08-2024
-  "%m-%d-%Y",	# 08-01-2024
-  "%Y/%m/%d",	# 2024/08/01
-  "%d/%m/%Y",	# 01/08/2024
-  "%m/%d/%Y",	# 08/01/2024
-  "%d-%m-%y",	# 01-08-24
-  "%m-%d-%y",	# 08-01-24
-  "%y-%m-%d",	# 24-08-01
-  "%d/%m/%y",	# 01/08/24
-  "%m/%d/%y",	# 08/01/24
-  "%d %b %Y",	# 01 Aug 2024
-  "%d %B %Y",	# 01 August 2024
-  "%b %d, %Y",   # Aug 01, 2024
-  "%B %d, %Y",   # August 01, 2024
-  "%Y-%m",   	# 2024-08
-  "%m/%Y",   	# 08/2024
-  "%d-%b-%Y",	# 01-Aug-2024
-  "%d %b %y",	# 01 Aug 24
-  "%d %B %y",	# 01 August 24
-  "%b %d, %y",   # Aug 01, 24
-  "%B %d, %y",   # August 01, 24
-  "%y/%m/%d",	# 24/08/01
-  "%d-%b-%y",	# 01-Aug-24
-  "%d %b %Y",	# 01 Aug 2024
-  "%b %d, %Y"	# Aug 01, 2024
+
+date_formats <- list(
+  mdy = c(
+    "%m-%d-%Y",	# 08-01-2024
+    "%m/%d/%Y",	# 08/01/2024
+    "%m-%d-%y",	# 08-01-24
+    "%m/%d/%y"	# 08/01/24
+  ),
+  yyyymd = c(
+    "%Y-%m-%d",	# 2024-08-01
+    "%Y/%m/%d"	# 2024/08/01
+    
+  ),
+  bmo = c(
+    "%b %d, %Y",   # Aug 01, 2024
+    "%B %d, %Y",   # August 01, 2024
+    "%d %b %Y",	# 01 Aug 2024
+    "%d %B %Y",	# 01 August 2024
+    "%d-%b-%Y",	# 01-Aug-2024
+    "%d %b %y",	# 01 Aug 24
+    "%d %B %y",	# 01 August 24
+    "%d-%b-%y",	# 01-Aug-24
+    "%d %b %Y",	# 01 Aug 2024
+    "%b %d, %Y",	# Aug 01, 2024
+    "%b %d, %y",   # Aug 01, 24
+    "%B %d, %y"   # August 01, 24
+  ),
+  dmy = c(
+    "%d-%m-%Y",	# 01-08-2024
+    "%d/%m/%Y",	# 01/08/2024
+    "%d-%m-%y",	# 01-08-24
+    "%d/%m/%y"	# 01/08/24
+  ),
+  unlikely = c(
+    "%y-%m-%d",	# 24-08-01
+    "%Y-%m",   	# 2024-08
+    "%m/%Y",   	# 08/2024
+    "%y/%m/%d"	# 24/08/01
+  )
 )
 #save(date_formats,file= "data/date_formats.rda")
 
@@ -39,15 +51,25 @@ date_formats <- c(
 #'
 #' @examples
 #' identify_date_format(")
-identify_date_format <- function(date){
+identify_date_format <- function(date, type = c("us","euro")[1]){
   #require(lubridate)
   #require(dplyr)
+  if(type=="us"){
+    datevec <- c(date_formats$yyyymd, date_formats$mdy, date_formats$bmo)
+  }
+  if(type == "euro"){
+    datevec <- c(date_formats$yyyymd, date_formats$dmy, date_formats$bmo)
+  }
   parsevec <- c()
-  for(fmt in date_formats){
-    parsed_date <- as.Date(date, format = fmt)  
+  for(fmt in datevec){
+    parsed_date <- as.Date(date, format = fmt)
     if(!is.na(parsed_date)){
+      ## prevent one-or two-digit number from being converted to 
+      # a four-digit year. 
+      if(substr(parsed_date,1,1)!=0){
       parsevec <- c(parsevec, fmt)
-    }
+      }
+      }
   }
   if(is.null(parsevec)){
     return("Unknown Format")
