@@ -104,7 +104,7 @@ make_collection_json <- function(columndf = test_column_dict[which(test_column_d
 #' @examples
 #' # Accessing database content (here, it is information about collections)
 #' collectionsreq <- api_request("GET", mytarget = "collections")
-#' collectionjson <- jsonlite::toJSON(httr::content(collectionreq), pretty=TRUE, auto_unbox = TRUE) 
+#' collectionjson <- jsonlite::toJSON(httr::content(collectionsreq), pretty=TRUE, auto_unbox = TRUE) 
 #' 
 #' # Modifying database content (here it is adding a new collection)
 #' testcollection <- make_collection_json()# default with sample data dictionary 
