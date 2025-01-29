@@ -34,3 +34,5 @@ pg_to_directus_type <- function(pgtype){
     stop("pgtype not in list")
   }
 }
+
+
