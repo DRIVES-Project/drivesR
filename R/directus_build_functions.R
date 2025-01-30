@@ -192,3 +192,20 @@ make_relations_json <- function(columndf = test_column_dict[which(test_column_di
   }
 }
 
+#' Convert a dataframe or tibble to a json object suitable to insert rows (items)
+#'  
+#' Basically just the jsonlite::toJSON function with options set to non-defaults 
+#' for conventience
+#' @param mydf 
+#' A dataframe or tibble with quality control steps complete
+#' @returns
+#' A prettified json object 
+#' @export
+#' @import jsonlite
+#'
+#' @examples
+#' testdf <- data.frame(x = 1:5, y = LETTERS[1:5])
+#' insert_json <- make_row_insert_json(testdf)
+make_row_insert_json <- function(mydf){
+  jsonlite::toJSON(mydf, pretty = TRUE, auto_unbox=TRUE)
+}

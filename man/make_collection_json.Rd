@@ -12,7 +12,7 @@ make_collection_json(
 \arguments{
 \item{columndf}{A dataframe of schema information about each column (field) from the column dictionary.}
 
-\item{tablerow}{A one-row dataframe of schema information about the table (collection) from the collection dictionary}
+\item{tablerow}{A one-row dataframe of schema information about the table (collection) from the table dictionary.}
 }
 \value{
 A character string for the corresponding data type recognized by the Directus API.
