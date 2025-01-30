@@ -35,44 +35,6 @@ pg_to_directus_type <- function(pgtype){
   }
 }
 
-#' Make a collection schema json object from data dictionary tables
-#'
-#' @param columndf 
-#' A dataframe of schema information about each column (field) from the column dictionary.
-#' @param tablerow 
-#' A one-row dataframe of schema information about the table (collection) from the collection dictionary
-#'
-#' @returns
-#' A character string for the corresponding data type recognized by the Directus API.
-#' @export
-#' @import jsonlite
-#'
-#' @examples
-#' my_collection_json <- make_collection_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_cat_info"),],
-#'                                             test_table_dict[1,])
-#' 
-#' 
-make_collection_json <- function(columndf = test_column_dict[which(test_column_dict$table_name=="test_cat_info"),],
-                                 tablerow = test_table_dict[1,]){
-  field_json_list <- lapply(1:nrow(columndf), function(i){
-    list(collection = columndf$table_name[i], 
-         field = columndf$column_name[i],
-         type = pg_to_directus_type(columndf$postgres_data_type[i]) ,
-         meta = list( note = columndf$description[i],
-                      sort = columndf$column_order[i]),
-         schema = list(is_primary_key = columndf$primary_key[i],
-                       is_nullable = columndf$nullable[i],
-                       is_unique = columndf$unique_value[i],
-                       has_auto_increment = columndf$auto_increment[i]
-         ))  
-  })
-  collection_list <- list("collection" = tablerow$table_name,
-                          "meta" = list(note = paste(tablerow$description, tablerow$organization, sep="\n ")),
-                          "schema" = list("name" = tablerow$table_name),
-                          "fields" = field_json_list)
-  collection_json <-  jsonlite::toJSON(collection_list, pretty = TRUE, auto_unbox = TRUE) 
-  return(collection_json)
-}
 
 #' Send a request to the Directus API
 #' https://docs.directus.io/
@@ -133,6 +95,100 @@ api_request <- function(myverb = "POST",
            "Authorization" = mytoken
          )
     )
+  }
+}
+
+#' Make a collection schema json object from data dictionary tables
+#'
+#' @param columndf 
+#' A dataframe of schema information about each column (field) from the column dictionary.
+#' @param tablerow 
+#' A one-row dataframe of schema information about the table (collection) from the table dictionary.
+#'
+#' @returns
+#' A character string for the corresponding data type recognized by the Directus API.
+#' @export
+#' @import jsonlite
+#'
+#' @examples
+#' my_collection_json <- make_collection_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_cat_info"),],
+#'                                             test_table_dict[1,])
+#' 
+#' 
+make_collection_json <- function(columndf = test_column_dict[which(test_column_dict$table_name=="test_cat_info"),],
+                                 tablerow = test_table_dict[1,]){
+  field_json_list <- lapply(1:nrow(columndf), function(i){
+    list(collection = columndf$table_name[i], 
+         field = columndf$column_name[i],
+         type = pg_to_directus_type(columndf$postgres_data_type[i]) ,
+         meta = list( note = columndf$description[i],
+                      sort = columndf$column_order[i]),
+         schema = list(is_primary_key = columndf$primary_key[i],
+                       is_nullable = columndf$nullable[i],
+                       is_unique = columndf$unique_value[i],
+                       has_auto_increment = columndf$auto_increment[i]
+         ))  
+  })
+  collection_list <- list("collection" = tablerow$table_name,
+                          "meta" = list(note = paste(tablerow$description, tablerow$organization, sep="\n ")),
+                          "schema" = list("name" = tablerow$table_name),
+                          "fields" = field_json_list)
+  collection_json <-  jsonlite::toJSON(collection_list, pretty = TRUE, auto_unbox = TRUE) 
+  return(collection_json)
+}
+
+#' Make relations json schema objects from data dictionary tables
+#'
+#' @param columndf 
+#' A dataframe of schema information about each column (field) from the column dictionary.
+#' @param tablerow 
+#' A one-row dataframe of schema information about the table (collection) from the table dictionary.
+#' @param update_action
+#' Action if the foreign key value is modified in it's original table. The default is CASCADE, which
+#' means that the update will cascade to related records. NO ACTION prevents records from being modified if they have
+#' dependent records 
+#' 
+#' @param delete_action 
+#' Action if the foreign key is deleted in its original table. The default is NO ACTION, which prevents records
+#' from being modified if they have dependent records. Another useful option might be SET DEFAULT or SET NULL.
+#'
+#' @returns
+#' A list of json objects. This list must be subsetted to use in api calls
+#' @export
+#' 
+#' @examples
+#' 
+#' testrel <- make_relations_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_favorite_toy"),],
+#'                                tablerow = test_table_dict[2,])
+#
+#' # If the table has multiple foreign keys, you can use this in a loop (lapply doesn't work)
+#' rel_req <- api_request("POST",mytarget = "relations",jsonbody = testrel[[1]])
+#' 
+#' 
+#' @import jsonlite
+make_relations_json <- function(columndf = test_column_dict[which(test_column_dict$table_name=="test_favorite_toy"),],
+                                tablerow = test_table_dict[2,],
+                                update_action = "CASCADE",
+                                delete_action = "NO ACTION"){
+  fkdf <- columndf[which(!is.na(columndf$foreign_key_table)),]
+  if(nrow(fkdf) > 0){
+    rel_json <- lapply(1:nrow(fkdf), function(i){
+      rel_list <- list(collection = tablerow$table_name,
+                       field = fkdf$column_name[i],
+                       related_collection = fkdf$foreign_key_table[i],
+                       schema = list(constraint_name = paste0("fkey_",fkdf$column_name),
+                                     table = tablerow$table_name,
+                                     column = fkdf$column_name[i],
+                                     foreign_key_table = fkdf$foreign_key_table[i],
+                                     foreign_key_column = fkdf$foreign_key_column[i],
+                                     on_update = update_action, 
+                                     on_delete = delete_action
+                       ),
+                       meta = NA
+                  )
+       return(jsonlite::toJSON(rel_list, pretty=TRUE, auto_unbox = TRUE))
+    })
+    return(rel_json)
   }
 }
 
