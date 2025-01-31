@@ -206,6 +206,9 @@ make_relations_json <- function(columndf = test_column_dict[which(test_column_di
 #' @examples
 #' testdf <- data.frame(x = 1:5, y = LETTERS[1:5])
 #' insert_json <- make_row_insert_json(testdf)
+#' # example with API request:
+#' test_insert <- make_row_insert_json(test_cat_info)
+#' insert_req <- api_request("POST","items/test_cat_info",test_insert)
 make_row_insert_json <- function(mydf){
   jsonlite::toJSON(mydf, pretty = TRUE, auto_unbox=TRUE)
 }
