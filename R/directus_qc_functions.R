@@ -21,7 +21,7 @@
 #' @importFrom dplyr inner_join
 #' @examples
 #' # set mytoken in function or with set_default_token()
-#' # Not run: site_info_check <- check_dictionary(table_name = "site_info",mytoken = "Bearer {myAPItoken}") 
+#' # Not run:  site_info_check <- check_dictionary(table_name = "site_info",mytoken = "Bearer {myAPItoken}") 
 #' 
 check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPItoken}"){
   ## get metadata info from Directus  
@@ -29,7 +29,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPIto
     if(!is.null(table_info)){
       table_info <- jsonlite::flatten(table_info)
     }else{
-      stop("table_name not found in Directus")
+      stop("Invalid token or collection url.")
     }
     qlist <- list(
       query = list(
@@ -133,3 +133,5 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPIto
     return(checkdf)
 
 }
+
+check_categories <- function(table_name = "site_info")
