@@ -66,13 +66,13 @@ get_db_info <- function(mytarget = "collections",
   if(!output_format %in% c("json","data.frame")){
     stop("output must be 'json' or 'data.frame'")
   }
-  table_req <- GET(
+  table_req <- httr::GET(
     glue::glue("{myurl}/{mytarget}"),
-    add_headers(
+    httr::add_headers(
       "Authorization" = mytoken
     )
   )
-  table_resp <- content(table_req, as="text")
+  table_resp <- httr::content(table_req, as="text")
   if(output_format == "json"){
     output <- jsonlite::prettify(table_resp)
   }
@@ -95,7 +95,7 @@ get_db_info <- function(mytarget = "collections",
 #' @import httr
 #' @examples
 get_table_from_req <- function(apirequest = NULL){
-  resp <- httr::content(apireq, as= "text")
+  resp <- httr::content(apirequest, as= "text")
   output <- jsonlite::fromJSON(resp)[["data"]]
   return(output)
 }
