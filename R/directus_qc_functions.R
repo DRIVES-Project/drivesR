@@ -31,7 +31,8 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPIto
     }else{
       stop("Invalid token or collection url.")
     }
-    qlist <- list(
+  # get rows from column dictionary  
+  qlist <- list(
       query = list(
         filter = list(
           table_name = list(
@@ -40,8 +41,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPIto
         )
       )
     )
-    
-    # get rows from column dictionary
+  
     qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
     
     dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken)
@@ -134,4 +134,167 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPIto
 
 }
 
-check_categories <- function(table_name = "site_info")
+
+
+#' Check category dictionary
+#' 
+#' Checks for discrepancies between the category dictionary and 
+#' column dictionary and input data. 
+#' 
+#' @param table_name 
+#' The table (collection) identifier
+#' 
+#' @param mytoken 
+#' Directus token. Can be set in the function or via set_default_token()
+#' 
+#' @param inputdf 
+#' A data frame of prospective rows to be added to the table. 
+#' If NULL, the function checks the category and column dictionaries. 
+#' 
+#' @returns
+#' If inputdf = NULL, it returns a data frame describing conditions and outcomes corresponding to 
+#' particular tables and fields. 
+#' If inputdf is provided, it returns a list with a dataframe of conditions (checkdf) and a list of 
+#' categorical values in the input data that are missing from the category dictionary. This list can
+#' be used to ammend the category dictionary. 
+#' 
+#' @export
+#' @import jsonlite
+#' @import httr
+#' @examples
+#' #Not run: check_categories("site_info") 
+#' 
+check_categories <- function(table_name = "site_info",mytoken = "Bearer {myAPItoken}", inputdf = NULL){
+  ## filter query for column and category dictionary.
+  qlist <- list(
+    query = list(
+      filter = list(
+        table_name = list(
+          "_eq" = table_name
+        )
+      )
+    )
+  )
+  qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
+  col_dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken) 
+  col_dict_table <- get_table_from_req(apirequest = col_dict_req)
+  if(length(col_dict_table) ==0){
+    stop("table_name not found in column_dictionary")
+  }
+  cat_fields_tdict <- col_dict_table$column_name[which(col_dict_table$is_category)]
+  if(length(cat_fields_tdict)==0){
+    stop("no category fields in column dictionary")
+  }
+  cat_dict_req <- api_request("SEARCH","items/category_dictionary",qjson, mytoken = mytoken)
+  cat_dict_table <- get_table_from_req(apirequest = cat_dict_req)
+  if(length(cat_dict_table) ==0){
+    stop("table_name not found in category dictionary")
+  }
+  # check that fields marked as categories in the column dictionary are included in the category dictionary
+  checkdf <- data.frame(table = NA,condition = NA, outcome = NA,fields=NA)
+  cat_fields_catdict <- unique(cat_dict_table$column_name)
+  in_cat_not_cdict <- setdiff(cat_fields_catdict, cat_fields_tdict)
+  
+  condname <- "All fields are categories in column_dictionary" 
+  cond <- length(in_cat_not_cdict) == 0
+  dfields <- ifelse(cond, NA, paste(in_cat_not_cdict, collapse=";"))
+  checkdf[1,] <- c("category_dictionary",condname, cond, dfields)
+  
+  # check that the categorical values in the data frame are accounted for in the category dictionary. 
+  in_cdict_not_cat <- setdiff(cat_fields_tdict, cat_fields_catdict)
+  condname <- "No fields are missing from category_dictionary"
+  cond <- length(in_cdict_not_cat) == 0
+  dfields <- ifelse(cond, NA, paste(in_cdict_not_cat, collapse=";"))
+  checkdf <- rbind(checkdf,c("column_dictionary",condname, cond, dfields))
+  
+  # stop here if not providing an input data frame--just checking dictionaries. 
+  if(is.null(inputdf)){
+    return(checkdf) 
+  }else{
+    # check for missing category columns
+    missingcat <- setdiff(cat_fields_catdict, names(inputdf))
+    condname <- "No missing category columns"
+    cond <- length(missingcat) == 0
+    dfields <- ifelse(cond, NA, paste(missingcat, collapse=";"))
+    checkdf <- rbind(checkdf,c("inputdf",condname, cond, dfields))
+    
+    # check for category values in input data missing from category dictionary
+    ## use field names from category dictionary
+    addvals <- c()
+    addvals_names <- c()
+    for(i in 1:length(cat_fields_catdict)){
+      cf <- cat_fields_catdict[i]
+      inputvals <- unique(inputdf[,cf][!is.na(inputdf[,cf])])
+      catvals <- cat_dict_table$category_level[which(cat_dict_table$column_name==cf)]
+      ## category values in input data missing from category_dictionary
+      inputvals_not_catvals <- setdiff(inputvals, catvals)
+      if(length(inputvals_not_catvals) > 0){
+        addvals_names <- c(addvals_names, cf)
+        addvals <- append(addvals, list(inputvals_not_catvals))
+      }
+    }
+    names(addvals) <- addvals_names
+    
+    condname <- "All values present in category_dictionary"
+    cond <- length(addvals) == 0
+    if(!cond){
+      dfields <- paste(addvals_names, collapse=";")
+    }
+     
+    checkdf <- rbind(checkdf,c("inputdf",condname, cond, dfields))
+    
+    return(list(checkdf = checkdf, missing_cats = addvals))
+    
+  } #end else 
+}#end function
+
+
+#' Check column names
+#' 
+#' Quality control step to check column names in a data frame to be imported into Directus.
+#' 
+#' @param table_name 
+#'  Table identifier, such as "site_info"
+#' @param inputdf 
+#'  Dataframe to be evaluated. 
+#'  
+#' @param mytoken
+#' Directus token. Can be set in the function or through set_default_token()
+#'
+#' @returns
+#' A dataframe of checks, outcomes, and relevant fields. 
+#' 
+#' @export
+#' 
+#' @import jsonlite
+#' @import httr
+#' @import glue
+#' @examples
+#' #Not run: check_column_names("site_info", mydf)
+check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken = mytoken){
+  ## get fields from directus
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken)
+  if(!is.null(table_info)){
+    table_info <- jsonlite::flatten(table_info)
+  }else{
+    stop("Invalid token or collection url.")
+  }
+  
+  checkdf <- data.frame("condition"=NA,"outcome"=NA,"fields"=NA)
+  
+  # fields in inputdf not in collection
+  condname <- "Inputdf fields match collection"
+  in_input_not_coll <- setdiff(names(inputdf), table_info$field)
+  cond <- length(in_input_not_coll) == 0
+  dfields <- ifelse(cond,NA, paste(in_input_not_coll, collapse=";"))
+  checkdf[1,] <- c(condname, cond, dfields)
+  
+  # fields in collection missing from inputdf
+  condname <- "All fields present in inputdf"
+  in_coll_not_input <- setdiff(table_info$field, names(inputdf))
+  cond <- length(in_coll_not_input) == 0
+  dfields <- ifelse(cond,NA, paste(in_coll_not_input, collapse=";"))
+  checkdf <- rbind(checkdf, c(condname, cond, dfields))
+  
+  return(checkdf)
+}
