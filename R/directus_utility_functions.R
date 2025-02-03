@@ -46,7 +46,7 @@ httr_dry_run <- function(r) {
 #' formals(api_request)$mytoken
 #' 
 set_default_token <- function(usertoken){
-  apifuns <- c("api_request","get_db_table","get_db_info","check_dictionary")
+  apifuns <- c("api_request","get_db_table","get_db_info","check_dictionary","check_categories","check_column_names")
   for(af in apifuns){
     mycode = glue::glue("formals({af})$mytoken <- '{usertoken}'")
     rstudioapi::sendToConsole(mycode)  
