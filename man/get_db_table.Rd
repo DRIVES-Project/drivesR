@@ -5,9 +5,10 @@
 \title{Fetch an entire table from Directus}
 \usage{
 get_db_table(
-  table_name = "test_cat_info",
+  table_name = "site_info",
   myurl = "https://data.drives-network.org",
-  mytoken = "Bearer {myAPItoken}"
+  mytoken = "Bearer {myAPItoken}",
+  mylimit = "-1"
 )
 }
 \arguments{
@@ -16,6 +17,9 @@ get_db_table(
 \item{myurl}{The database url. By default, "https://data.drives-network.org"}
 
 \item{mytoken}{The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets}
+
+\item{mylimit}{Can be used to set a limit to the number of rows. By default, limit = "-1", which imports all rows.
+It may be desirable to import rows in batches for very large tables.}
 }
 \value{
 A data frame containing all rows and columns of the specified table

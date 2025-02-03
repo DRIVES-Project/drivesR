@@ -7,6 +7,9 @@
 #' The database url. By default, "https://data.drives-network.org"
 #' @param mytoken 
 #' The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets
+#' @param mylimit
+#' Can be used to set a limit to the number of rows. By default, limit = "-1", which imports all rows.
+#' It may be desirable to import rows in batches for very large tables. 
 #' @returns
 #' A data frame containing all rows and columns of the specified table
 #' @export
@@ -16,11 +19,12 @@
 #' @examples
 #' testdf <- get_db_table("test_cat_info")
 #' 
-get_db_table <- function(table_name = "test_cat_info", 
+get_db_table <- function(table_name = "site_info", 
                          myurl = "https://data.drives-network.org",
-                         mytoken = "Bearer {myAPItoken}"){
+                         mytoken = "Bearer {myAPItoken}",
+                         mylimit = "-1"){
   table_req <- GET(
-    glue::glue("{myurl}/items/{table_name}"),
+    glue::glue("{myurl}/items/{table_name}?limit={mylimit}"),
     add_headers(
       "Authorization" = mytoken
     )
