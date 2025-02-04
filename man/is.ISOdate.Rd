@@ -2,26 +2,26 @@
 % Please edit documentation in R/date_wrangling.R
 \name{is.ISOdate}
 \alias{is.ISOdate}
-\title{Check if dates are in ISO format.
-Returns TRUE if a vector of character string dates is in a
-recognizable YYYY-MM-DD format. This works with - or / separators.
-It Also works with single digit month or day.}
+\title{Check if dates are in ISO format.}
 \usage{
-is.ISOdate(d)
+is.ISOdate(d, sepstr = NULL)
 }
 \arguments{
 \item{d}{a vector of dates in character format}
+
+\item{sepstr}{Specified separator character (usually -). Useful for applications that don't recognize / separator.}
 }
 \value{
 a vector of TRUE and FALSE indicating whether each date is in ISO format. NAs are returns as NA.
 }
 \description{
-Check if dates are in ISO format.
 Returns TRUE if a vector of character string dates is in a
-recognizable YYYY-MM-DD format. This works with - or / separators.
+YYYY-MM-DD format recognized by as.Date.
+as.Date recognizes - or / separators.
 It Also works with single digit month or day.
 }
 \examples{
-myd = c("2024-01-01","2022-01-01","6/23/22","24-01-01", NA,"jbs")
+myd = c("2024-01-01","2022/04/01","2023-15-01","6/23/22","24-01-01", NA,"jbs")
+cbind(myd, is.ISOdate(myd), is.ISOdate(myd, sep="-"))
 is.ISOdate(myd)
 }

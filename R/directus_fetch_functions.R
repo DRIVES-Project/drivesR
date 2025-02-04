@@ -50,6 +50,8 @@ get_db_table <- function(table_name = "site_info",
 #' Base URL for the drives database.
 #' @param mytoken 
 #' User-specific Directus API token, in the format "Bearer {myAPItoken}" without curly brackets.
+#' @param flatten
+#' If FALSE (default), the data dataframe will be nested. If TRUE, it will be flattened. Irrelevant if output is json.
 #' @returns
 #' A dataframe (default) or json string with schema and other metadata information pulled from directus
 #' @export
@@ -66,7 +68,8 @@ get_db_table <- function(table_name = "site_info",
 get_db_info <- function(mytarget = "collections",
                         output_format = c("data.frame","json")[1],
                          myurl = "https://data.drives-network.org",
-                         mytoken = "Bearer {myAPItoken}"){
+                         mytoken = "Bearer {myAPItoken}",
+                         flatten = FALSE){
   if(!output_format %in% c("json","data.frame")){
     stop("output must be 'json' or 'data.frame'")
   }
@@ -81,7 +84,10 @@ get_db_info <- function(mytarget = "collections",
     output <- jsonlite::prettify(table_resp)
   }
   if(output_format == "data.frame"){
-    output <- jsonlite::fromJSON(table_resp)[["data"]]  
+    output <- jsonlite::fromJSON(table_resp)[["data"]]
+    if(flatten==TRUE){
+      output <- jsonlite::flatten(output)
+    }
   }
   return(output)
 }

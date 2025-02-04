@@ -164,7 +164,9 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPIto
 #' @examples
 #' #Not run: check_categories("site_info") 
 #' 
-check_categories <- function(table_name = "site_info",mytoken = "Bearer {myAPItoken}", inputdf = NULL){
+check_categories <- function(table_name = "site_info",
+                             mytoken = "Bearer {myAPItoken}", 
+                             inputdf = NULL){
   ## filter query for column and category dictionary.
   qlist <- list(
     query = list(
@@ -297,4 +299,188 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
   checkdf <- rbind(checkdf, c(condname, cond, dfields))
   
   return(checkdf)
+}
+
+
+
+#' Check table contents before import
+#' 
+#' This function checks contents of a table (usually imported as a CSV) for
+#' possible failures in validation constraints. 
+#' The constraints checked are:
+#' 1) is_nullable
+#' 2) max_length (if applicable)
+#' 3) is_unique
+#' 4) data type.
+#' Column names and foreign key values are checked with a different function.
+#' @param table_name 
+#' Name of the table in Directus
+#' 
+#' @param inputdf 
+#' data frame intended for the Directus table
+#' 
+#' @param mytoken 
+#' User-specific Directus token. Can set with set_default_token()
+#'
+#' @returns
+#' A list with columns and rows failing each constraint. 
+#' 1) is_nullable
+#' 2) max_length 
+#' 3) is_unique
+#' 4) data type.
+#' @export
+#' @import httr
+#' @import glue
+#' @import jsonlite
+#' 
+#' @examples
+#' #not run: mydf <- read.csv("site_info_to_add.csv")
+#' #not run: check_table_contents("site_info", inputdf = mydf)
+check_table_contents <- function(table_name = "site_info",
+                                 inputdf = NULL, 
+                                 mytoken = "Bearer {myAPItoken}"){
+  checklist <- vector(mode = "list",length = 4)
+  names(checklist) <- c("nullable","max_length","unique","data_type")
+  # Fetch schema information for table
+  
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken= mytoken,flatten=TRUE)
+  # start with easier ones. 
+  # 1) is_nullable-----
+  ## validation fails if any non-nullable columns contain null (NA) values
+  nonNullableCols <- table_info$field[which(!table_info$schema.is_nullable)]
+  if(length(nonNullableCols) > 0){
+    outlist <- c()
+    ## If field is missing, it counts as null. 
+    for(i in 1:length(nonNullableCols)){
+      colname <- nonNullableCols[i]
+      if(!colname %in% names(inputdf)){
+        listitem <- list("missing non-nullable field")
+        names(listitem) <- colname
+        outlist <- append(outlist, listitem)
+      }#closes if field is missing.
+      else{ 
+        failrows <- which(is.na(inputdf[,colname]))
+        if(length(failrows) > 0){
+          listitem <- list(failrows)
+          names(listitem) <- colname
+          outlist <- append(outlist, listitem)
+        } #closes if
+      }#closes else
+    }# closes loop
+      if(length(outlist) > 0){
+        checklist$nullable <- outlist
+      }#closes if
+      else{
+        checklist$nullable <- "Passes null constraint"
+      }#closes else
+      
+      }else{
+    checklist$nullable <- "Null constraint does not apply"
+  }
+  
+  # 2) max_length (if applicable)----------
+  maxLengthDf <- table_info[which(!is.na(table_info$schema.max_length)),c("field","schema.max_length")]
+  ## it will always be 255, but that could change
+  if(nrow(maxLengthDf) > 0){
+    outlist <- c()
+    for(i in 1:nrow(maxLengthDf)){
+      colname <- maxLengthDf$field[i]
+      # if column name isn't there, skip to the next one. 
+      if(!colname %in% names(inputdf)){
+        next
+      }
+      failrows <- which(nchar(inputdf[,colname]) > maxLengthDf$schema.max_length[i])
+      if(length(failrows) > 0){
+        listitem <- list(failrows)
+        names(listitem) <- colname
+        outlist <- append(outlist, listitem)
+      }
+    }
+    
+    if(length(outlist) > 0){
+      checklist$max_length <- outlist
+    }else{
+      checklist$max_length <- "Passes max length constraint"
+    }
+  }else{
+    checklist$max_length <- "Max-length constraint does not apply"
+  }
+  
+  # 3) is_unique--------
+  uniqueCols <- table_info$field[which(table_info$schema.is_unique)]
+  if(length(uniqueCols) > 0){
+    outlist <- c()
+    for(i in 1:length(uniqueCols)){
+      colname <- uniqueCols[i]
+      # skip if absent
+      if(!colname %in% names(inputdf)){
+        next
+      }
+      if(anyDuplicated(inputdf[,colname])){
+        dupvals <- inputdf[,colname][which(duplicated(inputdf[,colname]))]  
+        failrows <- which(inputdf[,colname] %in% dupvals)
+        listitem <- list(failrows)
+        names(listitem) <- colname
+        outlist <- append(outlist, listitem)
+      }
+      
+    } # closes loop
+    if(length(outlist) > 0){
+      checklist$unique <- outlist
+    }else{
+      checklist$unique <- "Passes unique constraint"
+    }
+  }else{
+    checklist$unique <- "Unique constraint does not apply"
+  }
+  # 4) data type.-----------
+  # This one is a little harder. It applies to all columns. 
+  for(i in 1:nrow(table_info)){
+    colname <- table_info$field[i]
+    dtype <- table_info$type[i]
+    ## skip to next if missing from inputdf
+    if(!colname %in% names(inputdf) ){
+      next
+    }
+    # unrecognized data type
+    if(!dtype %in% c("text","string","integer","boolean","float","date")){
+      ### TODO-----
+      
+    }
+    
+    colvec <- inputdf[,colname]
+    if(dtype == "integer"){
+      # test for integer
+      ## Note: I tested this and NAs are excluded. 
+      failrows <- which(colvec != round(colvec, digits=0))
+    }
+    #if(dtype %in% c("string","text")){
+    # test for string and text
+      # I don't think this needs a check. anything can be read as a string
+      
+    #}
+    
+    if(dtype == "boolean"){
+    # test for boolean
+      ## Note: directus recognizes A lot of alternatives as boolean. 
+      # TRUE, FALSE, T, F with or without quotes. upper or lowercase. 0 or 1. 
+      # Handling of NA's depend on null constraint. If nulls are allowed, NAs will 
+      # be the default value. 
+      # R recognizes TRUE, FALSE, T, F, and NA as logical. not 0 or 1. 
+      # for our purposes, just use TRUE and FALSE
+      failrows <- which(!as.character(colvec) %in% c("TRUE","FALSE", NA))
+      }
+    
+    if(dtype == "float"){
+    # test for float
+      failrows <- which(!is.na(colvec) & is.na(as.numeric(colvec)))
+    }
+    if(dtype == "date")
+    # test for date
+    
+    
+    
+  }
+  ## TODO-----------
+  
 }
