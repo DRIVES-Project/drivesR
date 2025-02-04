@@ -26,112 +26,112 @@
 check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPItoken}"){
   ## get metadata info from Directus  
   table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken)
-    if(!is.null(table_info)){
-      table_info <- jsonlite::flatten(table_info)
-    }else{
-      stop("Invalid token or collection url.")
-    }
+  if(!is.null(table_info)){
+    table_info <- jsonlite::flatten(table_info)
+  }else{
+    stop("Invalid token or collection url.")
+  }
   # get rows from column dictionary  
   qlist <- list(
-      query = list(
-        filter = list(
-          table_name = list(
-            "_eq" = table_name
-          )
+    query = list(
+      filter = list(
+        table_name = list(
+          "_eq" = table_name
         )
       )
     )
+  )
   
-    qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
-    
-    dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken)
-    dict_table <- get_table_from_req(apirequest = dict_req)
-    if(length(dict_table) ==0){
-      stop("table_name not found in column_dictionary")
-    }
-    dict_table <- dict_table[order(dict_table$column_order),]
-    ## make a merged table to ease comparison.
-    names(dict_table) <- paste0("dict.", names(dict_table))
-    combined_table <- dplyr::inner_join(dict_table, table_info, by = c("dict.column_name"="schema.name")) ## omits rows whose names don't match
-    
-    checkdf <- data.frame(condition = NA, outcome = NA, dcols=NA, tcols = NA)
-    
-    # Checks:
-    ## number of fields matches
-    cond1name <- "Number of columns match"
-    cond1 <- nrow(table_info) == nrow(dict_table)
-    row1 <- c(cond1name,cond1)
-    checkdf[1,1:2] <-row1
-    
-    ## No mismatched field names in dictionary
-    condname <- "No mismatched fields in dictionary"
-    mismatched_dict_fields <- setdiff(dict_table$dict.column_name, table_info$field)
-    cond <- length(mismatched_dict_fields)==0
-    if(!cond){
-      dfields <- paste(mismatched_dict_fields, collapse=";")
-    }else{dfields <- NA}
-    newrow <- c(condname, cond, dfields,NA)
-    checkdf <- rbind(checkdf, newrow)
-    
-    ## No mismatched field names in table
-    condname <- "No mismatched fields in table"
-    mismatched_table_fields <- setdiff(table_info$field,dict_table$dict.column_name)
-    cond <- length(mismatched_table_fields)==0
-    if(!cond){
-      tfields <- paste(mismatched_table_fields, collapse=";")
-    }else{tfields <- NA}
-    newrow <- c(condname,cond, NA,tfields)
-    checkdf <- rbind(checkdf, newrow)
-
-    ## fields are in the correct order (after sorting by column order)
-    condname <- "Fields are in the same order"
-    cond <- identical(table_info$field, dict_table$dict.column_name)
-    newrow <- c(condname, cond,NA,NA)
-    checkdf <- rbind(checkdf, newrow)
-    
-    # Constraints------
-    ## data type
-    combined_table[,"dict.type"] <-sapply(combined_table$dict.postgres_data_type, 
-                                   function(x){pg_to_directus_type(x)})
-    
-    ## Most constraints can be done in a loop.
-    # foreign key involves more columns, so will be done separately
-    constraint_mat <- rbind("Same data type"=
-                              c("dict.type","type"),
-                            "Same primary key option"= 
-                              c("dict.primary_key","schema.is_primary_key"),
-                            "Same unique option" =
-                              c("dict.unique_value","schema.is_unique"),
-                            "Same nullable option"=
-                              c("dict.nullable","schema.is_nullable"),
-                            "Same autoincrement option" =
-                              c("dict.auto_increment","schema.has_auto_increment"))
-    for(i in 1:nrow(constraint_mat)){
-      condname <- rownames(constraint_mat)[i] 
-      dictname <-  constraint_mat[i,1]
-      tname <- constraint_mat[i,2]
-      mismatch <- combined_table$dict.column_name[which(combined_table[,dictname] != 
+  qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
+  
+  dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken)
+  dict_table <- get_table_from_req(apirequest = dict_req)
+  if(length(dict_table) ==0){
+    stop("table_name not found in column_dictionary")
+  }
+  dict_table <- dict_table[order(dict_table$column_order),]
+  ## make a merged table to ease comparison.
+  names(dict_table) <- paste0("dict.", names(dict_table))
+  combined_table <- dplyr::inner_join(dict_table, table_info, by = c("dict.column_name"="schema.name")) ## omits rows whose names don't match
+  
+  checkdf <- data.frame(condition = NA, outcome = NA, dcols=NA, tcols = NA)
+  
+  # Checks:
+  ## number of fields matches
+  cond1name <- "Number of columns match"
+  cond1 <- nrow(table_info) == nrow(dict_table)
+  row1 <- c(cond1name,cond1)
+  checkdf[1,1:2] <-row1
+  
+  ## No mismatched field names in dictionary
+  condname <- "No mismatched fields in dictionary"
+  mismatched_dict_fields <- setdiff(dict_table$dict.column_name, table_info$field)
+  cond <- length(mismatched_dict_fields)==0
+  if(!cond){
+    dfields <- paste(mismatched_dict_fields, collapse=";")
+  }else{dfields <- NA}
+  newrow <- c(condname, cond, dfields,NA)
+  checkdf <- rbind(checkdf, newrow)
+  
+  ## No mismatched field names in table
+  condname <- "No mismatched fields in table"
+  mismatched_table_fields <- setdiff(table_info$field,dict_table$dict.column_name)
+  cond <- length(mismatched_table_fields)==0
+  if(!cond){
+    tfields <- paste(mismatched_table_fields, collapse=";")
+  }else{tfields <- NA}
+  newrow <- c(condname,cond, NA,tfields)
+  checkdf <- rbind(checkdf, newrow)
+  
+  ## fields are in the correct order (after sorting by column order)
+  condname <- "Fields are in the same order"
+  cond <- identical(table_info$field, dict_table$dict.column_name)
+  newrow <- c(condname, cond,NA,NA)
+  checkdf <- rbind(checkdf, newrow)
+  
+  # Constraints------
+  ## data type
+  combined_table[,"dict.type"] <-sapply(combined_table$dict.postgres_data_type, 
+                                        function(x){pg_to_directus_type(x)})
+  
+  ## Most constraints can be done in a loop.
+  # foreign key involves more columns, so will be done separately
+  constraint_mat <- rbind("Same data type"=
+                            c("dict.type","type"),
+                          "Same primary key option"= 
+                            c("dict.primary_key","schema.is_primary_key"),
+                          "Same unique option" =
+                            c("dict.unique_value","schema.is_unique"),
+                          "Same nullable option"=
+                            c("dict.nullable","schema.is_nullable"),
+                          "Same autoincrement option" =
+                            c("dict.auto_increment","schema.has_auto_increment"))
+  for(i in 1:nrow(constraint_mat)){
+    condname <- rownames(constraint_mat)[i] 
+    dictname <-  constraint_mat[i,1]
+    tname <- constraint_mat[i,2]
+    mismatch <- combined_table$dict.column_name[which(combined_table[,dictname] != 
                                                         combined_table[,tname])]
-      cond <- length(mismatch) == 0 
-      dfield <- ifelse(!cond, paste(mismatch, collapse=";"), NA)
-      newrow <- c(condname, cond,dfield,NA)
-      checkdf <- rbind(checkdf, newrow)
-    }
-    
-    # foreign key. 
-    condname <- "Same foreign key option"
-    mismatch <- combined_table$dict.column_name[which(
-        combined_table$dict.foreign_key_table != combined_table$schema.foreign_key_table |
-          combined_table$dict.foreign_key_column != combined_table$schema.foreign_key_column
-        )]
     cond <- length(mismatch) == 0 
     dfield <- ifelse(!cond, paste(mismatch, collapse=";"), NA)
     newrow <- c(condname, cond,dfield,NA)
     checkdf <- rbind(checkdf, newrow)
-    
-    #output
-    return(checkdf)
-
+  }
+  
+  # foreign key. 
+  condname <- "Same foreign key option"
+  mismatch <- combined_table$dict.column_name[which(
+    combined_table$dict.foreign_key_table != combined_table$schema.foreign_key_table |
+      combined_table$dict.foreign_key_column != combined_table$schema.foreign_key_column
+  )]
+  cond <- length(mismatch) == 0 
+  dfield <- ifelse(!cond, paste(mismatch, collapse=";"), NA)
+  newrow <- c(condname, cond,dfield,NA)
+  checkdf <- rbind(checkdf, newrow)
+  
+  #output
+  return(checkdf)
+  
 }
 
 
@@ -242,7 +242,7 @@ check_categories <- function(table_name = "site_info",
     if(!cond){
       dfields <- paste(addvals_names, collapse=";")
     }
-     
+    
     checkdf <- rbind(checkdf,c("inputdf",condname, cond, dfields))
     
     return(list(checkdf = checkdf, missing_cats = addvals))
@@ -323,7 +323,15 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 #' User-specific Directus token. Can set with set_default_token()
 #'
 #' @returns
-#' A list with columns and rows failing each constraint. 
+#' A nested data frame (tibble) with results for each constraint. 
+#' If the constraint does not pass, the problem_list column contains
+#' a named list of row indices that break the constraint
+#' e.g., list("column1" = c(1,2,3), "column2" = c(3,4,5))
+#' 
+#' The dtype_problem_list column contains a list of the data types for 
+#' each columns that does not pass the constraint. 
+#' e.g., list("column1" = "boolean", "column2" = "date")
+#'    
 #' 1) is_nullable
 #' 2) max_length 
 #' 3) is_unique
@@ -332,24 +340,37 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 #' @import httr
 #' @import glue
 #' @import jsonlite
-#' 
+#' @import tibble
 #' @examples
 #' #not run: mydf <- read.csv("site_info_to_add.csv")
-#' #not run: check_table_contents("site_info", inputdf = mydf)
+#' #not run: checkdf <-  check_table_contents("site_info", inputdf = mydf)
 check_table_contents <- function(table_name = "site_info",
                                  inputdf = NULL, 
                                  mytoken = "Bearer {myAPItoken}"){
-  checklist <- vector(mode = "list",length = 4)
-  names(checklist) <- c("nullable","max_length","unique","data_type")
-  # Fetch schema information for table
+  pass_message <- ""
+  fail_message <- ""
+  na_message <- "constraint does not apply"
+  # constraintvec <- c("non-nullable","max_length","unique","data_type")
+  checkdf <- c()# empty data frame
   
+  # template row for checkdf
+  emptycheckrow <- tibble::tibble(constraint = NA,
+                 pass = NA,
+                 message = NA,
+                 problem_list = NA,
+                 dtype_problem_list = NA)
+  # Fetch schema information for table
   table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken= mytoken,flatten=TRUE)
   # start with easier ones. 
+
   # 1) is_nullable-----
+  checkrow <- emptycheckrow
+  checkrow$constraint <- "non_nullable"
+  
   ## validation fails if any non-nullable columns contain null (NA) values
   nonNullableCols <- table_info$field[which(!table_info$schema.is_nullable)]
   if(length(nonNullableCols) > 0){
-    outlist <- c()
+    outlist <- c() # empty list for problem items
     ## If field is missing, it counts as null. 
     for(i in 1:length(nonNullableCols)){
       colname <- nonNullableCols[i]
@@ -367,18 +388,29 @@ check_table_contents <- function(table_name = "site_info",
         } #closes if
       }#closes else
     }# closes loop
-      if(length(outlist) > 0){
-        checklist$nullable <- outlist
-      }#closes if
-      else{
-        checklist$nullable <- "Passes null constraint"
-      }#closes else
+    if(length(outlist) > 0){
+
+      checkrow$pass <- FALSE
+      checkrow$message <- fail_message
+      checkrow$problem_list <- list(outlist)
       
-      }else{
-    checklist$nullable <- "Null constraint does not apply"
+    }#closes if
+    else{
+      checkrow$pass <- TRUE
+      checkrow$message <- pass_message
+    }#closes else
+    
+  }else{
+    checkrow$pass <- TRUE
+    checkrow$message <- na_message
   }
+  # append to output tibble. 
+  checkdf <- rbind(checkdf, checkrow)
   
-  # 2) max_length (if applicable)----------
+  # 2) max_length ----------
+  checkrow <- emptycheckrow
+  checkrow$constraint <- "max_length"
+  
   maxLengthDf <- table_info[which(!is.na(table_info$schema.max_length)),c("field","schema.max_length")]
   ## it will always be 255, but that could change
   if(nrow(maxLengthDf) > 0){
@@ -398,15 +430,24 @@ check_table_contents <- function(table_name = "site_info",
     }
     
     if(length(outlist) > 0){
-      checklist$max_length <- outlist
+      checkrow$pass <- FALSE
+      checkrow$message <- fail_message
+      checkrow$problem_list <- list(outlist)
     }else{
-      checklist$max_length <- "Passes max length constraint"
+      checkrow$pass <- TRUE
+      checkrow$message <- pass_message
     }
   }else{
-    checklist$max_length <- "Max-length constraint does not apply"
+    checkrow$pass <- TRUE
+    checkrow$message <- na_message
   }
+  ## append to output
+  checkdf <- rbind(checkdf, checkrow)
   
   # 3) is_unique--------
+  checkrow <- emptycheckrow
+  checkrow$constraint <- "unique"
+  
   uniqueCols <- table_info$field[which(table_info$schema.is_unique)]
   if(length(uniqueCols) > 0){
     outlist <- c()
@@ -426,14 +467,25 @@ check_table_contents <- function(table_name = "site_info",
       
     } # closes loop
     if(length(outlist) > 0){
-      checklist$unique <- outlist
+      checkrow$pass <- FALSE
+      checkrow$message <- fail_message
+      checkrow$problem_list <- list(outlist)
     }else{
-      checklist$unique <- "Passes unique constraint"
+      checkrow$pass <- TRUE
+      checkrow$message <- pass_message
     }
   }else{
-    checklist$unique <- "Unique constraint does not apply"
+    checkrow$pass <- TRUE
+    checkrow$message <- na_message
   }
+  # append
+  checkdf <- rbind(checkdf, checkrow)
+  
   # 4) data type.-----------
+  checkrow <- emptycheckrow
+  checkrow$constraint <- "data_type"
+  outlist <- c()
+  out_dlist <- c()
   # This one is a little harder. It applies to all columns. 
   for(i in 1:nrow(table_info)){
     colname <- table_info$field[i]
@@ -444,24 +496,30 @@ check_table_contents <- function(table_name = "site_info",
     }
     # unrecognized data type
     if(!dtype %in% c("text","string","integer","boolean","float","date")){
-      ### TODO-----
-      
+      listitem <- list("unrecognized data type")
+      names(listitem) <- colname
+      outlist <- append(outlist, listitem)
+      listitem <- list(dtype)
+      names(listitem) <- colname
+      out_dlist <- append(out_dlist, listitem)
     }
-    
+    # test the data:
     colvec <- inputdf[,colname]
+    
     if(dtype == "integer"){
       # test for integer
       ## Note: I tested this and NAs are excluded. 
       failrows <- which(colvec != round(colvec, digits=0))
     }
-    #if(dtype %in% c("string","text")){
+    if(dtype %in% c("string","text")){
     # test for string and text
-      # I don't think this needs a check. anything can be read as a string
-      
-    #}
+    # I don't think this needs a check. anything can be read as a string
+    # anything can be string or text. string length constraint is above. 
+      failrows <- NULL   
+    }
     
     if(dtype == "boolean"){
-    # test for boolean
+      # test for boolean
       ## Note: directus recognizes A lot of alternatives as boolean. 
       # TRUE, FALSE, T, F with or without quotes. upper or lowercase. 0 or 1. 
       # Handling of NA's depend on null constraint. If nulls are allowed, NAs will 
@@ -469,18 +527,38 @@ check_table_contents <- function(table_name = "site_info",
       # R recognizes TRUE, FALSE, T, F, and NA as logical. not 0 or 1. 
       # for our purposes, just use TRUE and FALSE
       failrows <- which(!as.character(colvec) %in% c("TRUE","FALSE", NA))
-      }
+    }
     
     if(dtype == "float"){
-    # test for float
+      # test for float
       failrows <- which(!is.na(colvec) & is.na(as.numeric(colvec)))
     }
-    if(dtype == "date")
-    # test for date
+    if(dtype == "date"){
+      # test for date
+      failrows <- which(!is.ISOdate(colvec, sepstr="-"))
+    }
     
-    
-    
+    if(length(failrows) > 0){
+      listitem <- list(failrows)
+      names(listitem) <- colname
+      outlist <- append(outlist, listitem)
+      listitem <- list(dtype)
+      names(listitem) <- colname
+      out_dlist <- append(out_dlist, listitem)
+    }  
+      
+  }# closes loop over columns
+  if(length(outlist) > 0){
+    checkrow$pass <- FALSE
+    checkrow$message <- fail_message
+    checkrow$problem_list <- list(outlist)
+    checkrow$dtype_problem_list <- list(out_dlist)
+  }else{
+    checkrow$pass <- TRUE
+    checkrow$message <- pass_message
   }
-  ## TODO-----------
+  # append
+  checkdf <- rbind(checkdf, checkrow)
   
+  return(checkdf)
 }
