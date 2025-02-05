@@ -18,7 +18,15 @@ check_table_contents(
 \item{mytoken}{User-specific Directus token. Can set with set_default_token()}
 }
 \value{
-A list with columns and rows failing each constraint. 
+A nested data frame (tibble) with results for each constraint. 
+If the constraint does not pass, the problem_list column contains
+a named list of row indices that break the constraint
+e.g., list("column1" = c(1,2,3), "column2" = c(3,4,5))
+
+The dtype_problem_list column contains a list of the data types for 
+each columns that does not pass the constraint. 
+e.g., list("column1" = "boolean", "column2" = "date")
+   
 1) is_nullable
 2) max_length 
 3) is_unique
@@ -36,5 +44,5 @@ Column names and foreign key values are checked with a different function.
 }
 \examples{
 #not run: mydf <- read.csv("site_info_to_add.csv")
-#not run: check_table_contents("site_info", inputdf = mydf)
+#not run: checkdf <-  check_table_contents("site_info", inputdf = mydf)
 }
