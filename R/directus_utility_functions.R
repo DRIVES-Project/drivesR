@@ -52,7 +52,8 @@ set_default_token <- function(usertoken){
                "check_dictionary",
                "check_categories",
                "check_column_names",
-               "check_table_contents")
+               "check_table_contents",
+               "post_rows_in_batches")
   for(af in apifuns){
     mycode = glue::glue("formals({af})$mytoken <- '{usertoken}'")
     rstudioapi::sendToConsole(mycode)  
