@@ -8,7 +8,8 @@ get_db_table(
   table_name = "site_info",
   myurl = "https://data.drives-network.org",
   mytoken = "Bearer {myAPItoken}",
-  mylimit = "-1"
+  in_batches = FALSE,
+  batchsize = NULL
 )
 }
 \arguments{
@@ -18,16 +19,20 @@ get_db_table(
 
 \item{mytoken}{The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets}
 
-\item{mylimit}{Can be used to set a limit to the number of rows. By default, limit = "-1", which imports all rows.
-It may be desirable to import rows in batches for very large tables.}
+\item{in_batches}{When set to FALSE, all rows are imported with a single API call. When set to TRUE,
+rows are imported in batches specified by batchsize. Batched import may be useful 
+for large tables.}
+
+\item{batchsize}{Sets the number of rows per batch-import when in_batches = TRUE.}
 }
 \value{
-A data frame containing all rows and columns of the specified table
+A data frame containing all rows and columns of the specified table.
 }
 \description{
 Fetch an entire table from Directus
 }
 \examples{
-testdf <- get_db_table("test_cat_info")
+#not run: testdf <- get_db_table("site_info") # at once
+#not run: testdf2 <- get_db_table("site_info", in_batches = TRUE, batchsize = 4)
 
 }
