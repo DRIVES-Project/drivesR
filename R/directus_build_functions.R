@@ -212,3 +212,41 @@ make_relations_json <- function(columndf = test_column_dict[which(test_column_di
 make_row_insert_json <- function(mydf){
   jsonlite::toJSON(mydf, pretty = TRUE, auto_unbox=TRUE)
 }
+
+#' Post rows in batches
+#' 
+#' To get around issues of posting limits.
+#'
+#' @param table_name
+#' Table identifier in the database.
+#' 
+#' @param batchsize 
+#' Number of rows to be added at a time. Suggested amount is 1000 rows.
+#' Progress is printed to the console.
+#' 
+#' @param inputdf 
+#' Data frame of rows to be added. This should have passed quality control checks.
+#' 
+#' @param mytoken 
+#' Directus token. Can be set with set_default_token()
+#' @returns
+#' @export
+#'
+#' @examples
+post_rows_in_batches <- function(table_name = "crop_yields", batchsize = 1000, inputdf = NULL,mytoken){
+  nitems = nrow(inputdf)
+  nbatches = ceiling(batchsize/nitems)
+  start_i = 1
+  end_i = 0
+  batch_i = 1
+  
+  while(end_i < nitems){
+    end_i <- min(start_i + batchsize , nitems)
+    subsetdf <- importlist[[mytable]][start_i:end_i,]
+    insert_json <- make_row_insert_json(subsetdf)
+    myreq <- api_request("POST",glue::glue("items/{mytable}"),insert_json,mytoken = mytoken)
+    print(paste(batch_i,"of",nbatches,"status",myreq$status_code))
+    start_i <- end_i + 1
+    batch_i <- batch_i + 1
+  }
+}
