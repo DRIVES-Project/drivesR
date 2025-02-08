@@ -7,32 +7,101 @@
 #' The database url. By default, "https://data.drives-network.org"
 #' @param mytoken 
 #' The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets
-#' @param mylimit
-#' Can be used to set a limit to the number of rows. By default, limit = "-1", which imports all rows.
-#' It may be desirable to import rows in batches for very large tables. 
+#' @param in_batches
+#' When set to FALSE, all rows are imported with a single API call. When set to TRUE,
+#' rows are imported in batches specified by batchsize. Batched import may be useful 
+#' for large tables. 
+#' 
+#' @param batchsize
+#' Sets the number of rows per batch-import when in_batches = TRUE.
+#'  
 #' @returns
-#' A data frame containing all rows and columns of the specified table
+#' A data frame containing all rows and columns of the specified table.
+#' 
 #' @export
 #' @import httr
 #' @import glue
 #' @import jsonlite
 #' @examples
-#' testdf <- get_db_table("test_cat_info")
+#' #not run: testdf <- get_db_table("site_info") # at once
+#' #not run: testdf2 <- get_db_table("site_info", in_batches = TRUE, batchsize = 4)
 #' 
 get_db_table <- function(table_name = "site_info", 
                          myurl = "https://data.drives-network.org",
                          mytoken = "Bearer {myAPItoken}",
-                         mylimit = "-1"){
-  table_req <- GET(
-    glue::glue("{myurl}/items/{table_name}?limit={mylimit}"),
-    add_headers(
-      "Authorization" = mytoken
+                         in_batches = FALSE,
+                         batchsize = NULL
+                         ){
+  ## Check arguments-----
+  ## conditions to stop execution with incompatible arguments
+  if(!in_batches %in% c(TRUE,FALSE)){
+    stop("in_batches must be TRUE or FALSE")
+  }
+  limitTest <- ifelse(is.null(batchsize), TRUE, 
+                      ifelse(is.na(as.numeric(batchsize)), TRUE,
+                             !is_integer(batchsize) | as.numeric(batchsize) < 0))
+  if(in_batches == TRUE & limitTest) {
+    stop("When in_batches = TRUE, batchsize must be a positive integer")
+  }
+  
+  ## Bulk import------- 
+  if(in_batches==FALSE){
+    table_req <- GET(
+      glue::glue("{myurl}/items/{table_name}?limit=-1"),
+      add_headers(
+        "Authorization" = mytoken
+      )
     )
-  )
-  table_resp <- content(table_req, as="text")
-  table_df <- jsonlite::fromJSON(table_resp)[["data"]]
-  return(table_df)
+    if(table_req$status_code != 200){
+      ## error message
+      emessage <- paste0("Could not fetch data, status code ", table_req$status_code)
+      stop(emessage)
+    }
+    
+    table_resp <- content(table_req, as="text")
+    table_df <- jsonlite::fromJSON(table_resp)[["data"]]
+    return(table_df)
+  }
+ 
+  ## Batch import------ 
+  if(in_batches == TRUE){
+    outdf <- c() # empty data frame
+    offset <- 0 # start with an offset of 0 
+    breakcondition <- FALSE
+    while(breakcondition==FALSE){
+      
+      batch_req <- GET(
+        glue::glue("{myurl}/items/{table_name}?limit={batchsize}&offset={offset}"),
+        add_headers(
+          "Authorization" = mytoken
+        )
+      )
+      ## check status of batch req. If successful, continue. 
+      if(batch_req$status_code != 200){
+        #update so it shows the row range that had problems.
+        startrow = offset + 1
+        endrow = startrow + batchsize
+        emessage <- paste0("Could not fetch data for rows ",startrow," to ",endrow, ": status code ", table_req$status_code)
+        stop(emessage)
+      }# ends if for status code error. 
+      
+      batch_resp <- content(batch_req, as="text")
+      batch_df <- jsonlite::fromJSON(batch_resp)[["data"]]
+      ## convert request to data frame and append to outdf
+      
+      outdf <- rbind(outdf, batch_df)
+      
+      ### for each iteration, update the offset with offset + batchsize.
+      offset <- offset + batchsize
+      #include a condition to end once the fetched data has fewer rows than the batchsize
+      breakcondition <- ifelse(is.null(nrow(batch_df)),TRUE,
+                               nrow(batch_df) < batchsize)
+    }# ends while
+  return(outdf)  
+  }# ends if batch import
 }
+
+
 
 #' Fetch schema information from directus
 #'
@@ -109,3 +178,4 @@ get_table_from_req <- function(apirequest = NULL){
   output <- jsonlite::fromJSON(resp)[["data"]]
   return(output)
 }
+
