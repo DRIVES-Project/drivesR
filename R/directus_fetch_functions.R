@@ -81,7 +81,8 @@ get_db_table <- function(table_name = "site_info",
         #update so it shows the row range that had problems.
         startrow = offset + 1
         endrow = startrow + batchsize
-        emessage <- paste0("Could not fetch data for rows ",startrow," to ",endrow, ": status code ", table_req$status_code)
+        emessage <- paste0("Could not fetch data for rows ",
+                           startrow," to ",endrow, ": status code ", batch_req$status_code)
         stop(emessage)
       }# ends if for status code error. 
       
