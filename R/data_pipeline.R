@@ -30,8 +30,9 @@ expand_years <- function(mydf = NULL,
                          eycol = "end_year", 
                          ycol = "year"){
   # replace NA end years with na_end_year
-  mydf[which(is.na(mydf[,eycol])),eycol] <- ifelse(mydf[,sycol] > na_end_year, 
-                                                   mydf[,sycol], na_end_year)
+  narows <- which(is.na(mydf[,eycol]))
+  mydf[narows,eycol] <- ifelse(mydf[narows,sycol] > na_end_year, 
+                               mydf[narows,sycol], na_end_year)
   
   if(any(is.na(mydf[,sycol]))){
     stop("start_year column must not contain NAs")
