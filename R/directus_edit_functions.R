@@ -83,8 +83,13 @@ modify_rows <- function(table_name = NULL,
   for(i in 1:nrow(editdf)){
     mypk <- editdf[i,idcol]
     changecols <- names(editdf)[which(!names(editdf) %in% idcol)]
-    fixlist <- as.list(editdf[i,changecols]) # exclude primary key, since it can't be patched
-      #as list makes it so there are no square brackets around.
+    fixlist <- as.list(editdf[i,changecols]) # exclude primary key, since it can't be patched      
+    #as list makes it so there are no square brackets around.
+    if(is.null(names(fixlist))){
+      names(fixlist) <- changecols  
+      ## if there is only one column to be changed, as.list gets rid of the name.
+    }
+    
     fixjson <-  jsonlite::toJSON(fixlist,pretty=T, auto_unbox = TRUE)
     fixreq <- api_request("PATCH",
                           glue::glue("items/{table_name}/{mypk}"),
