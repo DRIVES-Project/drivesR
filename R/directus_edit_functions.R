@@ -40,7 +40,9 @@ delete_rows <- function(table_name = NULL,
   
   if(check_only == FALSE){
     for(pk in pkvec){
-      api_request("DELETE",glue::glue("items/{table_name}/{pk}"))
+      api_request("DELETE",glue::glue("items/{table_name}/{pk}"),
+                  mytoken = mytoken,
+                  myurl = myurl)
     }# closes for loop
   }# closes if 
 } #closes function
