@@ -8,6 +8,8 @@
 #' A vector of primary keys for rows you want to delete in the table.
 #' @param check_only
 #' TRUE or FALSE indicating whether you want to inspect the rows instead of deleting them.
+#' @param mytoken
+#' Directus api token, formatted as "Bearer myapitoken"
 #' @param ...
 #' Arguments passed to get_db_table and api_request.
 #' @returns
@@ -26,13 +28,14 @@
 delete_rows <- function(table_name = NULL, 
                         pkvec = NULL,
                         check_only = FALSE,
+                        mytoken = "Bearer myapitoken",
                         ...){
   if(check_only == TRUE){
     checkdf <- c()
     for(pk in pkvec){
       testrow <- get_db_info(glue::glue("items/{table_name}/{pk}"),
                              output_format = "data.frame",
-                             ...)
+                             mytoken = mytoken)
       checkdf <- rbind(checkdf, testrow)
     }# closes for loop
     return(checkdf)
@@ -40,7 +43,7 @@ delete_rows <- function(table_name = NULL,
   
   if(check_only == FALSE){
     for(pk in pkvec){
-      api_request("DELETE",glue::glue("items/{table_name}/{pk}"),...)
+      api_request("DELETE",glue::glue("items/{table_name}/{pk}"),mytoken = mytoken,...)
     }# closes for loop
   }# closes if 
 } #closes function

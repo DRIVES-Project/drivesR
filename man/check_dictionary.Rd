@@ -4,10 +4,12 @@
 \alias{check_dictionary}
 \title{Check dictionary metadata}
 \usage{
-check_dictionary(table_name = "site_info", ...)
+check_dictionary(table_name = "site_info", mytoken = "Bearer apitoken")
 }
 \arguments{
 \item{table_name}{Table (collection) name.}
+
+\item{mytoken}{API token, formatted as "Bearer apitoken"}
 
 \item{...}{parameters passed to get_db_info and api_request}
 }

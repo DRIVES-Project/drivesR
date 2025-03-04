@@ -62,7 +62,7 @@ expand_years <- function(mydf = NULL,
 #' @import purrr
 #' @examples
 #' # not run: dict <- import_dictionary_tables()
-import_dictionary_tables <- function(public = FALSE,...){
+import_dictionary_tables <- function(public = FALSE,mytoken = "Bearer myapitoken"){
   ## I'm a bit unclear on how I'm going to separate public and private tables. I 
   # may need a separate set of dictionaries. For now, just pretend there's only 
   # one set of dictionaries.
@@ -71,7 +71,7 @@ import_dictionary_tables <- function(public = FALSE,...){
   if(public == TRUE){
     dictvec <- paste0("public_",dictvec)
   }
-  outlist <- purrr::map(dictvec, ~get_db_table(table_name = .x,...))
+  outlist <- purrr::map(dictvec, ~get_db_table(table_name = .x,mytoken = mytoken))
   names(outlist) <- dictnames
   return(outlist)
 }
@@ -102,7 +102,7 @@ import_db_tables <- function(tablevec = NULL,
                              save_locally = FALSE,
                              savedir = ".", 
                              savename = "drives_dblist",
-                             ...){
+                             mytoken = "Bearer myapitoken"){
   if(is.null(tablevec)){ 
     ## query the database for all table names available to the user.
     ## Note: I tried excluding internal directus collections as a query, but it 
@@ -111,7 +111,7 @@ import_db_tables <- function(tablevec = NULL,
     ## remove internal directus tables. 
     tablevec <- collection_info$collection[which(!grepl("^directus_", collection_info$collection))]
     } # ends if(is.null(tablevec)
-  db <- purrr::map(tablevec, ~get_db_table(table_name = .x,...))
+  db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken))
   names(db) <- tablevec
   if(save_locally == TRUE){
     save(db, file = file.path(savedir, paste0(savename,".Rda")))

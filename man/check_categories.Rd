@@ -4,13 +4,20 @@
 \alias{check_categories}
 \title{Check category dictionary}
 \usage{
-check_categories(table_name = "site_info", inputdf = NULL, ...)
+check_categories(
+  table_name = "site_info",
+  inputdf = NULL,
+  mytoken = "Bearer apitoken",
+  ...
+)
 }
 \arguments{
 \item{table_name}{The table (collection) identifier}
 
 \item{inputdf}{A data frame of prospective rows to be added to the table. 
 If NULL, the function checks the category and column dictionaries.}
+
+\item{mytoken}{API token, formatted as "Bearer apitoken"}
 
 \item{...}{Arguments passed to api_request.}
 }

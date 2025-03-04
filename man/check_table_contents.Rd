@@ -4,7 +4,12 @@
 \alias{check_table_contents}
 \title{Check table contents before import}
 \usage{
-check_table_contents(table_name = "site_info", inputdf = NULL, ...)
+check_table_contents(
+  table_name = "site_info",
+  inputdf = NULL,
+  mytoken = "Bearer apitoken",
+  ...
+)
 }
 \arguments{
 \item{table_name}{Name of the table in Directus}

@@ -4,7 +4,13 @@
 \alias{delete_rows}
 \title{Delete rows in a table based on their primary key value}
 \usage{
-delete_rows(table_name = NULL, pkvec = NULL, check_only = FALSE, ...)
+delete_rows(
+  table_name = NULL,
+  pkvec = NULL,
+  check_only = FALSE,
+  mytoken = "Bearer myapitoken",
+  ...
+)
 }
 \arguments{
 \item{table_name}{The table identifier in directus}
@@ -12,6 +18,8 @@ delete_rows(table_name = NULL, pkvec = NULL, check_only = FALSE, ...)
 \item{pkvec}{A vector of primary keys for rows you want to delete in the table.}
 
 \item{check_only}{TRUE or FALSE indicating whether you want to inspect the rows instead of deleting them.}
+
+\item{mytoken}{Directus api token, formatted as "Bearer myapitoken"}
 
 \item{...}{Arguments passed to get_db_table and api_request.}
 }

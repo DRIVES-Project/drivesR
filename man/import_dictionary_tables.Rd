@@ -4,7 +4,7 @@
 \alias{import_dictionary_tables}
 \title{Import dictionary tables}
 \usage{
-import_dictionary_tables(public = FALSE, ...)
+import_dictionary_tables(public = FALSE, mytoken = "Bearer myapitoken")
 }
 \arguments{
 \item{public}{True or false indicating whether tables are in the set approved for public access.}

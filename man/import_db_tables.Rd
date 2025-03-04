@@ -9,7 +9,7 @@ import_db_tables(
   save_locally = FALSE,
   savedir = ".",
   savename = "drives_dblist",
-  ...
+  mytoken = "Bearer myapitoken"
 )
 }
 \arguments{

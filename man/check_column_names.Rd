@@ -4,12 +4,18 @@
 \alias{check_column_names}
 \title{Check column names}
 \usage{
-check_column_names(table_name = "site_info", inputdf = NULL, ...)
+check_column_names(
+  table_name = "site_info",
+  inputdf = NULL,
+  mytoken = "Bearer apitoken"
+)
 }
 \arguments{
 \item{table_name}{Table identifier, such as "site_info"}
 
 \item{inputdf}{Dataframe to be evaluated.}
+
+\item{mytoken}{directus API token, as "Bearer apitoken"}
 
 \item{...}{Arguments passed to get_db_info.}
 }

@@ -7,6 +7,8 @@
 #' @param table_name
 #' Table (collection) name.
 #'   
+#' @param mytoken
+#' API token, formatted as "Bearer apitoken"
 #' @param ...
 #' parameters passed to get_db_info and api_request
 #' @returns
@@ -23,9 +25,9 @@
 #' # set mytoken in function or with set_default_token()
 #' # Not run:  site_info_check <- check_dictionary(table_name = "site_info") 
 #' 
-check_dictionary <- function(table_name = "site_info",...){
+check_dictionary <- function(table_name = "site_info",mytoken = "Bearer apitoken"){
   ## get metadata info from Directus  
-  table_info <- get_db_info(glue::glue("fields/{table_name}"),...)
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken,...)
   if(!is.null(table_info)){
     table_info <- jsonlite::flatten(table_info)
   }else{
@@ -44,7 +46,7 @@ check_dictionary <- function(table_name = "site_info",...){
   
   qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
   
-  dict_req <- api_request("SEARCH","items/column_dictionary",qjson, ...)
+  dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken,...)
   dict_table <- get_table_from_req(apirequest = dict_req)
   if(length(dict_table) ==0){
     stop("table_name not found in column_dictionary")
@@ -144,6 +146,8 @@ check_dictionary <- function(table_name = "site_info",...){
 #' @param table_name 
 #' The table (collection) identifier
 #' 
+#' @param mytoken
+#' API token, formatted as "Bearer apitoken"
 #' @param ... 
 #' Arguments passed to api_request.
 #' 
@@ -165,7 +169,9 @@ check_dictionary <- function(table_name = "site_info",...){
 #' #Not run: check_categories("site_info") 
 #' 
 check_categories <- function(table_name = "site_info",
-                             inputdf = NULL, ...){
+                             inputdf = NULL, 
+                             mytoken = "Bearer apitoken",
+                             ...){
   ## filter query for column and category dictionary.
   qlist <- list(
     query = list(
@@ -177,7 +183,7 @@ check_categories <- function(table_name = "site_info",
     )
   )
   qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
-  col_dict_req <- api_request("SEARCH","items/column_dictionary",qjson, ...) 
+  col_dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken,...) 
   col_dict_table <- get_table_from_req(apirequest = col_dict_req)
   if(length(col_dict_table) ==0){
     stop("table_name not found in column_dictionary")
@@ -186,7 +192,7 @@ check_categories <- function(table_name = "site_info",
   if(length(cat_fields_tdict)==0){
     stop("no category fields in column dictionary")
   }
-  cat_dict_req <- api_request("SEARCH","items/category_dictionary",qjson, ...)
+  cat_dict_req <- api_request("SEARCH","items/category_dictionary",qjson, mytoken = mytoken)
   cat_dict_table <- get_table_from_req(apirequest = cat_dict_req)
   if(length(cat_dict_table) ==0){
     stop("table_name not found in category dictionary")
@@ -259,6 +265,8 @@ check_categories <- function(table_name = "site_info",
 #' @param inputdf 
 #'  Dataframe to be evaluated. 
 #'  
+#' @param mytoken
+#' directus API token, as "Bearer apitoken"
 #' @param ...
 #' Arguments passed to get_db_info.
 #'
@@ -272,9 +280,9 @@ check_categories <- function(table_name = "site_info",
 #' @import glue
 #' @examples
 #' #Not run: check_column_names("site_info", mydf)
-check_column_names <- function(table_name = "site_info", inputdf = NULL, ...){
+check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken = "Bearer apitoken"){
   ## get fields from directus
-  table_info <- get_db_info(glue::glue("fields/{table_name}"),...)
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken,...)
   if(!is.null(table_info)){
     table_info <- jsonlite::flatten(table_info)
   }else{
@@ -345,6 +353,7 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, ...){
 #' #not run: checkdf <-  check_table_contents("site_info", inputdf = mydf)
 check_table_contents <- function(table_name = "site_info",
                                  inputdf = NULL, 
+                                 mytoken = "Bearer apitoken",
                                  ...){
   pass_message <- ""
   fail_message <- ""
