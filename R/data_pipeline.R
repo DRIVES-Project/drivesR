@@ -85,10 +85,15 @@ import_dictionary_tables <- function(public = FALSE,mytoken = "Bearer myapitoken
 #' @param save_locally 
 #' TRUE or FALSE indicating whether the downloaded tables should be 
 #' saved to an R data object.
+#' @param import_from_local
+#' If TRUE, the function reads in an R data object with the path savedir and savename
+#' instead of downloading the tables from directus. 
 #' @param savedir 
 #' Directory path for saving locally. Defaults to the working directory.
 #' @param savename 
 #' File name for saving locally, excluding .Rda. Defaults to "drives_dblist"
+#' @param mytoken
+#' Directus API token, formatted as "Bearer apitoken"
 #' @param ...
 #' Arguments to be passed to get_db_table and get_db_info.
 #' @returns
@@ -100,21 +105,29 @@ import_dictionary_tables <- function(public = FALSE,mytoken = "Bearer myapitoken
 #' # not run: db <- import_db_tables()
 import_db_tables <- function(tablevec = NULL, 
                              save_locally = FALSE,
+                             import_from_local = FALSE,
                              savedir = ".", 
                              savename = "drives_dblist",
                              mytoken = "Bearer myapitoken"){
-  if(is.null(tablevec)){ 
-    ## query the database for all table names available to the user.
-    ## Note: I tried excluding internal directus collections as a query, but it 
-    # didn't work.
-    collection_info <- get_db_info(mytarget = "collections",output_format = "data.frame",... )
-    ## remove internal directus tables. 
-    tablevec <- collection_info$collection[which(!grepl("^directus_", collection_info$collection))]
-    } # ends if(is.null(tablevec)
-  db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken))
-  names(db) <- tablevec
-  if(save_locally == TRUE){
-    save(db, file = file.path(savedir, paste0(savename,".Rda")))
+  if(import_from_local == TRUE){
+    load(file.path(savedir,paste0(savename,".Rda")))
+    cat(paste0("\nImported list db with tables:\n"))
+    purrr::walk(names(db), function(x){cat(paste0("\n",x))})
   }
-  return(db)
+  if(import_from_local == FALSE){
+    if(is.null(tablevec)){ 
+      ## query the database for all table names available to the user.
+      ## Note: I tried excluding internal directus collections as a query, but it 
+      # didn't work.
+      collection_info <- get_db_info(mytarget = "collections",output_format = "data.frame",... )
+      ## remove internal directus tables. 
+      tablevec <- collection_info$collection[which(!grepl("^directus_", collection_info$collection))]
+      } # ends if(is.null(tablevec)
+    db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken))
+    names(db) <- tablevec
+    if(save_locally == TRUE){
+      save(db, file = file.path(savedir, paste0(savename,".Rda")))
+    }
+    return(db)
+  }# ends if(save_locally == FALSE)
 }# ends function

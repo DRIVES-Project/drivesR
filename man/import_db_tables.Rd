@@ -7,6 +7,7 @@
 import_db_tables(
   tablevec = NULL,
   save_locally = FALSE,
+  import_from_local = FALSE,
   savedir = ".",
   savename = "drives_dblist",
   mytoken = "Bearer myapitoken"
@@ -19,9 +20,14 @@ available to the user.}
 \item{save_locally}{TRUE or FALSE indicating whether the downloaded tables should be 
 saved to an R data object.}
 
+\item{import_from_local}{If TRUE, the function reads in an R data object with the path savedir and savename
+instead of downloading the tables from directus.}
+
 \item{savedir}{Directory path for saving locally. Defaults to the working directory.}
 
 \item{savename}{File name for saving locally, excluding .Rda. Defaults to "drives_dblist"}
+
+\item{mytoken}{Directus API token, formatted as "Bearer apitoken"}
 
 \item{...}{Arguments to be passed to get_db_table and get_db_info.}
 }
