@@ -113,6 +113,7 @@ import_db_tables <- function(tablevec = NULL,
     load(file.path(savedir,paste0(savename,".Rda")))
     cat(paste0("\nImported list db with tables:\n"))
     purrr::walk(names(db), function(x){cat(paste0("\n",x))})
+    return(db)
   }
   if(import_from_local == FALSE){
     if(is.null(tablevec)){ 
