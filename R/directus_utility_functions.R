@@ -30,12 +30,8 @@ httr_dry_run <- function(r) {
 #' User-specific API token formated as "Bearer {myAPI token"}
 #' @returns
 #' Send
-#' Resets default api token for relevant functions in drivesR by sending commands to the R console.
-#' For now, it just specifies relevant functions in separate lines of code. 
-#' There's probably a fancier way to do this with lists or whatever.
+#' Resets default api token for relevant functions in drivesR. 
 #' @export
-#' @import glue
-#' @importFrom rstudioapi sendToConsole
 #' @examples
 #' directus_token = "Bearer abunchofnumbersandletters"
 #' ## This token should be read from a script or text file that is not synced to github
@@ -46,21 +42,5 @@ httr_dry_run <- function(r) {
 #' formals(api_request)$mytoken
 #' 
 set_default_token <- function(usertoken){
-  apifuns <- c("api_request",
-               "get_db_table",
-               "get_db_info",
-               "check_dictionary",
-               "check_categories",
-               "check_column_names",
-               "check_table_contents",
-               "post_rows_in_batches",
-               "delete_rows",
-               "modify_rows",
-               "import_dictionary_tables",
-               "import_db_tables")
-  for(af in apifuns){
-    mycode = glue::glue("formals({af})$mytoken <- '{usertoken}'")
-    rstudioapi::sendToConsole(mycode)  
-  }
-  
+  force(options("drivesR.default.directustoken"= usertoken))
 }

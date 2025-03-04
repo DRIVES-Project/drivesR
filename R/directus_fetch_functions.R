@@ -28,7 +28,7 @@
 #' 
 get_db_table <- function(table_name = "site_info", 
                          myurl = "https://data.drives-network.org",
-                         mytoken = "Bearer {myAPItoken}",
+                         mytoken = getOption("drivesR.default.directustoken"),
                          in_batches = FALSE,
                          batchsize = NULL
                          ){
@@ -138,7 +138,7 @@ get_db_table <- function(table_name = "site_info",
 get_db_info <- function(mytarget = "collections",
                         output_format = c("data.frame","json")[1],
                          myurl = "https://data.drives-network.org",
-                         mytoken = "Bearer {myAPItoken}",
+                         mytoken = getOption("drivesR.default.directustoken"),
                          flatten = FALSE){
   if(!output_format %in% c("json","data.frame")){
     stop("output must be 'json' or 'data.frame'")

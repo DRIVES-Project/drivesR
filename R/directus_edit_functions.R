@@ -28,7 +28,7 @@
 delete_rows <- function(table_name = NULL, 
                         pkvec = NULL,
                         check_only = FALSE,
-                        mytoken = "Bearer myapitoken",
+                        mytoken = getOption("drivesR.default.directustoken"),
                         ...){
   if(check_only == TRUE){
     checkdf <- c()
@@ -77,7 +77,9 @@ delete_rows <- function(table_name = NULL,
 #' 
 modify_rows <- function(table_name = NULL, 
                       editdf = NULL,
-                      idcol = "uid",...){
+                      idcol = "uid",
+                      mytoken = getOption("drivesR.default.directustoken"),
+                      ...){
   problemrows <- c()
   for(i in 1:nrow(editdf)){
     mypk <- editdf[i,idcol]
@@ -92,7 +94,7 @@ modify_rows <- function(table_name = NULL,
     fixjson <-  jsonlite::toJSON(fixlist,pretty=T, auto_unbox = TRUE)
     fixreq <- api_request("PATCH",
                           glue::glue("items/{table_name}/{mypk}"),
-                          fixjson,...)
+                          fixjson,mytoken = mytoken,...)
     if(fixreq$status_code != 200){
       addrow <- data.frame(pk = mypk, status_code = fixreq$status_code)
       problemrows <- rbind(problemrows, addrow)

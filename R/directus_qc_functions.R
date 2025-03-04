@@ -25,7 +25,7 @@
 #' # set mytoken in function or with set_default_token()
 #' # Not run:  site_info_check <- check_dictionary(table_name = "site_info") 
 #' 
-check_dictionary <- function(table_name = "site_info",mytoken = "Bearer apitoken"){
+check_dictionary <- function(table_name = "site_info",mytoken = getOption("drivesR.default.directustoken")){
   ## get metadata info from Directus  
   table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken,...)
   if(!is.null(table_info)){
@@ -170,7 +170,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer apitoken
 #' 
 check_categories <- function(table_name = "site_info",
                              inputdf = NULL, 
-                             mytoken = "Bearer apitoken",
+                             mytoken = getOption("drivesR.default.directustoken"),
                              ...){
   ## filter query for column and category dictionary.
   qlist <- list(
@@ -280,7 +280,7 @@ check_categories <- function(table_name = "site_info",
 #' @import glue
 #' @examples
 #' #Not run: check_column_names("site_info", mydf)
-check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken = "Bearer apitoken"){
+check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken = getOption("drivesR.default.directustoken")){
   ## get fields from directus
   table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken,...)
   if(!is.null(table_info)){

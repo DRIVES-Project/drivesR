@@ -62,7 +62,7 @@ expand_years <- function(mydf = NULL,
 #' @import purrr
 #' @examples
 #' # not run: dict <- import_dictionary_tables()
-import_dictionary_tables <- function(public = FALSE,mytoken = "Bearer myapitoken"){
+import_dictionary_tables <- function(public = FALSE,mytoken = getOption("drivesR.default.directustoken")){
   ## I'm a bit unclear on how I'm going to separate public and private tables. I 
   # may need a separate set of dictionaries. For now, just pretend there's only 
   # one set of dictionaries.
@@ -108,7 +108,7 @@ import_db_tables <- function(tablevec = NULL,
                              import_from_local = FALSE,
                              savedir = ".", 
                              savename = "drives_dblist",
-                             mytoken = "Bearer myapitoken"){
+                             mytoken = getOption("drivesR.default.directustoken")){
   if(import_from_local == TRUE){
     load(file.path(savedir,paste0(savename,".Rda")))
     cat(paste0("\nImported list db with tables:\n"))
