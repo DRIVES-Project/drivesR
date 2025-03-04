@@ -37,10 +37,11 @@ httr_dry_run <- function(r) {
 #' ## This token should be read from a script or text file that is not synced to github
 #' 
 #' # see what defaults are before and after running
-#' formals(api_request)$mytoken
+#' formals(api_request)$mytoken # shows name of option used to set default.
+#' getOption("drivesR.default.directustoken") # shows default option.
 #' # Not run: set_default_token(directus_token)
-#' formals(api_request)$mytoken
+#' getOption("drivesR.default.directustoken") # shows new default
 #' 
 set_default_token <- function(usertoken){
-  force(options("drivesR.default.directustoken"= usertoken))
+  options("drivesR.default.directustoken"= usertoken)
 }
