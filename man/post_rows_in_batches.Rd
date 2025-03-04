@@ -8,7 +8,7 @@ post_rows_in_batches(
   table_name = "crop_yields",
   batchsize = 1000,
   inputdf = NULL,
-  mytoken
+  ...
 )
 }
 \arguments{
@@ -20,6 +20,9 @@ Progress is printed to the console.}
 \item{inputdf}{Data frame of rows to be added. This should have passed quality control checks.}
 
 \item{mytoken}{Directus token. Can be set with set_default_token()}
+}
+\value{
+Silent.
 }
 \description{
 To get around issues of posting limits.

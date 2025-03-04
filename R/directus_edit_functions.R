@@ -8,6 +8,8 @@
 #' A vector of primary keys for rows you want to delete in the table.
 #' @param check_only
 #' TRUE or FALSE indicating whether you want to inspect the rows instead of deleting them.
+#' @param ...
+#' Arguments passed to get_db_table and api_request.
 #' @returns
 #' If check_only = TRUE, returns a data frame of the table subset corresponding to the primary 
 #' keys in pkvec. if check_only = FALSE, the function performs delete operations on primary keys
@@ -24,15 +26,13 @@
 delete_rows <- function(table_name = NULL, 
                         pkvec = NULL,
                         check_only = FALSE,
-                        mytoken = NULL,
-                        myurl = "https://data.drives-network.org"){
+                        ...){
   if(check_only == TRUE){
     checkdf <- c()
     for(pk in pkvec){
       testrow <- get_db_info(glue::glue("items/{table_name}/{pk}"),
                              output_format = "data.frame",
-                             mytoken = mytoken,
-                             myurl = myurl)
+                             ...)
       checkdf <- rbind(checkdf, testrow)
     }# closes for loop
     return(checkdf)
@@ -40,9 +40,7 @@ delete_rows <- function(table_name = NULL,
   
   if(check_only == FALSE){
     for(pk in pkvec){
-      api_request("DELETE",glue::glue("items/{table_name}/{pk}"),
-                  mytoken = mytoken,
-                  myurl = myurl)
+      api_request("DELETE",glue::glue("items/{table_name}/{pk}"),...)
     }# closes for loop
   }# closes if 
 } #closes function
@@ -59,10 +57,8 @@ delete_rows <- function(table_name = NULL,
 #' A data frame with columns for the primary key and whatever is to be modified.
 #' @param idcol 
 #' Name of the primary key column in editdf.
-#' @param mytoken 
-#' Directus token.
-#' @param myurl 
-#' Directus URL.
+#' @param ... 
+#' Arguments passed to api_request.
 #' @returns
 #' Loops through rows of edit df and performs a PATCH request on each corresponding 
 #' item in the database. if the patch request does not work, it returns ids for problem rows.
@@ -78,9 +74,7 @@ delete_rows <- function(table_name = NULL,
 #' 
 modify_rows <- function(table_name = NULL, 
                       editdf = NULL,
-                      idcol = "uid",
-                      mytoken = NULL,
-                      myurl = "https://data.drives-network.org"){
+                      idcol = "uid",...){
   problemrows <- c()
   for(i in 1:nrow(editdf)){
     mypk <- editdf[i,idcol]
@@ -95,9 +89,7 @@ modify_rows <- function(table_name = NULL,
     fixjson <-  jsonlite::toJSON(fixlist,pretty=T, auto_unbox = TRUE)
     fixreq <- api_request("PATCH",
                           glue::glue("items/{table_name}/{mypk}"),
-                          fixjson,
-                          myurl = myurl,
-                          mytoken = mytoken)
+                          fixjson,...)
     if(fixreq$status_code != 200){
       addrow <- data.frame(pk = mypk, status_code = fixreq$status_code)
       problemrows <- rbind(problemrows, addrow)

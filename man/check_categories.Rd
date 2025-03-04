@@ -4,19 +4,15 @@
 \alias{check_categories}
 \title{Check category dictionary}
 \usage{
-check_categories(
-  table_name = "site_info",
-  mytoken = "Bearer {myAPItoken}",
-  inputdf = NULL
-)
+check_categories(table_name = "site_info", inputdf = NULL, ...)
 }
 \arguments{
 \item{table_name}{The table (collection) identifier}
 
-\item{mytoken}{Directus token. Can be set in the function or via set_default_token()}
-
 \item{inputdf}{A data frame of prospective rows to be added to the table. 
 If NULL, the function checks the category and column dictionaries.}
+
+\item{...}{Arguments passed to api_request.}
 }
 \value{
 If inputdf = NULL, it returns a data frame describing conditions and outcomes corresponding to 

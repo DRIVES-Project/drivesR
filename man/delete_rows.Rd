@@ -4,13 +4,7 @@
 \alias{delete_rows}
 \title{Delete rows in a table based on their primary key value}
 \usage{
-delete_rows(
-  table_name = NULL,
-  pkvec = NULL,
-  check_only = FALSE,
-  mytoken = NULL,
-  myurl = "https://data.drives-network.org"
-)
+delete_rows(table_name = NULL, pkvec = NULL, check_only = FALSE, ...)
 }
 \arguments{
 \item{table_name}{The table identifier in directus}
@@ -18,6 +12,8 @@ delete_rows(
 \item{pkvec}{A vector of primary keys for rows you want to delete in the table.}
 
 \item{check_only}{TRUE or FALSE indicating whether you want to inspect the rows instead of deleting them.}
+
+\item{...}{Arguments passed to get_db_table and api_request.}
 }
 \value{
 If check_only = TRUE, returns a data frame of the table subset corresponding to the primary 

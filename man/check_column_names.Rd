@@ -4,14 +4,14 @@
 \alias{check_column_names}
 \title{Check column names}
 \usage{
-check_column_names(table_name = "site_info", inputdf = NULL, mytoken = mytoken)
+check_column_names(table_name = "site_info", inputdf = NULL, ...)
 }
 \arguments{
 \item{table_name}{Table identifier, such as "site_info"}
 
 \item{inputdf}{Dataframe to be evaluated.}
 
-\item{mytoken}{Directus token. Can be set in the function or through set_default_token()}
+\item{...}{Arguments passed to get_db_info.}
 }
 \value{
 A dataframe of checks, outcomes, and relevant fields.

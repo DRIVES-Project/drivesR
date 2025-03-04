@@ -4,12 +4,12 @@
 \alias{check_dictionary}
 \title{Check dictionary metadata}
 \usage{
-check_dictionary(table_name = "site_info", mytoken = "Bearer {myAPItoken}")
+check_dictionary(table_name = "site_info", ...)
 }
 \arguments{
 \item{table_name}{Table (collection) name.}
 
-\item{mytoken}{Directus token. Can be set in the function or via set_default_token()E}
+\item{...}{parameters passed to get_db_info and api_request}
 }
 \value{
 A data frame with a set of conditions, outcome (TRUE = pass or FALSE = fails), and 
@@ -19,4 +19,9 @@ columns for fields in the column_dictionary (dcols) and Directus table schema (t
 \description{
 Check for discrepancies between collection metadata stored in Directus
  and in data dictionaries.
+}
+\examples{
+# set mytoken in function or with set_default_token()
+# Not run:  site_info_check <- check_dictionary(table_name = "site_info") 
+
 }

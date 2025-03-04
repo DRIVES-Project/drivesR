@@ -4,13 +4,7 @@
 \alias{modify_rows}
 \title{Modify content in existing rows}
 \usage{
-modify_rows(
-  table_name = NULL,
-  editdf = NULL,
-  idcol = "uid",
-  mytoken = NULL,
-  myurl = "https://data.drives-network.org"
-)
+modify_rows(table_name = NULL, editdf = NULL, idcol = "uid", ...)
 }
 \arguments{
 \item{table_name}{Table identifier within Directus}
@@ -19,9 +13,7 @@ modify_rows(
 
 \item{idcol}{Name of the primary key column in editdf.}
 
-\item{mytoken}{Directus token.}
-
-\item{myurl}{Directus URL.}
+\item{...}{Arguments passed to api_request.}
 }
 \value{
 Loops through rows of edit df and performs a PATCH request on each corresponding 

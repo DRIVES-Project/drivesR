@@ -4,18 +4,14 @@
 \alias{check_table_contents}
 \title{Check table contents before import}
 \usage{
-check_table_contents(
-  table_name = "site_info",
-  inputdf = NULL,
-  mytoken = "Bearer {myAPItoken}"
-)
+check_table_contents(table_name = "site_info", inputdf = NULL, ...)
 }
 \arguments{
 \item{table_name}{Name of the table in Directus}
 
 \item{inputdf}{data frame intended for the Directus table}
 
-\item{mytoken}{User-specific Directus token. Can set with set_default_token()}
+\item{...}{Arguments passed to get_db_info}
 }
 \value{
 A nested data frame (tibble) with results for each constraint. 

@@ -7,8 +7,8 @@
 #' @param table_name
 #' Table (collection) name.
 #'   
-#' @param mytoken 
-#' Directus token. Can be set in the function or via set_default_token()E
+#' @param ...
+#' parameters passed to get_db_info and api_request
 #' @returns
 #' A data frame with a set of conditions, outcome (TRUE = pass or FALSE = fails), and 
 #' fields that fail the condition. In case of mismatched field names, there are separate 
@@ -21,11 +21,11 @@
 #' @importFrom dplyr inner_join
 #' @examples
 #' # set mytoken in function or with set_default_token()
-#' # Not run:  site_info_check <- check_dictionary(table_name = "site_info",mytoken = "Bearer {myAPItoken}") 
+#' # Not run:  site_info_check <- check_dictionary(table_name = "site_info") 
 #' 
-check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPItoken}"){
+check_dictionary <- function(table_name = "site_info",...){
   ## get metadata info from Directus  
-  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken)
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),...)
   if(!is.null(table_info)){
     table_info <- jsonlite::flatten(table_info)
   }else{
@@ -44,7 +44,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPIto
   
   qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
   
-  dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken)
+  dict_req <- api_request("SEARCH","items/column_dictionary",qjson, ...)
   dict_table <- get_table_from_req(apirequest = dict_req)
   if(length(dict_table) ==0){
     stop("table_name not found in column_dictionary")
@@ -144,8 +144,8 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPIto
 #' @param table_name 
 #' The table (collection) identifier
 #' 
-#' @param mytoken 
-#' Directus token. Can be set in the function or via set_default_token()
+#' @param ... 
+#' Arguments passed to api_request.
 #' 
 #' @param inputdf 
 #' A data frame of prospective rows to be added to the table. 
@@ -165,8 +165,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = "Bearer {myAPIto
 #' #Not run: check_categories("site_info") 
 #' 
 check_categories <- function(table_name = "site_info",
-                             mytoken = "Bearer {myAPItoken}", 
-                             inputdf = NULL){
+                             inputdf = NULL, ...){
   ## filter query for column and category dictionary.
   qlist <- list(
     query = list(
@@ -178,7 +177,7 @@ check_categories <- function(table_name = "site_info",
     )
   )
   qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
-  col_dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken) 
+  col_dict_req <- api_request("SEARCH","items/column_dictionary",qjson, ...) 
   col_dict_table <- get_table_from_req(apirequest = col_dict_req)
   if(length(col_dict_table) ==0){
     stop("table_name not found in column_dictionary")
@@ -187,7 +186,7 @@ check_categories <- function(table_name = "site_info",
   if(length(cat_fields_tdict)==0){
     stop("no category fields in column dictionary")
   }
-  cat_dict_req <- api_request("SEARCH","items/category_dictionary",qjson, mytoken = mytoken)
+  cat_dict_req <- api_request("SEARCH","items/category_dictionary",qjson, ...)
   cat_dict_table <- get_table_from_req(apirequest = cat_dict_req)
   if(length(cat_dict_table) ==0){
     stop("table_name not found in category dictionary")
@@ -260,8 +259,8 @@ check_categories <- function(table_name = "site_info",
 #' @param inputdf 
 #'  Dataframe to be evaluated. 
 #'  
-#' @param mytoken
-#' Directus token. Can be set in the function or through set_default_token()
+#' @param ...
+#' Arguments passed to get_db_info.
 #'
 #' @returns
 #' A dataframe of checks, outcomes, and relevant fields. 
@@ -273,9 +272,9 @@ check_categories <- function(table_name = "site_info",
 #' @import glue
 #' @examples
 #' #Not run: check_column_names("site_info", mydf)
-check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken = mytoken){
+check_column_names <- function(table_name = "site_info", inputdf = NULL, ...){
   ## get fields from directus
-  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken)
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),...)
   if(!is.null(table_info)){
     table_info <- jsonlite::flatten(table_info)
   }else{
@@ -319,8 +318,8 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 #' @param inputdf 
 #' data frame intended for the Directus table
 #' 
-#' @param mytoken 
-#' User-specific Directus token. Can set with set_default_token()
+#' @param ... 
+#' Arguments passed to get_db_info
 #'
 #' @returns
 #' A nested data frame (tibble) with results for each constraint. 
@@ -346,7 +345,7 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 #' #not run: checkdf <-  check_table_contents("site_info", inputdf = mydf)
 check_table_contents <- function(table_name = "site_info",
                                  inputdf = NULL, 
-                                 mytoken = "Bearer {myAPItoken}"){
+                                 ...){
   pass_message <- ""
   fail_message <- ""
   na_message <- "constraint does not apply"
@@ -360,7 +359,7 @@ check_table_contents <- function(table_name = "site_info",
                  problem_list = NA,
                  dtype_problem_list = NA)
   # Fetch schema information for table
-  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken= mytoken,flatten=TRUE)
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),flatten=TRUE,...)
   # start with easier ones. 
 
   # 1) is_nullable-----

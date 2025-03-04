@@ -230,10 +230,11 @@ make_row_insert_json <- function(mydf){
 #' @param mytoken 
 #' Directus token. Can be set with set_default_token()
 #' @returns
+#' Silent.
 #' @export
 #'
 #' @examples
-post_rows_in_batches <- function(table_name = "crop_yields", batchsize = 1000, inputdf = NULL,mytoken){
+post_rows_in_batches <- function(table_name = "crop_yields", batchsize = 1000, inputdf = NULL,...){
   nitems = nrow(inputdf)
   nbatches = ceiling(batchsize/nitems)
   start_i = 1
@@ -244,7 +245,7 @@ post_rows_in_batches <- function(table_name = "crop_yields", batchsize = 1000, i
     end_i <- min(start_i + batchsize , nitems)
     subsetdf <- importlist[[mytable]][start_i:end_i,]
     insert_json <- make_row_insert_json(subsetdf)
-    myreq <- api_request("POST",glue::glue("items/{mytable}"),insert_json,mytoken = mytoken)
+    myreq <- api_request("POST",glue::glue("items/{mytable}"),insert_json,...)
     print(paste(batch_i,"of",nbatches,"status",myreq$status_code))
     start_i <- end_i + 1
     batch_i <- batch_i + 1
