@@ -4,7 +4,10 @@
 \alias{check_dictionary}
 \title{Check dictionary metadata}
 \usage{
-check_dictionary(table_name = "site_info", mytoken = "Bearer apitoken")
+check_dictionary(
+  table_name = "site_info",
+  mytoken = getOption("drivesR.default.directustoken")
+)
 }
 \arguments{
 \item{table_name}{Table (collection) name.}

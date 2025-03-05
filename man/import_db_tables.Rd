@@ -10,7 +10,7 @@ import_db_tables(
   import_from_local = FALSE,
   savedir = ".",
   savename = "drives_dblist",
-  mytoken = "Bearer myapitoken"
+  mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{

@@ -11,9 +11,7 @@ set_default_token(usertoken)
 }
 \value{
 Send
-Resets default api token for relevant functions in drivesR by sending commands to the R console.
-For now, it just specifies relevant functions in separate lines of code. 
-There's probably a fancier way to do this with lists or whatever.
+Resets default api token for relevant functions in drivesR.
 }
 \description{
 Set a user-specific API token as the default for functions making API requests. 
@@ -24,8 +22,9 @@ directus_token = "Bearer abunchofnumbersandletters"
 ## This token should be read from a script or text file that is not synced to github
 
 # see what defaults are before and after running
-formals(api_request)$mytoken
+formals(api_request)$mytoken # shows name of option used to set default.
+getOption("drivesR.default.directustoken") # shows default option.
 # Not run: set_default_token(directus_token)
-formals(api_request)$mytoken
+getOption("drivesR.default.directustoken") # shows new default
 
 }

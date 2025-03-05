@@ -7,7 +7,7 @@
 check_categories(
   table_name = "site_info",
   inputdf = NULL,
-  mytoken = "Bearer apitoken",
+  mytoken = getOption("drivesR.default.directustoken"),
   ...
 )
 }

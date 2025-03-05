@@ -8,7 +8,7 @@ get_db_info(
   mytarget = "collections",
   output_format = c("data.frame", "json")[1],
   myurl = "https://data.drives-network.org",
-  mytoken = "Bearer {myAPItoken}",
+  mytoken = getOption("drivesR.default.directustoken"),
   flatten = FALSE
 )
 }

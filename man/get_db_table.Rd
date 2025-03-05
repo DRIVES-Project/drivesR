@@ -7,7 +7,7 @@
 get_db_table(
   table_name = "site_info",
   myurl = "https://data.drives-network.org",
-  mytoken = "Bearer {myAPItoken}",
+  mytoken = getOption("drivesR.default.directustoken"),
   in_batches = FALSE,
   batchsize = NULL
 )

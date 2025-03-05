@@ -8,7 +8,7 @@ delete_rows(
   table_name = NULL,
   pkvec = NULL,
   check_only = FALSE,
-  mytoken = "Bearer myapitoken",
+  mytoken = getOption("drivesR.default.directustoken"),
   ...
 )
 }

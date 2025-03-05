@@ -11,7 +11,7 @@ api_request(
   mytarget = "collections",
   jsonbody = NULL,
   myurl = "https://data.drives-network.org",
-  mytoken = "Bearer {myAPItoken}"
+  mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{

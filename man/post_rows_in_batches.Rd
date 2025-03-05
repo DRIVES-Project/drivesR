@@ -8,6 +8,7 @@ post_rows_in_batches(
   table_name = "crop_yields",
   batchsize = 1000,
   inputdf = NULL,
+  mytoken = getOption("drivesR.default.directustoken"),
   ...
 )
 }

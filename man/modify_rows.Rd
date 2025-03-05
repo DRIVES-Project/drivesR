@@ -4,7 +4,13 @@
 \alias{modify_rows}
 \title{Modify content in existing rows}
 \usage{
-modify_rows(table_name = NULL, editdf = NULL, idcol = "uid", ...)
+modify_rows(
+  table_name = NULL,
+  editdf = NULL,
+  idcol = "uid",
+  mytoken = getOption("drivesR.default.directustoken"),
+  ...
+)
 }
 \arguments{
 \item{table_name}{Table identifier within Directus}
