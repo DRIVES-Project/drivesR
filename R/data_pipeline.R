@@ -250,3 +250,32 @@ harmonize_treatments_units <- function(db = NULL,
                                 by = c("site_id", "treatmentID2", "year"))
   return(yearly_unit_trt2) 
 }
+
+
+#' List treatment components by management practice.
+#' 
+#' Uses information in the site_treatment_type_info table 
+#' @param site_treatment_type_info 
+#' A data frame with the site_treatment_type_info table. If left as
+#' NULL, this table is imported from directus. 
+#' @param mytoken 
+#' Directus token, formatted as "Bearer myapitoken". Set by set_default_token().
+#' @returns
+#' A named list of treatment types corresponding to a set of core management practices described for
+#' all sites. Useful for identifying columns in harmonized dataframes with all treatment types. 
+#' @export
+#'
+#' @examples
+#' #not run: management_practice_list <- list_treatments_by_management_practice()
+#' # not run: harmonized_treatments <- harmonize_treatments()
+#' # If I want to do something with N fertility treatments, for example.
+#' #not run: nfert <- harmonized_treatments[,c("site_id","treatmentID2","year",management_practice_list$`N fertility`)]
+list_treatments_by_management_practice <- function(site_treatment_type_info = NULL,
+                                                   mytoken = getOption("drivesR.default.directustoken")){
+  if(is.null(site_treatment_type_info)){
+    site_treatment_type_info <- get_db_table("site_treatment_type_info",mytoken = mytoken)
+  }
+  management_practice_list <- tapply(site_treatment_type_info$treatment_type,
+                                     site_treatment_type_info$management_practice, unique)
+  return(management_practice_list)
+}
