@@ -570,3 +570,79 @@ check_table_contents <- function(table_name = "site_info",
   
   return(checkdf)
 }
+
+#' Check for mistakes in treatment components and years.
+#' 
+#' Harmonization steps require that:
+#' 1) Expanding by start and end years in experimental_unit_treatments
+#' results in a single row per treatment_id per unit_id per year (one for treatmentID1, one for treatmentID2)
+#' 2) Expanding by start and end years in treatment_id_components results
+#' in 1 level per treatment type and treatment id per year.
+#' 3) When these expanded tables are combined, there is only 1 level per treatment type, unit id, treatment id, and year.
+#' @param db 
+#' A list containing named data frames treatment_id_info, treatment_id_components,
+#' and experimental_unit_treatments. Because this function is intended to check for mistakes before
+#' uploading to the database, this list must be supplied by the user. 
+#' @returns
+#' A list with subsetted problem rows of experimental_unit_treatments, treatment_id_components, and the
+#' combined dataframe with treatment components by experimental unit. 
+#' @export
+#' @import dplyr
+#'
+#' @examples
+#' # not run trt_check <- check_treatment_years(db)
+check_treatment_years <- function(db = NULL){
+  
+  ## set up-------
+  outlist <- vector(mode = "list",length = 3)
+  names(outlist) <- c("experimental_unit_treatments","treatment_id_components","combined")
+  treatment_id_components <- suppressMessages(dplyr::left_join(db$treatment_id_components, db$treatment_id_info))
+  experimental_unit_treatments <- suppressMessages(dplyr::left_join(db$experimental_unit_treatments, db$treatment_id_info))
+  
+  suppressWarnings({
+    ## 1: experimental_unit_treatments--------
+    ## expand experimental_unit_treatments by year. 
+    cat("\nCondition 1: Single row per unit_id, year, and treatment_id_type? ")
+    ut <- expand_years(experimental_unit_treatments)
+    utdups <- check_dups(ut,checkcols = c("unit_id","year","treatment_id_type"))
+    if(utdups$ndups==0){
+      cat("Yes!")
+    }
+    if(utdups$ndups > 0){
+      cat("No. See output list.")
+      outlist[[1]] <- experimental_unit_treatments[which(experimental_unit_treatments$uid %in% unique(utdups$dupdf$uid)),]
+    }
+    
+    ## 2: treatment_id_components--------
+    ## Get wide version of treatment components (yearly)
+    # separate trt type 1 and 2
+    cat("\nCondition 2: Single row per treatment_id, treatment_level, and year? ")
+    tc <- expand_years(treatment_id_components)
+    tcdups <- check_dups(tc, c("site_id","treatment_id","year","treatment_type"))
+    if(tcdups$ndups == 0){
+      cat("Yes!")
+    }
+    if(tcdups$ndups > 0){
+      cat("No. See output list.")
+      outlist[[2]] <- treatment_id_components[which(treatment_id_components$uid %in% unique(tcdups$dupdf$uid)),]
+       
+    }
+    
+    ## 3: combined experimental_unit_treatments and treatment_id_components-------
+    cat("\nCondition 2: Single row per unit_id, treatment_level, and year? ")
+    ## left join excludes treatments not assigned to a unit_id.
+    combodf <- suppressMessages(
+      dplyr::left_join(ut,tc,
+                        by = c("site_id","treatment_id_type","treatment_id","year"),
+                        suffix = c(".experimental_unit_treatment",".treatment_id_components")))
+    combodups <- check_dups(combodf, checkcols = c("unit_id","year","treatment_type","treatment_id_type"))
+    if(combodups$ndups ==0){
+      cat("Yes!")
+    }
+    if(combodups$ndups > 0){
+      cat("No. See output list.")
+      outlist[[3]] <- combodups$dupdf
+    }
+  })#ends suppressWarnings.
+  return(outlist)
+}
