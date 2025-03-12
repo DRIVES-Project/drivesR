@@ -2,7 +2,7 @@
 % Please edit documentation in R/directus_qc_functions.R
 \name{check_dictionary}
 \alias{check_dictionary}
-\title{Check dictionary metadata}
+\title{Check dictionary metadata for a database table.}
 \usage{
 check_dictionary(
   table_name = "site_info",
@@ -13,8 +13,6 @@ check_dictionary(
 \item{table_name}{Table (collection) name.}
 
 \item{mytoken}{API token, formatted as "Bearer apitoken"}
-
-\item{...}{parameters passed to get_db_info and api_request}
 }
 \value{
 A data frame with a set of conditions, outcome (TRUE = pass or FALSE = fails), and 
@@ -23,7 +21,19 @@ columns for fields in the column_dictionary (dcols) and Directus table schema (t
 }
 \description{
 Check for discrepancies between collection metadata stored in Directus
- and in data dictionaries.
+ and in data dictionaries for a specified table. Conditions tested are:
+ 1) The table_name is present in the column_dictionary.
+ 2) The number of columns matches between the table schema and column_dictionary.
+ 3) Column names match between the table schema and column_dictionary.
+ 4) Column names are in the same order, as specified by the column_order field in in column_dictionary. 
+ 5) Data constraints coded in the column_dictionary match what is in the table schema.
+ These constraints are:
+ - data type
+ - primary key
+ - unique
+ - nullable
+ - autoincremented
+ - foreign key tables and fields.
 }
 \examples{
 # set mytoken in function or with set_default_token()

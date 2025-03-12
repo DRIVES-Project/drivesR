@@ -7,8 +7,7 @@
 check_table_contents(
   table_name = "site_info",
   inputdf = NULL,
-  mytoken = "Bearer apitoken",
-  ...
+  mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{
@@ -41,7 +40,7 @@ The constraints checked are:
 2) max_length (if applicable)
 3) is_unique
 4) data type.
-Column names and foreign key values are checked with a different function.
+Column names and foreign key values are checked with different functions.
 }
 \examples{
 #not run: mydf <- read.csv("site_info_to_add.csv")
