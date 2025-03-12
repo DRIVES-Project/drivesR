@@ -1,16 +1,27 @@
 
-#' Check dictionary metadata
+#' Check dictionary metadata for a database table.
 #' 
 #' Check for discrepancies between collection metadata stored in Directus
-#'  and in data dictionaries.
+#'  and in data dictionaries for a specified table. Conditions tested are:
+#'  1) The table_name is present in the column_dictionary.
+#'  2) The number of columns matches between the table schema and column_dictionary.
+#'  3) Column names match between the table schema and column_dictionary.
+#'  4) Column names are in the same order, as specified by the column_order field in in column_dictionary. 
+#'  5) Data constraints coded in the column_dictionary match what is in the table schema.
+#'  These constraints are:
+#'  - data type
+#'  - primary key
+#'  - unique
+#'  - nullable
+#'  - autoincremented
+#'  - foreign key tables and fields. 
+#'   
 #'  
 #' @param table_name
 #' Table (collection) name.
 #'   
 #' @param mytoken
 #' API token, formatted as "Bearer apitoken"
-#' @param ...
-#' parameters passed to get_db_info and api_request
 #' @returns
 #' A data frame with a set of conditions, outcome (TRUE = pass or FALSE = fails), and 
 #' fields that fail the condition. In case of mismatched field names, there are separate 
@@ -27,7 +38,7 @@
 #' 
 check_dictionary <- function(table_name = "site_info",mytoken = getOption("drivesR.default.directustoken")){
   ## get metadata info from Directus  
-  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken,...)
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken)
   if(!is.null(table_info)){
     table_info <- jsonlite::flatten(table_info)
   }else{
@@ -46,7 +57,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = getOption("drive
   
   qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
   
-  dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken,...)
+  dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken)
   dict_table <- get_table_from_req(apirequest = dict_req)
   if(length(dict_table) ==0){
     stop("table_name not found in column_dictionary")
@@ -60,13 +71,13 @@ check_dictionary <- function(table_name = "site_info",mytoken = getOption("drive
   
   # Checks:
   ## number of fields matches
-  cond1name <- "Number of columns match"
+  cond1name <- "Number of columns match."
   cond1 <- nrow(table_info) == nrow(dict_table)
   row1 <- c(cond1name,cond1)
   checkdf[1,1:2] <-row1
   
   ## No mismatched field names in dictionary
-  condname <- "No mismatched fields in dictionary"
+  condname <- "No mismatched column names in dictionary."
   mismatched_dict_fields <- setdiff(dict_table$dict.column_name, table_info$field)
   cond <- length(mismatched_dict_fields)==0
   if(!cond){
@@ -76,7 +87,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = getOption("drive
   checkdf <- rbind(checkdf, newrow)
   
   ## No mismatched field names in table
-  condname <- "No mismatched fields in table"
+  condname <- "No mismatched column names in table schema"
   mismatched_table_fields <- setdiff(table_info$field,dict_table$dict.column_name)
   cond <- length(mismatched_table_fields)==0
   if(!cond){
@@ -86,7 +97,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = getOption("drive
   checkdf <- rbind(checkdf, newrow)
   
   ## fields are in the correct order (after sorting by column order)
-  condname <- "Fields are in the same order"
+  condname <- "Column names are in the same order"
   cond <- identical(table_info$field, dict_table$dict.column_name)
   newrow <- c(condname, cond,NA,NA)
   checkdf <- rbind(checkdf, newrow)
@@ -121,7 +132,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = getOption("drive
   }
   
   # foreign key. 
-  condname <- "Same foreign key option"
+  condname <- "Same foreign key options"
   mismatch <- combined_table$dict.column_name[which(
     combined_table$dict.foreign_key_table != combined_table$schema.foreign_key_table |
       combined_table$dict.foreign_key_column != combined_table$schema.foreign_key_column
@@ -143,13 +154,29 @@ check_dictionary <- function(table_name = "site_info",mytoken = getOption("drive
 #' Checks for discrepancies between the category dictionary and 
 #' column dictionary and input data. 
 #' 
+#' First the function tests a set of preliminary conditions. Failure
+#' in any of these throws out an error message.
+#' 1) The table name is present in the column dictionary
+#' 2) The column dictionary for this table contains no category fields.
+#' 3) The table name is present in the category dictionary.
+#' 
+#' If these conditions are met, the function checks for correspondence 
+#' between the category dictionary and the column dictionary. These conditions 
+#' are:
+#' 1) All column_name values in the category_dictionary are specified as categories in column_dictionary.
+#' 2) No fields are missing from category_dictionary
+#' 
+#' If an input table is provided under the inputdf argument, the function checks that
+#' the contents of this table match what is in the category dictionary. 
+#' The two conditions are: 
+#' 1) No category columns are missing from inputdf.
+#' 2) All category levels in inputdf are present in category_dictionary.
+#' 
 #' @param table_name 
 #' The table (collection) identifier
 #' 
 #' @param mytoken
-#' API token, formatted as "Bearer apitoken"
-#' @param ... 
-#' Arguments passed to api_request.
+#' API token, formatted as "Bearer apitoken". 
 #' 
 #' @param inputdf 
 #' A data frame of prospective rows to be added to the table. 
@@ -170,8 +197,7 @@ check_dictionary <- function(table_name = "site_info",mytoken = getOption("drive
 #' 
 check_categories <- function(table_name = "site_info",
                              inputdf = NULL, 
-                             mytoken = getOption("drivesR.default.directustoken"),
-                             ...){
+                             mytoken = getOption("drivesR.default.directustoken")){
   ## filter query for column and category dictionary.
   qlist <- list(
     query = list(
@@ -202,7 +228,7 @@ check_categories <- function(table_name = "site_info",
   cat_fields_catdict <- unique(cat_dict_table$column_name)
   in_cat_not_cdict <- setdiff(cat_fields_catdict, cat_fields_tdict)
   
-  condname <- "All fields are categories in column_dictionary" 
+  condname <- "All column_name values in the category_dictionary are specified as categories in column_dictionary." 
   cond <- length(in_cat_not_cdict) == 0
   dfields <- ifelse(cond, NA, paste(in_cat_not_cdict, collapse=";"))
   checkdf[1,] <- c("category_dictionary",condname, cond, dfields)
@@ -220,7 +246,7 @@ check_categories <- function(table_name = "site_info",
   }else{
     # check for missing category columns
     missingcat <- setdiff(cat_fields_catdict, names(inputdf))
-    condname <- "No missing category columns"
+    condname <- "No category columns are missing from inputdf."
     cond <- length(missingcat) == 0
     dfields <- ifelse(cond, NA, paste(missingcat, collapse=";"))
     checkdf <- rbind(checkdf,c("inputdf",condname, cond, dfields))
@@ -242,7 +268,7 @@ check_categories <- function(table_name = "site_info",
     }
     names(addvals) <- addvals_names
     
-    condname <- "All values present in category_dictionary"
+    condname <- "All category levels in inputdf are present in category_dictionary."
     cond <- length(addvals) == 0
     if(!cond){
       dfields <- paste(addvals_names, collapse=";")
@@ -256,9 +282,10 @@ check_categories <- function(table_name = "site_info",
 }#end function
 
 
-#' Check column names
+#' Check column names for a staged table.
 #' 
-#' Quality control step to check column names in a data frame to be imported into Directus.
+#' Quality control step to check that column names in a data frame to be imported into Directus
+#' match what is in the table schema.
 #' 
 #' @param table_name 
 #'  Table identifier, such as "site_info"
@@ -267,8 +294,6 @@ check_categories <- function(table_name = "site_info",
 #'  
 #' @param mytoken
 #' directus API token, as "Bearer apitoken"
-#' @param ...
-#' Arguments passed to get_db_info.
 #'
 #' @returns
 #' A dataframe of checks, outcomes, and relevant fields. 
@@ -282,7 +307,7 @@ check_categories <- function(table_name = "site_info",
 #' #Not run: check_column_names("site_info", mydf)
 check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken = getOption("drivesR.default.directustoken")){
   ## get fields from directus
-  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken,...)
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken)
   if(!is.null(table_info)){
     table_info <- jsonlite::flatten(table_info)
   }else{
@@ -319,7 +344,7 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 #' 2) max_length (if applicable)
 #' 3) is_unique
 #' 4) data type.
-#' Column names and foreign key values are checked with a different function.
+#' Column names and foreign key values are checked with different functions.
 #' @param table_name 
 #' Name of the table in Directus
 #' 
@@ -353,8 +378,7 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 #' #not run: checkdf <-  check_table_contents("site_info", inputdf = mydf)
 check_table_contents <- function(table_name = "site_info",
                                  inputdf = NULL, 
-                                 mytoken = "Bearer apitoken",
-                                 ...){
+                                 mytoken = getOption("drivesR.default.directustoken")){
   pass_message <- ""
   fail_message <- ""
   na_message <- "constraint does not apply"
@@ -368,7 +392,7 @@ check_table_contents <- function(table_name = "site_info",
                  problem_list = NA,
                  dtype_problem_list = NA)
   # Fetch schema information for table
-  table_info <- get_db_info(glue::glue("fields/{table_name}"),flatten=TRUE,...)
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),flatten=TRUE,mytoken = mytoken)
   # start with easier ones. 
 
   # 1) is_nullable-----
