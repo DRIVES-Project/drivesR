@@ -314,7 +314,7 @@ list_treatments_by_management_practice <- function(site_treatment_type_info = NU
 #' # not run: wideyield <- harmonize_yields(crop_fractions_as_columns = TRUE)
 harmonize_yields <- function(crop_yields = NULL,
                              crop_fractions_as_columns = FALSE,
-                             primary_crop_fractions = c("grain","fruit"),
+                             primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
                              mytoken = getOption("drivesR.default.directustoken")){
   
   if(is.null(crop_yields)){
