@@ -120,7 +120,7 @@ import_db_tables <- function(tablevec = NULL,
       ## query the database for all table names available to the user.
       ## Note: I tried excluding internal directus collections as a query, but it 
       # didn't work.
-      collection_info <- get_db_info(mytarget = "collections",output_format = "data.frame",... )
+      collection_info <- get_db_info(mytarget = "collections",output_format = "data.frame",mytoken = mytoken )
       ## remove internal directus tables. 
       tablevec <- collection_info$collection[which(!grepl("^directus_", collection_info$collection))]
       } # ends if(is.null(tablevec)
