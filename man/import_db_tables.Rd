@@ -10,6 +10,7 @@ import_db_tables(
   import_from_local = FALSE,
   savedir = ".",
   savename = "drives_dblist",
+  public = FALSE,
   mytoken = getOption("drivesR.default.directustoken")
 )
 }
@@ -26,6 +27,9 @@ instead of downloading the tables from directus.}
 \item{savedir}{Directory path for saving locally. Defaults to the working directory.}
 
 \item{savename}{File name for saving locally, excluding .Rda. Defaults to "drives_dblist"}
+
+\item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES 
+database. FALSE otherwise.}
 
 \item{mytoken}{Directus API token, formatted as "Bearer apitoken"}
 

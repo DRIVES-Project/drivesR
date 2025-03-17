@@ -16,6 +16,7 @@ for harvest index calculations and such.}
 harmonize_yields(
   crop_yields = NULL,
   crop_fractions_as_columns = FALSE,
+  public = FALSE,
   primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
   mytoken = getOption("drivesR.default.directustoken")
 )
@@ -28,8 +29,12 @@ this table will be downloaded via the Directus API.}
 columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 
 as in the database table.}
 
+\item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES 
+database. FALSE otherwise.}
+
 \item{primary_crop_fractions}{A vector of crop fractions to select as the primary fraction, when there is more than one.
-So far, this only pertains to grain and tomato fruit.}
+So far, this only pertains to grain and tomato fruit. The default is set with the 
+option drivesR.primary_crop_fractions.}
 
 \item{mytoken}{Directus token, formatted as "Bearer myapitoken". Can be set with set_default_token().}
 }

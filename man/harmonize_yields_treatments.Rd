@@ -7,6 +7,7 @@
 harmonize_yields_treatments(
   db = NULL,
   crop_fractions_as_columns = FALSE,
+  public = FALSE,
   mytoken = getOption("drivesR.default.directustoken")
 )
 }
@@ -18,6 +19,9 @@ If left NULL, these tables are imported from Directus.}
 \item{crop_fractions_as_columns}{#' If TRUE, multiple fractions from the same crop are organized in separate 
 columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 
 as in the database table.}
+
+\item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES 
+database. FALSE otherwise.}
 
 \item{mytoken}{Directus token, formatted as "Bearer myapitoken". Set by set_default_token().}
 }
