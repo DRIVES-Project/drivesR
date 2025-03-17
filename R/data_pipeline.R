@@ -92,6 +92,9 @@ import_dictionary_tables <- function(public = FALSE,mytoken = getOption("drivesR
 #' Directory path for saving locally. Defaults to the working directory.
 #' @param savename 
 #' File name for saving locally, excluding .Rda. Defaults to "drives_dblist"
+##' @param public 
+#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
+#' database. FALSE otherwise. 
 #' @param mytoken
 #' Directus API token, formatted as "Bearer apitoken"
 #' @param ...
@@ -108,6 +111,7 @@ import_db_tables <- function(tablevec = NULL,
                              import_from_local = FALSE,
                              savedir = ".", 
                              savename = "drives_dblist",
+                             public = FALSE,
                              mytoken = getOption("drivesR.default.directustoken")){
   if(import_from_local == TRUE){
     load(file.path(savedir,paste0(savename,".Rda")))
@@ -121,11 +125,16 @@ import_db_tables <- function(tablevec = NULL,
       ## Note: I tried excluding internal directus collections as a query, but it 
       # didn't work.
       collection_info <- get_db_info(mytarget = "collections",output_format = "data.frame",mytoken = mytoken )
-      ## remove internal directus tables. 
+      ## remove internal directus tables.
       tablevec <- collection_info$collection[which(!grepl("^directus_", collection_info$collection))]
       } # ends if(is.null(tablevec)
+    if(!is.null(tablevec)){
+      ## if public == TRUE, add public prefix to all but dictionary tables. 
+      prefix <- ifelse(public == TRUE,"public_","") 
+      tablevec <- ifelse(!grepl("dictionary",tablevec),paste0(prefix,tablevec),tablevec)
+    }
     db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken))
-    names(db) <- tablevec
+    names(db) <- gsub("^public_","",tablevec)## removes public prefix to table names, if present
     if(save_locally == TRUE){
       save(db, file = file.path(savedir, paste0(savename,".Rda")))
     }
@@ -141,7 +150,9 @@ import_db_tables <- function(tablevec = NULL,
 #' @param db
 #' A list of database tables containing named dataframes treatment_id_info and treatment_id_components.
 #' If left NULL, these tables are imported from Directus.
-#'  
+#' @param public 
+#' TRUE if data are to be downloaded from the publicly available part of the DRIVES database.
+#' FALSE otherwise. 
 #' @param mytoken 
 #' Directus API token, formatted as "Bearer myapitoken". Defaults to option set for "drivesR.default.directustoken"
 #' @returns
@@ -154,6 +165,7 @@ import_db_tables <- function(tablevec = NULL,
 #' @examples
 #' #not run: tcw <- harmonize_treatments()
 harmonize_treatments <- function(db = NULL, 
+                                 public = FALSE,
                                  mytoken = getOption("drivesR.default.directustoken")){
   # if db is supplied, check for required tables. 
   trttables <- c("treatment_id_info","treatment_id_components")
@@ -164,7 +176,9 @@ harmonize_treatments <- function(db = NULL,
   }
     if(is.null(db)){
     # Import from directus
-      db <- import_db_tables(tablevec = c(trttables), mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
+      prefix <- ifelse(public ==TRUE,"public_","")
+      dltables <-  paste0(prefix, trttables)
+      db <- import_db_tables(tablevec = dltables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
   }
   # add treatment_id_info to components
   treatment_id_components <- dplyr::left_join(db$treatment_id_components, db$treatment_id_info)
@@ -215,6 +229,9 @@ harmonize_treatments <- function(db = NULL,
 #' A list of database tables containing named dataframes treatment_id_info,
 #' treatment_id_components, and experimental_unit_treatments.
 #' If left NULL, these tables are imported from Directus.
+#' @param public 
+#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
+#' database. FALSE otherwise. 
 #' @param mytoken 
 #' Directus token, formatted as "Bearer myapitoken". Can be set with set_default_token()
 #' @returns
@@ -225,6 +242,7 @@ harmonize_treatments <- function(db = NULL,
 #' @examples
 #' # not run: trt_units <- harmonize_treatment_units()
 harmonize_treatments_units <- function(db = NULL,
+                                       public = FALSE,
                                        mytoken = getOption("drivesR.default.directustoken")){
   trttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments")
   if(!is.null(db)){
@@ -234,7 +252,9 @@ harmonize_treatments_units <- function(db = NULL,
     }
   }
   if(is.null(db)){
-    db <- import_db_tables(trttables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
+    prefix <- ifelse(public ==TRUE,"public_","")
+    dltables <-  paste0(prefix, trttables)
+    db <- import_db_tables(dltables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
   }
   ## get harmonized treatments.
   tcw <- harmonize_treatments(db = db)
@@ -300,9 +320,13 @@ list_treatments_by_management_practice <- function(site_treatment_type_info = NU
 #' If TRUE, multiple fractions from the same crop are organized in separate 
 #' columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 
 #' as in the database table.
+#' @param public 
+#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
+#' database. FALSE otherwise. 
 #' @param primary_crop_fractions
 #' A vector of crop fractions to select as the primary fraction, when there is more than one.
-#' So far, this only pertains to grain and tomato fruit.
+#' So far, this only pertains to grain and tomato fruit. The default is set with the 
+#' option drivesR.primary_crop_fractions. 
 #' @returns
 #' A data frame of lightly processed crop yield data. 
 #' If crop_fractions_as_columns is set to TRUE, 
@@ -316,11 +340,13 @@ list_treatments_by_management_practice <- function(site_treatment_type_info = NU
 #' # not run: wideyield <- harmonize_yields(crop_fractions_as_columns = TRUE)
 harmonize_yields <- function(crop_yields = NULL,
                              crop_fractions_as_columns = FALSE,
+                             public = FALSE,
                              primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
                              mytoken = getOption("drivesR.default.directustoken")){
   
   if(is.null(crop_yields)){
-    crop_yields <- get_db_table("crop_yields", mytoken = mytoken)
+    dltable <- ifelse(public == TRUE, "public_crop_yields","crop_yields")
+    crop_yields <- get_db_table(dltable, mytoken = mytoken)
   }
   ## fill in NAs for actual_crop_id
   narows <- which(is.na(crop_yields$actual_crop_id))
@@ -364,6 +390,9 @@ harmonize_yields <- function(crop_yields = NULL,
 #' #' If TRUE, multiple fractions from the same crop are organized in separate 
 #' columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 
 #' as in the database table. 
+#' @param public
+#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
+#' database. FALSE otherwise. 
 #' @param mytoken 
 #' Directus token, formatted as "Bearer myapitoken". Set by set_default_token().
 #' @returns
@@ -380,6 +409,7 @@ harmonize_yields <- function(crop_yields = NULL,
 harmonize_yields_treatments <- function(
     db = NULL,
     crop_fractions_as_columns = FALSE,
+    public = FALSE,
     mytoken = getOption("drivesR.default.directustoken")){
   ytrttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields")
   if(!is.null(db)){
@@ -388,7 +418,9 @@ harmonize_yields_treatments <- function(
     }
   }
   if(is.null(db)){
-    db <- import_db_tables(ytrttables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
+    prefix <- ifelse(public==TRUE,"public_","")
+    dltables <- paste0(prefix, ytrttables)
+    db <- import_db_tables(dltables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
   }
   treatmentunits <- harmonize_treatments_units(db = db)
   yields <- harmonize_yields(crop_yields = db$crop_yields, 
@@ -396,4 +428,41 @@ harmonize_yields_treatments <- function(
                              mytoken = mytoken)
   outyield <- dplyr::left_join(yields, treatmentunits, by = c("site_id","unit_id","harvest_year"="year"))
   return(outyield)
+}
+
+
+#' Harmonize daily weather data
+#'
+#' @param weather_daily
+#' A dataframe corresponding to the weather_daily table
+#' in the DRIVES database. If NULL, this table is downloaded from Directus.
+#'  
+#' @param mytoken
+#' Directus token, formatted as "Bearer myapitoken". This can be set 
+#'  with set_default_token(). 
+#'   
+#' @param public 
+#' TRUE if weather data is from the publicly available part of the DRIVES database.
+#' FALSE otherwise.
+#' 
+#' @returns
+#' A data frame of mildly processed weather data with weather variables in separate columns
+#' (instead of in separate rows as in the database). The processed table also excludes
+#' weather_station_id, flag, and uid columns from the original database table. 
+#' @export
+#' @import tidyr
+#' @examples
+harmonize_weather <- function(weather_daily=NULL,
+                              mytoken = getOption("drivesR.default.directustoken"),
+                              public = FALSE){
+  if(is.null(weather_daily)){
+    ## import from directus
+    tablename <- ifelse(public == TRUE,"public_weather_daily","weather_daily")
+    weather_daily <- get_db_table(tablename, mytoken = mytoken)
   }
+  wide_weather <- tidyr::pivot_wider(weather_daily, 
+                                     id_cols = c("site_id","year","date","day_of_year"),
+                                     names_from = variable,
+                                     values_from = value)
+  return(wide_weather)
+}
