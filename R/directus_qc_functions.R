@@ -734,6 +734,6 @@ check_fk_values <- function(table_name = NULL,
       message(glue::glue("Foreign key violations in column {fkfield}."))
       outlist[[i]] <- inputdf[which(fkTF==FALSE),]
     }
-    return(outlist)
-  }
-}
+  }# closes loop
+  return(outlist)
+}# closes function
