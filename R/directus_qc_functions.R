@@ -709,7 +709,7 @@ check_fk_values <- function(table_name = NULL,
     fkq <- jsonlite::toJSON(list("fields" = fkfield),auto_unbox = FALSE)
     
     fkreq <- httr::GET(
-      glue::glue("{myurl}/items/{fktable}?fields={fkfield}"),
+      glue::glue("{myurl}/items/{fktable}?fields={fkfield}&limit=-1"),
       httr::add_headers(
         "Authorization" = mytoken
       )
