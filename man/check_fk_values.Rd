@@ -7,7 +7,8 @@
 check_fk_values(
   table_name = NULL,
   inputdf = NULL,
-  mytoken = getOption("drivesR.default.directustoken")
+  mytoken = getOption("drivesR.default.directustoken"),
+  myurl = getOption("drivesR.default.url")
 )
 }
 \arguments{

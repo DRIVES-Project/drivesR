@@ -7,9 +7,8 @@
 delete_rows(
   table_name = NULL,
   pkvec = NULL,
-  check_only = FALSE,
-  mytoken = getOption("drivesR.default.directustoken"),
-  ...
+  check_only = TRUE,
+  mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{

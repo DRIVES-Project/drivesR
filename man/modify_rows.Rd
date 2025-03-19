@@ -8,8 +8,7 @@ modify_rows(
   table_name = NULL,
   editdf = NULL,
   idcol = "uid",
-  mytoken = getOption("drivesR.default.directustoken"),
-  ...
+  mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{
