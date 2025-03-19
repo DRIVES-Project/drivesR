@@ -670,3 +670,68 @@ check_treatment_years <- function(db = NULL){
   })#ends suppressWarnings.
   return(outlist)
 }
+
+
+#' Check foreign key values for a staged table.
+#'
+#' @param table_name 
+#' Name of the table in the DRIVES database.
+#' @param inputdf 
+#' Data frame containing foreign key colulmns.
+#' @param mytoken 
+#' Directus token.
+#'
+#' @returns
+#' A list of columns with foreign key constraints and 
+#' a dataframe of subsetted rows from inputdf that violate
+#' foreign key constraints--or NULL if all rows pass. 
+#' The function throws out messages about the results of each foreign
+#' key columns. 
+#' 
+#' @export
+#'
+#' @examples
+#' # not run: fkcheck <- check_fk_values("crop_variety_info", inputdf = staged_df)
+check_fk_values <- function(table_name = NULL,
+                            inputdf = NULL,
+                            mytoken = getOption("drivesR.default.directustoken")){
+  # import schema information
+  table_schema <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken, flatten = TRUE)
+  fk_schema <- table_schema[which(!is.na(table_schema$schema.foreign_key_table)),]
+  # make a list of foreign key options.
+  fklist <- vector(mode = "list", length = nrow(fk_schema))
+  names(fklist) <- fk_schema$field # named by field name in input table.
+  for(i in 1:nrow(fk_schema)){
+    fktable = fk_schema$schema.foreign_key_table[i]
+    fkfield = fk_schema$schema.foreign_key_column[i]
+    fkq <- jsonlite::toJSON(list("fields" = fkfield),auto_unbox = FALSE)
+    
+    fkreq <- httr::GET(
+      glue::glue("{myurl}/items/{fktable}?fields={fkfield}"),
+      httr::add_headers(
+        "Authorization" = mytoken
+      )
+    )
+    fkoptions <- get_table_from_req(fkreq)
+    fklist[[i]] <- fkoptions[[1]]# removes from data frame
+  }
+  # check fk columns in inputdf against fklist.
+  outlist <-vector(mode = "list", length = length(fklist))
+  names(outlist) <- fk_schema$field
+  for(i in 1:nrow(fk_schema)){
+    fkfield <- fk_schema$field[i]
+    fkTF <- inputdf[,fkfield] %in% fklist[[fkfield]]
+    ## if the field is nullable, set NAs to true. 
+    if(fk_schema$schema.is_nullable[i] == TRUE &
+       any(is.na(inputdf[,fkfield]))){
+      fkTF[which(is.na(inputdf[,fkfield]))] <- TRUE
+    }
+    if(all(fkTF == TRUE)){
+      message(glue::glue("No foreign key violations in column {fkfield}."))
+    }else{
+      message(glue::glue("Foreign key violations in column {fkfield}."))
+      outlist[[i]] <- inputdf[which(fkTF==FALSE),]
+    }
+    return(outlist)
+  }
+}
