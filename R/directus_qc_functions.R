@@ -694,9 +694,11 @@ check_treatment_years <- function(db = NULL){
 #' # not run: fkcheck <- check_fk_values("crop_variety_info", inputdf = staged_df)
 check_fk_values <- function(table_name = NULL,
                             inputdf = NULL,
-                            mytoken = getOption("drivesR.default.directustoken")){
+                            mytoken = getOption("drivesR.default.directustoken"),
+                            myurl = getOption("drivesR.default.url")){
   # import schema information
-  table_schema <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken, flatten = TRUE)
+  table_schema <- get_db_info(glue::glue("fields/{table_name}"),mytoken = mytoken, flatten = TRUE,
+                              output_format = "data.frame" )
   fk_schema <- table_schema[which(!is.na(table_schema$schema.foreign_key_table)),]
   # make a list of foreign key options.
   fklist <- vector(mode = "list", length = nrow(fk_schema))
