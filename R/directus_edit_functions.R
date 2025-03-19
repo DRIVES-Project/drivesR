@@ -78,8 +78,7 @@ delete_rows <- function(table_name = NULL,
 modify_rows <- function(table_name = NULL, 
                       editdf = NULL,
                       idcol = "uid",
-                      mytoken = getOption("drivesR.default.directustoken"),
-                      ...){
+                      mytoken = getOption("drivesR.default.directustoken")){
   problemrows <- c()
   for(i in 1:nrow(editdf)){
     mypk <- editdf[i,idcol]
@@ -91,10 +90,10 @@ modify_rows <- function(table_name = NULL,
       ## if there is only one column to be changed, as.list gets rid of the name.
     }
     
-    fixjson <-  jsonlite::toJSON(fixlist,pretty=T, auto_unbox = TRUE)
+    fixjson <-  jsonlite::toJSON(fixlist,pretty=T, auto_unbox = TRUE,na = "null" )
     fixreq <- api_request("PATCH",
                           glue::glue("items/{table_name}/{mypk}"),
-                          fixjson,mytoken = mytoken,...)
+                          fixjson,mytoken = mytoken)
     if(fixreq$status_code != 200){
       addrow <- data.frame(pk = mypk, status_code = fixreq$status_code)
       problemrows <- rbind(problemrows, addrow)
@@ -103,6 +102,9 @@ modify_rows <- function(table_name = NULL,
   if(length(problemrows) > 0){
     names(problemrows)[1] <- idcol
     return(problemrows)
+    np = nrow(problemrows)
+    message(glue::glue("Problems found in {np} rows."))
+  }else{
+    message("No problems.")
   }
-  
 }
