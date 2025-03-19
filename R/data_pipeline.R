@@ -96,7 +96,7 @@ import_dictionary_tables <- function(public = FALSE,mytoken = getOption("drivesR
 #' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
 #' database. FALSE otherwise. 
 #' @param mytoken
-#' Directus API token, formatted as "Bearer apitoken"
+#' Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token()
 #' @param ...
 #' Arguments to be passed to get_db_table and get_db_info.
 #' @returns
@@ -465,4 +465,34 @@ harmonize_weather <- function(weather_daily=NULL,
                                      names_from = variable,
                                      values_from = value)
   return(wide_weather)
+}
+
+#' Harmonize harvest dates
+#' Does some light processing of the harvest_dates table.
+#'
+#' @param harvest_dates 
+#' A data frame of the harvest_dates table from the DRIVES database. 
+#' If NULL, this table is downloaded from Directus.
+#' @param mytoken
+#' Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token() 
+#' @param public 
+#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
+#' database. FALSE otherwise. 
+#' @returns
+#' A data frame of harvest date data with minor changes.
+#' ...
+#' @export
+#'
+#' @examples
+harmonize_harvest_dates <- function(harvest_dates = NULL,
+                                    mytoken = getOption("drivesR.default.directustoken"),
+                                    public = FALSE){
+  if(is.null(harvest_dates)){
+    tablename <- ifelse(public == TRUE,"public_harvest_dates","harvest_dates")
+    harvest_dates <- get_db_table(tablename, mytoken = mytoken)
+  }
+ ## Step 1: fill in missing actual_crop_id with expected_crop_id
+  nacrop <- which(is.na(harvest_dates$actual_crop_id))
+  harvest_dates$actual_crop_id[nacrop] <- harvest_dates$expected_crop_id[nacrop]
+  
 }
