@@ -31,7 +31,7 @@ instead of downloading the tables from directus.}
 \item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES 
 database. FALSE otherwise.}
 
-\item{mytoken}{Directus API token, formatted as "Bearer apitoken"}
+\item{mytoken}{Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token()}
 
 \item{...}{Arguments to be passed to get_db_table and get_db_info.}
 }
