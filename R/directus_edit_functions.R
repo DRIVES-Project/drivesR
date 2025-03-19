@@ -27,23 +27,32 @@
 
 delete_rows <- function(table_name = NULL, 
                         pkvec = NULL,
-                        check_only = FALSE,
-                        mytoken = getOption("drivesR.default.directustoken"),
-                        ...){
+                        check_only = TRUE,
+                        mytoken = getOption("drivesR.default.directustoken")){
   if(check_only == TRUE){
+    # query for primary key.
     checkdf <- c()
     for(pk in pkvec){
       testrow <- get_db_info(glue::glue("items/{table_name}/{pk}"),
                              output_format = "data.frame",
                              mytoken = mytoken)
-      checkdf <- rbind(checkdf, testrow)
+      ## with only one row, empty values are coded as null.
+      # they need to be converted to NAs.
+      # I looked for more elegant solutions, but couldn't find anything.
+      testrow <- lapply(testrow, function(x){
+        if(is.null(x)){
+          NA
+        }else{
+            x}
+        })
+      checkdf <- rbind(checkdf, as.data.frame(testrow))
     }# closes for loop
     return(checkdf)
   }# closes if
   
   if(check_only == FALSE){
     for(pk in pkvec){
-      api_request("DELETE",glue::glue("items/{table_name}/{pk}"),mytoken = mytoken,...)
+      api_request("DELETE",glue::glue("items/{table_name}/{pk}"),mytoken = mytoken)
     }# closes for loop
   }# closes if 
 } #closes function
