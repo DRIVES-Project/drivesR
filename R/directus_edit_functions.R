@@ -40,10 +40,7 @@ delete_rows <- function(table_name = NULL,
       # they need to be converted to NAs.
       # I looked for more elegant solutions, but couldn't find anything.
       testrow <- lapply(testrow, function(x){
-        if(is.null(x)){
-          NA
-        }else{
-            x}
+        if(is.null(x)) NA else x
         })
       checkdf <- rbind(checkdf, as.data.frame(testrow))
     }# closes for loop
