@@ -27,7 +27,7 @@
 #' #not run: testdf2 <- get_db_table("site_info", in_batches = TRUE, batchsize = 4)
 #' 
 get_db_table <- function(table_name = "site_info", 
-                         myurl = "https://data.drives-network.org",
+                         myurl = getOption("drivesR.default.url"),
                          mytoken = getOption("drivesR.default.directustoken"),
                          in_batches = FALSE,
                          batchsize = NULL
@@ -137,7 +137,7 @@ get_db_table <- function(table_name = "site_info",
 #' 
 get_db_info <- function(mytarget = "collections",
                         output_format = c("data.frame","json")[1],
-                         myurl = "https://data.drives-network.org",
+                         myurl = getOption("drivesR.default.url"),
                          mytoken = getOption("drivesR.default.directustoken"),
                          flatten = FALSE){
   if(!output_format %in% c("json","data.frame")){
@@ -180,3 +180,54 @@ get_table_from_req <- function(apirequest = NULL){
   return(output)
 }
 
+#' Fetch table contents by primary keys
+#' Function to query contents of a database table with a vector of primary key values.
+#' Useful for double-checking before running 'modify_rows' or 'delete_rows'.
+#' It could be useful for querying information across tables. 
+#'
+#' @param table_name
+#' The table identifier in the DRIVES database. If public = TRUE, the table name is automatically 
+#' modified to query the public version of the database table. 
+#' @param pkvec 
+#' A vector of primary key values.
+#' @param pkfield
+#' The name of the column name that holds the table's primary key. 
+#' For most tables, this is 'uid'. 
+#' @param public
+#' If TRUE, the function queries publicly available data tables. 
+#' Since this function is mostly for internal use, the default is FALSE. 
+#' @param mytoken 
+#' @param myurl 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+query_table_by_pk <- function(
+    table_name = NULL,
+    pkvec = NULL,
+    pkfield = "uid",
+    public = FALSE,
+    fast_way = FALSE,
+    mytoken = getOption("drivesR.default.directustoken"),
+    myurl = getOption("drivesR.default.url")){
+  
+  # set table name as public or internal:
+  if(public == TRUE & !grepl("dictionary", table_name)){
+    tname <- paste0("public_",table_name)
+  }else{
+    tname <- table_name
+  }
+  # set up request
+  
+  
+  reqlist <- list("query"= list("filter" = 
+                    list("fieldname" = 
+                           list("_in" = pkvec)),
+                  "limit" = -1))
+  names(reqlist[[1]][[1]]) <- pkfield
+  reqjson <- jsonlite::toJSON(reqlist,auto_unbox = TRUE)
+  testreq <- api_request("SEARCH", glue::glue("items/{tname}"),jsonbody = reqjson)
+  outdf <- get_table_from_req(testreq)
+  return(outdf)
+}
