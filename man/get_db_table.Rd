@@ -6,7 +6,7 @@
 \usage{
 get_db_table(
   table_name = "site_info",
-  myurl = "https://data.drives-network.org",
+  myurl = getOption("drivesR.default.url"),
   mytoken = getOption("drivesR.default.directustoken"),
   in_batches = FALSE,
   batchsize = NULL

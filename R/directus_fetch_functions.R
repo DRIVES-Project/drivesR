@@ -203,6 +203,7 @@ get_table_from_req <- function(apirequest = NULL){
 #' @export
 #'
 #' @examples
+#' #not run: qtable <- query_table_by_pk("harvest_dates",pkvec = 1:100, pkfield = "uid)
 query_table_by_pk <- function(
     table_name = NULL,
     pkvec = NULL,
