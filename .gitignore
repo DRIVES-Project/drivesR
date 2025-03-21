@@ -37,4 +37,4 @@ rsconnect/
 drivesR.Rproj
 
 #Configuration scripts containing private information
-directus_creds.R
+R/directus_creds.R
