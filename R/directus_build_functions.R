@@ -213,6 +213,48 @@ make_row_insert_json <- function(mydf){
   jsonlite::toJSON(mydf, pretty = TRUE, auto_unbox=TRUE)
 }
 
+
+#' Convert column dictionary content into json-formatted field schema.
+#' This is for adding fields to existing collections. Once 
+#' a collection exists, only one field can be added at a time with 
+#' an API request.
+#'
+#' @param column_dictionary_row 
+#'
+#' @returns
+#' A json-formatted object containing schema information for a new field in an 
+#' existing collection.
+#' 
+#' @export
+#'
+#' @examples
+#' column_dictionary <- test_column_dict
+#' ## model the new field on an existing field (for demo purposes)
+#' newrow <- test_column_dict[which(test_column_dict$column_name == "cat_name"),]
+#' newrow$column_id <- "test_cat_info:favorite_food"
+#' newrow$column_name <- "favorite_food"
+#' newrowjson <- make_field_json(newrow)
+#' # not run: newfieldreq <- api_request("POST",mytarget ="fields/test_cat_info",jsonbody= newrowjson)
+make_field_json <- function(column_dictionary_row = NULL){
+    if(nrow(as.data.frame(column_dictionary_row)) != 1){
+      stop("Input must be a single-row data frame.")
+    }
+    fieldlist <- list(collection = column_dictionary_row$table_name, 
+         field = column_dictionary_row$column_name,
+         type = pg_to_directus_type(column_dictionary_row$postgres_data_type) ,
+         meta = list( note = column_dictionary_row$description,
+                      sort = column_dictionary_row$column_order),
+         schema = list(is_primary_key = column_dictionary_row$primary_key,
+                       is_nullable = column_dictionary_row$nullable,
+                       is_unique = column_dictionary_row$unique_value,
+                       has_auto_increment = column_dictionary_row$auto_increment
+         ))  
+
+    fieldjson <- jsonlite::toJSON(fieldlist, pretty = TRUE, auto_unbox = TRUE) 
+    return(fieldjson)  
+}
+
+
 #' Post rows in batches
 #' 
 #' To get around issues of posting limits.
