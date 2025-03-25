@@ -26,7 +26,12 @@ check_dups <- function(mydf, checkcols = NULL,
   if(is.null(checkcols) & is.null(dupvec))stop("You must include checkcols or dupvec.")
   if(!is.null(checkcols) & !is.null(dupvec))stop("Either checkcols or dupvec must be NULL.")
   if(is.null(dupvec) & is.vector(checkcols)){
+    if(length(checkcols) > 1){
     dupvec <- apply(mydf[,checkcols], 1, function(x){paste(x, collapse=";")})
+    }
+    if(length(checkcols)==1){
+      dupvec <- mydf[,checkcols]
+    }
   }
   mydups <- unique(dupvec[which(duplicated(dupvec))])
   numdupvals <- length(mydups)
