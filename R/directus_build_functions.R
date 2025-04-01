@@ -17,14 +17,14 @@ pg_to_directus_type <- function(pgtype){
                                        "numeric",
                                        "array",
                                        "date"
-                                      ),
-                           dir_type = c("integer",
-                                        "text",
-                                        "string",
-                                        "boolean",
-                                        "float",
-                                        "text",
-                                        "date"))
+  ),
+  dir_type = c("integer",
+               "text",
+               "string",
+               "boolean",
+               "float",
+               "text",
+               "date"))
   if(length(pgtype) > 1){
     stop("pgtype must be of length 1")
   }
@@ -74,10 +74,10 @@ pg_to_directus_type <- function(pgtype){
 #' 
 #' @seealso [${1:make_collection_json}()]
 api_request <- function(myverb = "POST",
-                         mytarget = "collections",
-                         jsonbody = NULL ,
-                         myurl = "https://data.drives-network.org",
-                         mytoken = getOption("drivesR.default.directustoken")){
+                        mytarget = "collections",
+                        jsonbody = NULL ,
+                        myurl = getOption("drivesR.default.url"),
+                        mytoken = getOption("drivesR.default.directustoken")){
   #require(httr)  
   if(!is.null(jsonbody)){
     VERB(myverb,
@@ -185,8 +185,8 @@ make_relations_json <- function(columndf = test_column_dict[which(test_column_di
                                      on_delete = delete_action
                        ),
                        meta = NA
-                  )
-       return(jsonlite::toJSON(rel_list, pretty=TRUE, auto_unbox = TRUE))
+      )
+      return(jsonlite::toJSON(rel_list, pretty=TRUE, auto_unbox = TRUE))
     })
     return(rel_json)
   }
@@ -236,24 +236,50 @@ make_row_insert_json <- function(mydf){
 #' newrowjson <- make_field_json(newrow)
 #' # not run: newfieldreq <- api_request("POST",mytarget ="fields/test_cat_info",jsonbody= newrowjson)
 make_field_json <- function(column_dictionary_row = NULL){
-    if(nrow(as.data.frame(column_dictionary_row)) != 1){
-      stop("Input must be a single-row data frame.")
-    }
-    fieldlist <- list(collection = column_dictionary_row$table_name, 
-         field = column_dictionary_row$column_name,
-         type = pg_to_directus_type(column_dictionary_row$postgres_data_type) ,
-         meta = list( note = column_dictionary_row$description,
-                      sort = column_dictionary_row$column_order),
-         schema = list(is_primary_key = column_dictionary_row$primary_key,
-                       is_nullable = column_dictionary_row$nullable,
-                       is_unique = column_dictionary_row$unique_value,
-                       has_auto_increment = column_dictionary_row$auto_increment
-         ))  
-
-    fieldjson <- jsonlite::toJSON(fieldlist, pretty = TRUE, auto_unbox = TRUE) 
-    return(fieldjson)  
+  if(nrow(as.data.frame(column_dictionary_row)) != 1){
+    stop("Input must be a single-row data frame.")
+  }
+  fieldlist <- list(collection = column_dictionary_row$table_name, 
+                    field = column_dictionary_row$column_name,
+                    type = pg_to_directus_type(column_dictionary_row$postgres_data_type) ,
+                    meta = list( note = column_dictionary_row$description,
+                                 sort = column_dictionary_row$column_order),
+                    schema = list(is_primary_key = column_dictionary_row$primary_key,
+                                  is_nullable = column_dictionary_row$nullable,
+                                  is_unique = column_dictionary_row$unique_value,
+                                  has_auto_increment = column_dictionary_row$auto_increment
+                    ))  
+  
+  fieldjson <- jsonlite::toJSON(fieldlist, pretty = TRUE, auto_unbox = TRUE) 
+  return(fieldjson)  
 }
 
+
+#' Add rows to a database table
+#' 
+#' This adds all rows in an input dataframe in a single API request. To add
+#' more than 100 rows, use post_rows_in_batches. For use in an interactive R session.
+#'    
+#' @param table_name 
+#' The name of the database table.  
+#' @param inputdf
+#' The dataframe containing rows to be added. Contents should have been checked.
+#'  
+#' @param mytoken 
+#' Directus token, formatted as "Bearer mytoken."
+#' @returns
+#' Converts the input df to a json and runs an API post request on the specified table. 
+#' The status code of that request is returned as a message.
+#' @export
+#'
+#' @examples
+post_rows <- function(table_name = NULL,
+                      inputdf = NULL,
+                      mytoken = getOption("drivesR.default.directustoken")){
+  insert_json <- make_row_insert_json(inputdf)
+  myreq <- api_request("POST",glue::glue("items/{table_name}"),insert_json,mytoken = mytoken)
+  message(paste("POST request complete with status code",myreq$status_code))
+}
 
 #' Post rows in batches
 #' 
