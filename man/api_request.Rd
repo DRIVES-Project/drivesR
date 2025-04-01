@@ -10,7 +10,7 @@ api_request(
   myverb = "POST",
   mytarget = "collections",
   jsonbody = NULL,
-  myurl = "https://data.drives-network.org",
+  myurl = getOption("drivesR.default.url"),
   mytoken = getOption("drivesR.default.directustoken")
 )
 }
