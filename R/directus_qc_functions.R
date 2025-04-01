@@ -379,8 +379,8 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 check_table_contents <- function(table_name = NULL,
                                  inputdf = NULL, 
                                  mytoken = getOption("drivesR.default.directustoken")){
-  pass_message <- ""
-  fail_message <- ""
+  pass_message <- "pass"
+  fail_message <- "fail"
   na_message <- "constraint does not apply"
   # constraintvec <- c("non-nullable","max_length","unique","data_type")
   checkdf <- c()# empty data frame
@@ -398,7 +398,7 @@ check_table_contents <- function(table_name = NULL,
   #0)  Primary key------
   checkrow <- emptycheckrow
   checkrow$constraint <- "primary key"
-  #' the primary key must not contain any existing keys. 
+  # the primary key must not contain any existing keys. 
   pkrow <- table_info[which(table_info$schema.is_primary_key),]
   pkfield <- pkrow$field
   auto_increment_pk <- pkrow$schema.has_auto_increment
@@ -424,6 +424,7 @@ check_table_contents <- function(table_name = NULL,
     ## passes if primary key column is absent or all empty
     if(!pk_in_inputdf | (pk_in_inputdf & pk_all_empty)){
       checkrow$pass <- TRUE
+      checkrow$message <- pass_message
     }
     if(pk_in_inputdf & !pk_all_empty & !pk_all_full){
       checkrow$pass <- FALSE
@@ -438,7 +439,7 @@ check_table_contents <- function(table_name = NULL,
     pkoptions <- get_table_from_req(pkreq)[[1]]## subset so it's a vector instead of a df.
     pk_overlap <- any(inputdf[,pkfield] %in% pkoptions)
     pk_dups <- any(duplicated(inputdf[,pkfield]))
-    if(pk_overlap & !pkdups){
+    if(pk_overlap & !pk_dups){
       checkrow$pass <- FALSE
       checkrow$message <- "Primary keys overlap with existing values."
       checkrow$problem_cols <- pkfield
@@ -446,19 +447,20 @@ check_table_contents <- function(table_name = NULL,
       names(plist) <- pkfield
       checkrow$problem_list <- plist
     } 
-    if(!pk_overlap & pkdups){
+    if(!pk_overlap & pk_dups){
       checkrow$pass <- FALSE
       checkrow$problem_cols <- pkfield
       checkrow$message <- "Primary keys are not unique."
     }
     
-    if(pk_overlap & pkdups){
+    if(pk_overlap & pk_dups){
       checkrow$pass <- FALSE
       checkrow$problem_cols <- pkfield
       checkrow$message <- "Primary keys are not unique and overlap with existing values."
     }
-    if(!pk_overlap & !pkdups){
+    if(!pk_overlap & !pk_dups){
       checkrow$pass <- TRUE
+      checkrow$message <- pass_message
     }
   }
   

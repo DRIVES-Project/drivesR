@@ -5,7 +5,7 @@
 \title{Check table contents before import}
 \usage{
 check_table_contents(
-  table_name = "site_info",
+  table_name = NULL,
   inputdf = NULL,
   mytoken = getOption("drivesR.default.directustoken")
 )
