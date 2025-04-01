@@ -376,7 +376,7 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 #' @examples
 #' #not run: mydf <- read.csv("site_info_to_add.csv")
 #' #not run: checkdf <-  check_table_contents("site_info", inputdf = mydf)
-check_table_contents <- function(table_name = "site_info",
+check_table_contents <- function(table_name = NULL,
                                  inputdf = NULL, 
                                  mytoken = getOption("drivesR.default.directustoken")){
   pass_message <- ""
@@ -389,10 +389,83 @@ check_table_contents <- function(table_name = "site_info",
   emptycheckrow <- tibble::tibble(constraint = NA,
                  pass = NA,
                  message = NA,
+                 problem_cols = NA,
                  problem_list = NA,
                  dtype_problem_list = NA)
   # Fetch schema information for table
   table_info <- get_db_info(glue::glue("fields/{table_name}"),flatten=TRUE,mytoken = mytoken)
+  
+  #0)  Primary key------
+  checkrow <- emptycheckrow
+  checkrow$constraint <- "primary key"
+  #' the primary key must not contain any existing keys. 
+  pkrow <- table_info[which(table_info$schema.is_primary_key),]
+  pkfield <- pkrow$field
+  auto_increment_pk <- pkrow$schema.has_auto_increment
+  pk_in_inputdf <- pkfield %in% names(inputdf)
+  pk_all_empty <- ifelse(pk_in_inputdf, all(is.na(inputdf[,pkfield])),FALSE)# test logic with NA
+  pk_all_full <- ifelse(pk_in_inputdf, all(!is.na(inputdf[,pkfield])), FALSE)# test logic with NA
+  
+  ## Conditions applying only to non-autoincremented primary key.
+  if(!auto_increment_pk){
+    if(!pk_in_inputdf){
+      checkrow$pass <- FALSE
+      checkrow$message <- "Missing column for non-auto-incremented primary key."
+      checkrow$problem_cols <- pkfield
+    }
+    if(pk_in_inputdf & any(is.na(inputdf[,pkfield]))){
+      checkrow$pass <- FALSE
+      checkrow$message <- "Missing values for non-auto-incremented primary key."
+      checkrow$problem_cols <- pkfield
+    }
+  }
+  ## conditions applying only to autoincremented primary key
+  if(auto_increment_pk){
+    ## passes if primary key column is absent or all empty
+    if(!pk_in_inputdf | (pk_in_inputdf & pk_all_empty)){
+      checkrow$pass <- TRUE
+    }
+    if(pk_in_inputdf & !pk_all_empty & !pk_all_full){
+      checkrow$pass <- FALSE
+      checkrow$message <- "Partially filled primary key column."
+      checkrow$problem_cols <- pkfield
+    }
+  }
+  ## conditions applying to both
+  if(pk_in_inputdf & pk_all_full){
+    ## pk options need to be checked.
+    pkreq <- api_request("GET",glue::glue("items/{table_name}?fields={pkfield}&limit=-1"))
+    pkoptions <- get_table_from_req(pkreq)[[1]]## subset so it's a vector instead of a df.
+    pk_overlap <- any(inputdf[,pkfield] %in% pkoptions)
+    pk_dups <- any(duplicated(inputdf[,pkfield]))
+    if(pk_overlap & !pkdups){
+      checkrow$pass <- FALSE
+      checkrow$message <- "Primary keys overlap with existing values."
+      checkrow$problem_cols <- pkfield
+      plist <- list(which(inputdf[,pkfield] %in% pkoptions))
+      names(plist) <- pkfield
+      checkrow$problem_list <- plist
+    } 
+    if(!pk_overlap & pkdups){
+      checkrow$pass <- FALSE
+      checkrow$problem_cols <- pkfield
+      checkrow$message <- "Primary keys are not unique."
+    }
+    
+    if(pk_overlap & pkdups){
+      checkrow$pass <- FALSE
+      checkrow$problem_cols <- pkfield
+      checkrow$message <- "Primary keys are not unique and overlap with existing values."
+    }
+    if(!pk_overlap & !pkdups){
+      checkrow$pass <- TRUE
+    }
+  }
+  
+  # append to output tibble. 
+  checkdf <- rbind(checkdf, checkrow)
+  
+  ## data validation constraints. 
   # start with easier ones. 
 
   # 1) is_nullable-----
@@ -400,9 +473,12 @@ check_table_contents <- function(table_name = "site_info",
   checkrow$constraint <- "non_nullable"
   
   ## validation fails if any non-nullable columns contain null (NA) values
-  nonNullableCols <- table_info$field[which(!table_info$schema.is_nullable)]
+  ## this excludes fields with defaults provided (such as autoincremented)
+  nonNullableCols <- table_info$field[which(!table_info$schema.is_nullable & 
+                                              is.na(table_info$schema.default_value))]
   if(length(nonNullableCols) > 0){
     outlist <- c() # empty list for problem items
+    cnames <- "" # empty string for column names
     ## If field is missing, it counts as null. 
     for(i in 1:length(nonNullableCols)){
       colname <- nonNullableCols[i]
@@ -410,6 +486,8 @@ check_table_contents <- function(table_name = "site_info",
         listitem <- list("missing non-nullable field")
         names(listitem) <- colname
         outlist <- append(outlist, listitem)
+        mysep <- ifelse(cnames == "", "",";")
+        cnames <- paste(cnames,colname, sep=mysep)
       }#closes if field is missing.
       else{ 
         failrows <- which(is.na(inputdf[,colname]))
@@ -417,14 +495,16 @@ check_table_contents <- function(table_name = "site_info",
           listitem <- list(failrows)
           names(listitem) <- colname
           outlist <- append(outlist, listitem)
+          mysep <- ifelse(cnames == "", "",";")
+          cnames <- paste(cnames,colname, sep=mysep)
         } #closes if
       }#closes else
     }# closes loop
     if(length(outlist) > 0){
-
       checkrow$pass <- FALSE
       checkrow$message <- fail_message
       checkrow$problem_list <- list(outlist)
+      checkrow$problem_cols <- cnames
       
     }#closes if
     else{
@@ -442,11 +522,11 @@ check_table_contents <- function(table_name = "site_info",
   # 2) max_length ----------
   checkrow <- emptycheckrow
   checkrow$constraint <- "max_length"
-  
   maxLengthDf <- table_info[which(!is.na(table_info$schema.max_length)),c("field","schema.max_length")]
   ## it will always be 255, but that could change
   if(nrow(maxLengthDf) > 0){
     outlist <- c()
+    cnames <- "" # empty string for column names
     for(i in 1:nrow(maxLengthDf)){
       colname <- maxLengthDf$field[i]
       # if column name isn't there, skip to the next one. 
@@ -458,6 +538,8 @@ check_table_contents <- function(table_name = "site_info",
         listitem <- list(failrows)
         names(listitem) <- colname
         outlist <- append(outlist, listitem)
+        mysep <- ifelse(cnames == "", "",";")
+        cnames <- paste(cnames,colname, sep=mysep)
       }
     }
     
@@ -465,6 +547,7 @@ check_table_contents <- function(table_name = "site_info",
       checkrow$pass <- FALSE
       checkrow$message <- fail_message
       checkrow$problem_list <- list(outlist)
+      checkrow$problem_cols <- cnames
     }else{
       checkrow$pass <- TRUE
       checkrow$message <- pass_message
@@ -479,10 +562,12 @@ check_table_contents <- function(table_name = "site_info",
   # 3) is_unique--------
   checkrow <- emptycheckrow
   checkrow$constraint <- "unique"
-  
-  uniqueCols <- table_info$field[which(table_info$schema.is_unique)]
+  ## exclude primary key because that is checked above.
+  uniqueCols <- table_info$field[which(table_info$schema.is_unique & 
+                                         !table_info$schema.is_primary_key)]
   if(length(uniqueCols) > 0){
-    outlist <- c()
+    outlist <- c()# empty list for problem items
+    cnames <- "" # empty string for column names
     for(i in 1:length(uniqueCols)){
       colname <- uniqueCols[i]
       # skip if absent
@@ -495,6 +580,9 @@ check_table_contents <- function(table_name = "site_info",
         listitem <- list(failrows)
         names(listitem) <- colname
         outlist <- append(outlist, listitem)
+        mysep <- ifelse(cnames == "", "",";")
+        cnames <- paste(cnames,colname, sep=mysep)
+        
       }
       
     } # closes loop
@@ -502,6 +590,7 @@ check_table_contents <- function(table_name = "site_info",
       checkrow$pass <- FALSE
       checkrow$message <- fail_message
       checkrow$problem_list <- list(outlist)
+      checkrow$problem_cols <- cnames
     }else{
       checkrow$pass <- TRUE
       checkrow$message <- pass_message
@@ -516,8 +605,9 @@ check_table_contents <- function(table_name = "site_info",
   # 4) data type.-----------
   checkrow <- emptycheckrow
   checkrow$constraint <- "data_type"
-  outlist <- c()
-  out_dlist <- c()
+  outlist <- c()# empty list for problem items
+  out_dlist <- c()# empty list for problem items for data type
+  cnames <- "" # empty string for column names
   # This one is a little harder. It applies to all columns. 
   for(i in 1:nrow(table_info)){
     colname <- table_info$field[i]
@@ -534,6 +624,8 @@ check_table_contents <- function(table_name = "site_info",
       listitem <- list(dtype)
       names(listitem) <- colname
       out_dlist <- append(out_dlist, listitem)
+      mysep <- ifelse(cnames=="", "",";")
+      cnames <- paste(cnames,colname, sep=mysep)
     }
     # test the data:
     colvec <- inputdf[,colname]
@@ -577,6 +669,8 @@ check_table_contents <- function(table_name = "site_info",
       listitem <- list(dtype)
       names(listitem) <- colname
       out_dlist <- append(out_dlist, listitem)
+      mysep <- ifelse(cnames=="", "",";")
+      cnames <- paste(cnames,colname, sep=mysep)
     }  
       
   }# closes loop over columns
@@ -585,6 +679,7 @@ check_table_contents <- function(table_name = "site_info",
     checkrow$message <- fail_message
     checkrow$problem_list <- list(outlist)
     checkrow$dtype_problem_list <- list(out_dlist)
+    checkrow$problem_cols <- cnames
   }else{
     checkrow$pass <- TRUE
     checkrow$message <- pass_message
