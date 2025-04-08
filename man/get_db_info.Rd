@@ -35,8 +35,8 @@ A dataframe (default) or json string with schema and other metadata information 
 Fetch schema information from directus
 }
 \examples{
-collection_info <- get_db_info("collections")
-site_field_info <- get_db_info("fields/site_info")
-foreign_key_info <- get_db_info("relations")
+# collection_info <- get_db_info("collections")
+# site_field_info <- get_db_info("fields/site_info")
+# foreign_key_info <- get_db_info("relations")
 
 }

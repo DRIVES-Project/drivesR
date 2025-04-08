@@ -34,6 +34,11 @@ get_db_table <- function(table_name = "site_info",
                          ){
   ## Check arguments-----
   ## conditions to stop execution with incompatible arguments
+  validToken <- test_api_token(mytoken = mytoken,
+                               myurl = myurl)
+  if(!validToken){
+    stop("Invalid Directus API token.")
+  }
   if(!in_batches %in% c(TRUE,FALSE)){
     stop("in_batches must be TRUE or FALSE")
   }
@@ -131,15 +136,21 @@ get_db_table <- function(table_name = "site_info",
 #' @import glue
 #' 
 #' @examples
-#' collection_info <- get_db_info("collections")
-#' site_field_info <- get_db_info("fields/site_info")
-#' foreign_key_info <- get_db_info("relations")
+#' # collection_info <- get_db_info("collections")
+#' # site_field_info <- get_db_info("fields/site_info")
+#' # foreign_key_info <- get_db_info("relations")
 #' 
 get_db_info <- function(mytarget = "collections",
                         output_format = c("data.frame","json")[1],
                          myurl = getOption("drivesR.default.url"),
                          mytoken = getOption("drivesR.default.directustoken"),
                          flatten = FALSE){
+  # check for valid API token.
+  validToken <- test_api_token(mytoken = mytoken,
+                               myurl = myurl)
+  if(!validToken){
+    stop("Invalid Directus API token.")
+  }
   if(!output_format %in% c("json","data.frame")){
     stop("output must be 'json' or 'data.frame'")
   }
@@ -198,7 +209,7 @@ get_table_from_req <- function(apirequest = NULL){
 #' Since this function is mostly for internal use, the default is FALSE. 
 #' @param mytoken 
 #' Directus token, formatted as "Bearer APITOKEN". 
-#' Can be set with set_default_token.
+#' Can be set with set_default_token. 
 #' @param myurl 
 #' Directus URL. Set at package loading ("https://data.drives-network.org").
 #' @returns
@@ -212,15 +223,14 @@ query_table_by_pk <- function(
     pkfield = "uid",
     public = FALSE,
     mytoken = getOption("drivesR.default.directustoken")){
-  
-  # set table name as public or internal:
+
+    # set table name as public or internal:
   if(public == TRUE & !grepl("dictionary", table_name)){
     tname <- paste0("public_",table_name)
   }else{
     tname <- table_name
   }
   # set up request
-  
   
   reqlist <- list("query"= list("filter" = 
                     list("fieldname" = 

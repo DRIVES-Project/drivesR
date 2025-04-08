@@ -65,12 +65,12 @@ pg_to_directus_type <- function(pgtype){
 #' @import glue
 #' @examples
 #' # Accessing database content (here, it is information about collections)
-#' collectionsreq <- api_request("GET", mytarget = "collections")
-#' collectionjson <- jsonlite::toJSON(httr::content(collectionsreq), pretty=TRUE, auto_unbox = TRUE) 
+#' # not run: collectionsreq <- api_request("GET", mytarget = "collections")
+#' # not run: collectionjson <- jsonlite::toJSON(httr::content(collectionsreq), pretty=TRUE, auto_unbox = TRUE) 
 #' 
 #' # Modifying database content (here it is adding a new collection)
-#' testcollection <- make_collection_json()# default with sample data dictionary 
-#' new_collection_req <- api_request("POST", "collections",testcollection)
+#' #not run: testcollection <- make_collection_json()# default with sample data dictionary 
+#' #not run: new_collection_req <- api_request("POST", "collections",testcollection)
 #' 
 #' @seealso [${1:make_collection_json}()]
 api_request <- function(myverb = "POST",
@@ -78,6 +78,12 @@ api_request <- function(myverb = "POST",
                         jsonbody = NULL ,
                         myurl = getOption("drivesR.default.url"),
                         mytoken = getOption("drivesR.default.directustoken")){
+  
+  validToken <- test_api_token(mytoken = mytoken,
+                               myurl = myurl)
+  if(!validToken){
+    stop("Invalid Directus API token.")
+  }
   #require(httr)  
   if(!is.null(jsonbody)){
     VERB(myverb,
@@ -158,11 +164,11 @@ make_collection_json <- function(columndf = test_column_dict[which(test_column_d
 #' 
 #' @examples
 #' 
-#' testrel <- make_relations_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_favorite_toy"),],
-#'                                tablerow = test_table_dict[2,])
+#' #not run: testrel <- make_relations_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_favorite_toy"),],
+#' #                                tablerow = test_table_dict[2,])
 #
 #' # If the table has multiple foreign keys, you can use this in a loop (lapply doesn't work)
-#' rel_req <- api_request("POST",mytarget = "relations",jsonbody = testrel[[1]])
+#' #not run: rel_req <- api_request("POST",mytarget = "relations",jsonbody = testrel[[1]])
 #' 
 #' 
 #' @import jsonlite
@@ -208,7 +214,7 @@ make_relations_json <- function(columndf = test_column_dict[which(test_column_di
 #' insert_json <- make_row_insert_json(testdf)
 #' # example with API request:
 #' test_insert <- make_row_insert_json(test_cat_info)
-#' insert_req <- api_request("POST","items/test_cat_info",test_insert)
+#' # insert_req <- api_request("POST","items/test_cat_info",test_insert)
 make_row_insert_json <- function(mydf){
   jsonlite::toJSON(mydf, pretty = TRUE, auto_unbox=TRUE)
 }
