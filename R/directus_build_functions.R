@@ -304,17 +304,18 @@ post_rows <- function(table_name = NULL,
 #' @examples
 post_rows_in_batches <- function(table_name = "crop_yields", batchsize = 1000, inputdf = NULL,mytoken = getOption("drivesR.default.directustoken")){
   nitems = nrow(inputdf)
-  nbatches = ceiling(batchsize/nitems)
+  nbatches = ceiling(nitems/batchsize)
   start_i = 1
   end_i = 0
   batch_i = 1
   
   while(end_i < nitems){
-    end_i <- min(start_i + batchsize , nitems)
-    subsetdf <- importlist[[mytable]][start_i:end_i,]
+    end_i <- min(start_i + batchsize -1 , nitems)
+    subsetdf <- inputdf[start_i:end_i,]
     insert_json <- make_row_insert_json(subsetdf)
-    myreq <- api_request("POST",glue::glue("items/{mytable}"),insert_json,mytoken = mytoken)
-    print(paste(batch_i,"of",nbatches,"status",myreq$status_code))
+    myreq <- api_request("POST",glue::glue("items/{table_name}"),insert_json,mytoken = mytoken)
+    message(paste("Batch",batch_i,"of",nbatches,"status",myreq$status_code))
+    #cat(paste0("\nstart_i = ",start_i,", end_i = ",end_i,", batch_i = ",batch_i))
     start_i <- end_i + 1
     batch_i <- batch_i + 1
   }
