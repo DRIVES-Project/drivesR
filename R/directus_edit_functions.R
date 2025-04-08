@@ -8,10 +8,11 @@
 #' A vector of primary keys for rows you want to delete in the table.
 #' @param check_only
 #' TRUE or FALSE indicating whether you want to inspect the rows instead of deleting them.
+#' The default is TRUE as a protective measure.
+#' @param pkfield
+#' Name of the primary key column. The default is "uid."
 #' @param mytoken
 #' Directus api token, formatted as "Bearer myapitoken"
-#' @param ...
-#' Arguments passed to get_db_table and api_request.
 #' @returns
 #' If check_only = TRUE, returns a data frame of the table subset corresponding to the primary 
 #' keys in pkvec. if check_only = FALSE, the function performs delete operations on primary keys
@@ -28,22 +29,17 @@
 delete_rows <- function(table_name = NULL, 
                         pkvec = NULL,
                         check_only = TRUE,
+                        pkfield = "uid",
                         mytoken = getOption("drivesR.default.directustoken")){
   if(check_only == TRUE){
     # query for primary key.
-    checkdf <- c()
-    for(pk in pkvec){
-      testrow <- get_db_info(glue::glue("items/{table_name}/{pk}"),
-                             output_format = "data.frame",
-                             mytoken = mytoken)
+    checkdf <- query_table_by_pk(table_name = table_name,
+                                 pkvec = pkvec,
+                                 pkfield = pkfield,
+                                 mytoken = mytoken)
       ## with only one row, empty values are coded as null.
       # they need to be converted to NAs.
       # I looked for more elegant solutions, but couldn't find anything.
-      testrow <- lapply(testrow, function(x){
-        if(is.null(x)) NA else x
-        })
-      checkdf <- rbind(checkdf, as.data.frame(testrow))
-    }# closes for loop
     return(checkdf)
   }# closes if
   
@@ -66,8 +62,8 @@ delete_rows <- function(table_name = NULL,
 #' A data frame with columns for the primary key and whatever is to be modified.
 #' @param idcol 
 #' Name of the primary key column in editdf.
-#' @param ... 
-#' Arguments passed to api_request.
+#' @param batchsize 
+#' Number of rows to complete per batch. Recommended to cap at 1000.
 #' @returns
 #' Loops through rows of edit df and performs a PATCH request on each corresponding 
 #' item in the database. if the patch request does not work, it returns ids for problem rows.
@@ -92,7 +88,7 @@ modify_rows <- function(table_name = NULL,
   end_i = 0
   batch_i = 1
   problemrows <- c()
-  while(end_i < nitems){
+  for(i in seq_along(nbatches)){
     end_i <- min(start_i + batchsize -1 , nitems)
     subsetdf <- editdf[start_i:end_i,]
     fixjson <- make_row_insert_json(subsetdf)  

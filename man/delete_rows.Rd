@@ -8,6 +8,7 @@ delete_rows(
   table_name = NULL,
   pkvec = NULL,
   check_only = TRUE,
+  pkfield = "uid",
   mytoken = getOption("drivesR.default.directustoken")
 )
 }
@@ -16,11 +17,12 @@ delete_rows(
 
 \item{pkvec}{A vector of primary keys for rows you want to delete in the table.}
 
-\item{check_only}{TRUE or FALSE indicating whether you want to inspect the rows instead of deleting them.}
+\item{check_only}{TRUE or FALSE indicating whether you want to inspect the rows instead of deleting them.
+The default is TRUE as a protective measure.}
+
+\item{pkfield}{Name of the primary key column. The default is "uid."}
 
 \item{mytoken}{Directus api token, formatted as "Bearer myapitoken"}
-
-\item{...}{Arguments passed to get_db_table and api_request.}
 }
 \value{
 If check_only = TRUE, returns a data frame of the table subset corresponding to the primary 

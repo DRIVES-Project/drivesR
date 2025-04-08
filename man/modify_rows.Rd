@@ -7,6 +7,7 @@
 modify_rows(
   table_name = NULL,
   editdf = NULL,
+  batchsize = 1000,
   idcol = "uid",
   mytoken = getOption("drivesR.default.directustoken")
 )
@@ -16,9 +17,9 @@ modify_rows(
 
 \item{editdf}{A data frame with columns for the primary key and whatever is to be modified.}
 
-\item{idcol}{Name of the primary key column in editdf.}
+\item{batchsize}{Number of rows to complete per batch. Recommended to cap at 1000.}
 
-\item{...}{Arguments passed to api_request.}
+\item{idcol}{Name of the primary key column in editdf.}
 }
 \value{
 Loops through rows of edit df and performs a PATCH request on each corresponding 
