@@ -88,7 +88,7 @@ modify_rows <- function(table_name = NULL,
   end_i = 0
   batch_i = 1
   problemrows <- c()
-  for(i in seq_along(nbatches)){
+  for(i in 1:nbatches){
     end_i <- min(start_i + batchsize -1 , nitems)
     subsetdf <- editdf[start_i:end_i,]
     fixjson <- make_row_insert_json(subsetdf)  
@@ -100,7 +100,7 @@ modify_rows <- function(table_name = NULL,
       problemrows <- rbind(problemrows, addrows)
     }# closes if
     message(paste("Batch",batch_i,"of",nbatches,"status",fixreq$status_code))
-    #cat(paste0("\nstart_i = ",start_i,", end_i = ",end_i,", batch_i = ",batch_i))
+    cat(paste0("\nstart_i = ",start_i,", end_i = ",end_i,", batch_i = ",batch_i))
     start_i <- end_i + 1
     batch_i <- batch_i + 1
   }# closes loop
