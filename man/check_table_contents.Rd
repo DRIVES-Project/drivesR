@@ -14,8 +14,6 @@ check_table_contents(
 \item{table_name}{Name of the table in Directus}
 
 \item{inputdf}{data frame intended for the Directus table}
-
-\item{...}{Arguments passed to get_db_info}
 }
 \value{
 A nested data frame (tibble) with results for each constraint. 

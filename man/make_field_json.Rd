@@ -10,7 +10,8 @@ an API request.}
 make_field_json(column_dictionary_row = NULL)
 }
 \arguments{
-\item{column_dictionary_row}{}
+\item{column_dictionary_row}{A row from the column dictionary, filled out with information for 
+the new field.}
 }
 \value{
 A json-formatted object containing schema information for a new field in an 

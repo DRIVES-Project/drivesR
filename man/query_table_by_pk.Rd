@@ -12,9 +12,7 @@ query_table_by_pk(
   pkvec = NULL,
   pkfield = "uid",
   public = FALSE,
-  fast_way = FALSE,
-  mytoken = getOption("drivesR.default.directustoken"),
-  myurl = getOption("drivesR.default.url")
+  mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{
@@ -29,9 +27,10 @@ For most tables, this is 'uid'.}
 \item{public}{If TRUE, the function queries publicly available data tables. 
 Since this function is mostly for internal use, the default is FALSE.}
 
-\item{mytoken}{}
+\item{mytoken}{Directus token, formatted as "Bearer APITOKEN". 
+Can be set with set_default_token.}
 
-\item{myurl}{}
+\item{myurl}{Directus URL. Set at package loading ("https://data.drives-network.org").}
 }
 \description{
 Fetch table contents by primary keys

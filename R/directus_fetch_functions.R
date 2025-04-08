@@ -197,8 +197,10 @@ get_table_from_req <- function(apirequest = NULL){
 #' If TRUE, the function queries publicly available data tables. 
 #' Since this function is mostly for internal use, the default is FALSE. 
 #' @param mytoken 
+#' Directus token, formatted as "Bearer APITOKEN". 
+#' Can be set with set_default_token.
 #' @param myurl 
-#'
+#' Directus URL. Set at package loading ("https://data.drives-network.org").
 #' @returns
 #' @export
 #'
@@ -209,9 +211,7 @@ query_table_by_pk <- function(
     pkvec = NULL,
     pkfield = "uid",
     public = FALSE,
-    fast_way = FALSE,
-    mytoken = getOption("drivesR.default.directustoken"),
-    myurl = getOption("drivesR.default.url")){
+    mytoken = getOption("drivesR.default.directustoken")){
   
   # set table name as public or internal:
   if(public == TRUE & !grepl("dictionary", table_name)){

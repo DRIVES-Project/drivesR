@@ -11,8 +11,6 @@ import_dictionary_tables(
 }
 \arguments{
 \item{public}{True or false indicating whether tables are in the set approved for public access.}
-
-\item{...}{Arguments passed to get_db_table(). Specifically, myurl and mytoken.}
 }
 \value{
 A list of three dictionary tables. One describing database tables, one 

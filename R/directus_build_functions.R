@@ -48,7 +48,7 @@ pg_to_directus_type <- function(pgtype){
 #' @param mytarget
 #' The part of the URL string pointing to the content you want to read or modify. 
 #' @param myurl 
-#' Root URL for the DRIVES database. 
+#' Root URL for the DRIVES database. Set as a default when the package loads ("https://data.drives-network.org/)
 #' @param mytoken 
 #' API token for the user. This is formatted as "Bearer {APItoken}" (without the curly brackets).
 #' It is recommended that the user make a script that loads the API token and database URL.
@@ -220,7 +220,8 @@ make_row_insert_json <- function(mydf){
 #' an API request.
 #'
 #' @param column_dictionary_row 
-#'
+#' A row from the column dictionary, filled out with information for 
+#' the new field.
 #' @returns
 #' A json-formatted object containing schema information for a new field in an 
 #' existing collection.

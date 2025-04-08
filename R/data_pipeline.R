@@ -53,8 +53,6 @@ expand_years <- function(mydf = NULL,
 #'
 #' @param public 
 #' True or false indicating whether tables are in the set approved for public access.
-#' @param ... 
-#' Arguments passed to get_db_table(). Specifically, myurl and mytoken. 
 #' @returns
 #' A list of three dictionary tables. One describing database tables, one 
 #' describing columns within tables, and one describing categories within columns. 
@@ -97,8 +95,6 @@ import_dictionary_tables <- function(public = FALSE,mytoken = getOption("drivesR
 #' database. FALSE otherwise. 
 #' @param mytoken
 #' Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token()
-#' @param ...
-#' Arguments to be passed to get_db_table and get_db_info.
 #' @returns
 #' A list of DRIVES database tables. 
 #' @export

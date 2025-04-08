@@ -22,7 +22,7 @@ api_request(
 \item{jsonbody}{A JSON object containing the content of the request, if applicable. For POST and PATCH, this is content you want to modify.
 For SEARCH, the content will be some kind of filter query. This argument will typically be NULL for DELTE and GET requests.}
 
-\item{myurl}{Root URL for the DRIVES database.}
+\item{myurl}{Root URL for the DRIVES database. Set as a default when the package loads ("https://data.drives-network.org/)}
 
 \item{mytoken}{API token for the user. This is formatted as "Bearer {APItoken}" (without the curly brackets).
 It is recommended that the user make a script that loads the API token and database URL.}

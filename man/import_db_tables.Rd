@@ -32,8 +32,6 @@ instead of downloading the tables from directus.}
 database. FALSE otherwise.}
 
 \item{mytoken}{Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token()}
-
-\item{...}{Arguments to be passed to get_db_table and get_db_info.}
 }
 \value{
 A list of DRIVES database tables.

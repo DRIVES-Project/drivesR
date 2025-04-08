@@ -209,7 +209,7 @@ check_categories <- function(table_name = "site_info",
     )
   )
   qjson <- jsonlite::toJSON(qlist, pretty = TRUE, auto_unbox = TRUE)
-  col_dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken,...) 
+  col_dict_req <- api_request("SEARCH","items/column_dictionary",qjson, mytoken = mytoken) 
   col_dict_table <- get_table_from_req(apirequest = col_dict_req)
   if(length(col_dict_table) ==0){
     stop("table_name not found in column_dictionary")
@@ -351,9 +351,6 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 #' @param inputdf 
 #' data frame intended for the Directus table
 #' 
-#' @param ... 
-#' Arguments passed to get_db_info
-#'
 #' @returns
 #' A nested data frame (tibble) with results for each constraint. 
 #' If the constraint does not pass, the problem_list column contains
