@@ -83,27 +83,30 @@ delete_rows <- function(table_name = NULL,
 #' 
 modify_rows <- function(table_name = NULL, 
                       editdf = NULL,
+                      batchsize = 1000,
                       idcol = "uid",
                       mytoken = getOption("drivesR.default.directustoken")){
+  nitems = nrow(editdf)
+  nbatches = ceiling(nitems/batchsize)
+  start_i = 1
+  end_i = 0
+  batch_i = 1
   problemrows <- c()
-  for(i in 1:nrow(editdf)){
-    mypk <- editdf[i,idcol]
-    changecols <- names(editdf)[which(!names(editdf) %in% idcol)]
-    fixlist <- as.list(editdf[i,changecols]) # exclude primary key, since it can't be patched      
-    #as list makes it so there are no square brackets around.
-    if(is.null(names(fixlist))){
-      names(fixlist) <- changecols  
-      ## if there is only one column to be changed, as.list gets rid of the name.
-    }
-    
-    fixjson <-  jsonlite::toJSON(fixlist,pretty=T, auto_unbox = TRUE,na = "null" )
+  while(end_i < nitems){
+    end_i <- min(start_i + batchsize -1 , nitems)
+    subsetdf <- editdf[start_i:end_i,]
+    fixjson <- make_row_insert_json(subsetdf)  
     fixreq <- api_request("PATCH",
-                          glue::glue("items/{table_name}/{mypk}"),
+                          glue::glue("items/{table_name}"),
                           fixjson,mytoken = mytoken)
     if(fixreq$status_code != 200){
-      addrow <- data.frame(pk = mypk, status_code = fixreq$status_code)
-      problemrows <- rbind(problemrows, addrow)
+      addrows <- data.frame(pk = subsetdf[,idcol], status_code = fixreq$status_code)
+      problemrows <- rbind(problemrows, addrows)
     }# closes if
+    message(paste("Batch",batch_i,"of",nbatches,"status",fixreq$status_code))
+    #cat(paste0("\nstart_i = ",start_i,", end_i = ",end_i,", batch_i = ",batch_i))
+    start_i <- end_i + 1
+    batch_i <- batch_i + 1
   }# closes loop
   if(length(problemrows) > 0){
     names(problemrows)[1] <- idcol
