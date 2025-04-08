@@ -100,7 +100,7 @@ modify_rows <- function(table_name = NULL,
       problemrows <- rbind(problemrows, addrows)
     }# closes if
     message(paste("Batch",batch_i,"of",nbatches,"status",fixreq$status_code))
-    cat(paste0("\nstart_i = ",start_i,", end_i = ",end_i,", batch_i = ",batch_i))
+    #cat(paste0("\nstart_i = ",start_i,", end_i = ",end_i,", batch_i = ",batch_i))
     start_i <- end_i + 1
     batch_i <- batch_i + 1
   }# closes loop
