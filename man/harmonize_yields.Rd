@@ -39,7 +39,10 @@ option drivesR.primary_crop_fractions.}
 \item{mytoken}{Directus token, formatted as "Bearer myapitoken". Can be set with set_default_token().}
 }
 \value{
-A data frame of lightly processed crop yield data. 
+A data frame of lightly processed crop yield data. Information stored in the table
+is used to generate new columns, including dry yield (in kg/ha) and a TRUE/FALSE 
+column for cover crops.
+
 If crop_fractions_as_columns is set to TRUE, 
 data describing fractions from the same crop will be described in separate columns, with 
 suffix _1 for the primary fraction and _2, _3, etc. for other fractions.
