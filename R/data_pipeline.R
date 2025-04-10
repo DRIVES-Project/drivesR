@@ -330,7 +330,10 @@ list_treatments_by_management_practice <- function(site_treatment_type_info = NU
 #' So far, this only pertains to grain and tomato fruit. The default is set with the 
 #' option drivesR.primary_crop_fractions. 
 #' @returns
-#' A data frame of lightly processed crop yield data. 
+#' A data frame of lightly processed crop yield data. Information stored in the table
+#' is used to generate new columns, including dry yield (in kg/ha) and a TRUE/FALSE 
+#' column for cover crops.
+#' 
 #' If crop_fractions_as_columns is set to TRUE, 
 #' data describing fractions from the same crop will be described in separate columns, with 
 #' suffix _1 for the primary fraction and _2, _3, etc. for other fractions. 
@@ -360,6 +363,15 @@ harmonize_yields <- function(crop_yields = NULL,
                                dry_yield_kg_ha = yield_kg_ha - yield_kg_ha*(yield_percent_moisture)/100)
   # move next to yield column.
   crop_yields <- dplyr::relocate(crop_yields, dry_yield_kg_ha, .before = yield_kg_ha)
+  
+  # add column indicating cover crops
+    
+  crop_yields <- dplyr::mutate(
+                  dplyr::group_by(crop_yields,unit_id,harvest_year,actual_crop_id),
+                  cover_crop = all(removed_from_field_tf == FALSE) & actual_crop_id != "fallow"
+                )
+    
+  
   # Stop here for the long option. 
   if(crop_fractions_as_columns == FALSE){
     return(crop_yields)
