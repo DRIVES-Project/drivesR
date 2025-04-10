@@ -53,6 +53,7 @@ expand_years <- function(mydf = NULL,
 #'
 #' @param public 
 #' True or false indicating whether tables are in the set approved for public access.
+#' Can be set directly or though defaults
 #' @returns
 #' A list of three dictionary tables. One describing database tables, one 
 #' describing columns within tables, and one describing categories within columns. 
@@ -60,7 +61,8 @@ expand_years <- function(mydf = NULL,
 #' @import purrr
 #' @examples
 #' # not run: dict <- import_dictionary_tables()
-import_dictionary_tables <- function(public = FALSE,mytoken = getOption("drivesR.default.directustoken")){
+import_dictionary_tables <- function(public = getOption("drivesR.default.public"),
+                                     mytoken = getOption("drivesR.default.directustoken")){
   ## I'm a bit unclear on how I'm going to separate public and private tables. I 
   # may need a separate set of dictionaries. For now, just pretend there's only 
   # one set of dictionaries.
@@ -92,7 +94,8 @@ import_dictionary_tables <- function(public = FALSE,mytoken = getOption("drivesR
 #' File name for saving locally, excluding .Rda. Defaults to "drives_dblist"
 ##' @param public 
 #' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise. 
+#' database. FALSE otherwise.
+#' Can be set directly or though options. 
 #' @param mytoken
 #' Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token()
 #' @returns
@@ -107,7 +110,7 @@ import_db_tables <- function(tablevec = NULL,
                              import_from_local = FALSE,
                              savedir = ".", 
                              savename = "drives_dblist",
-                             public = FALSE,
+                             public = getOption("drivesR.default.public"),
                              mytoken = getOption("drivesR.default.directustoken")){
   if(import_from_local == TRUE){
     load(file.path(savedir,paste0(savename,".Rda")))
@@ -149,7 +152,7 @@ import_db_tables <- function(tablevec = NULL,
 #' If left NULL, these tables are imported from Directus.
 #' @param public 
 #' TRUE if data are to be downloaded from the publicly available part of the DRIVES database.
-#' FALSE otherwise. 
+#' FALSE otherwise. Can be set directly or though options.
 #' @param mytoken 
 #' Directus API token, formatted as "Bearer myapitoken". Defaults to option set for "drivesR.default.directustoken"
 #' @returns
@@ -162,7 +165,7 @@ import_db_tables <- function(tablevec = NULL,
 #' @examples
 #' #not run: tcw <- harmonize_treatments()
 harmonize_treatments <- function(db = NULL, 
-                                 public = FALSE,
+                                 public = getOption("drivesR.default.public"),
                                  mytoken = getOption("drivesR.default.directustoken")){
   # if db is supplied, check for required tables. 
   trttables <- c("treatment_id_info","treatment_id_components")
@@ -229,7 +232,7 @@ harmonize_treatments <- function(db = NULL,
 #' If left NULL, these tables are imported from Directus.
 #' @param public 
 #' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise. 
+#' database. FALSE otherwise. Can be set directly or though options.
 #' @param mytoken 
 #' Directus token, formatted as "Bearer myapitoken". Can be set with set_default_token()
 #' @returns
@@ -240,7 +243,7 @@ harmonize_treatments <- function(db = NULL,
 #' @examples
 #' # not run: trt_units <- harmonize_treatment_units()
 harmonize_treatments_units <- function(db = NULL,
-                                       public = FALSE,
+                                       public = getOption("drivesR.default.public"),
                                        mytoken = getOption("drivesR.default.directustoken")){
   trttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments")
   if(!is.null(db)){
@@ -321,7 +324,7 @@ list_treatments_by_management_practice <- function(site_treatment_type_info = NU
 #' as in the database table.
 #' @param public 
 #' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise. 
+#' database. FALSE otherwise. Can be set directly or though options.
 #' @param primary_crop_fractions
 #' A vector of crop fractions to select as the primary fraction, when there is more than one.
 #' So far, this only pertains to grain and tomato fruit. The default is set with the 
@@ -339,7 +342,7 @@ list_treatments_by_management_practice <- function(site_treatment_type_info = NU
 #' # not run: wideyield <- harmonize_yields(crop_fractions_as_columns = TRUE)
 harmonize_yields <- function(crop_yields = NULL,
                              crop_fractions_as_columns = FALSE,
-                             public = FALSE,
+                             public = getOption("drivesR.default.public"),
                              primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
                              mytoken = getOption("drivesR.default.directustoken")){
   
@@ -392,7 +395,7 @@ harmonize_yields <- function(crop_yields = NULL,
 #' as in the database table. 
 #' @param public
 #' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise. 
+#' database. FALSE otherwise. Can be set directly or though options.
 #' @param mytoken 
 #' Directus token, formatted as "Bearer myapitoken". Set by set_default_token().
 #' @returns
@@ -409,7 +412,7 @@ harmonize_yields <- function(crop_yields = NULL,
 harmonize_yields_treatments <- function(
     db = NULL,
     crop_fractions_as_columns = FALSE,
-    public = FALSE,
+    public =  getOption("drivesR.default.public"),
     mytoken = getOption("drivesR.default.directustoken")){
   ytrttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields")
   if(!is.null(db)){
@@ -444,7 +447,7 @@ harmonize_yields_treatments <- function(
 #'   
 #' @param public 
 #' TRUE if weather data is from the publicly available part of the DRIVES database.
-#' FALSE otherwise.
+#' FALSE otherwise. Can be set directly or though options.
 #' 
 #' @returns
 #' A data frame of mildly processed weather data with weather variables in separate columns
@@ -455,7 +458,7 @@ harmonize_yields_treatments <- function(
 #' @examples
 harmonize_weather <- function(weather_daily=NULL,
                               mytoken = getOption("drivesR.default.directustoken"),
-                              public = FALSE){
+                              public = getOption("drivesR.default.public")){
   if(is.null(weather_daily)){
     ## import from directus
     tablename <- ifelse(public == TRUE,"public_weather_daily","weather_daily")
@@ -477,7 +480,7 @@ harmonize_weather <- function(weather_daily=NULL,
 #' If NULL, this table is downloaded from Directus.
 #' @param public 
 #' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise. 
+#' database. FALSE otherwise. Can be set directly or though options.
 #' @param crop_fractions_as_columns
 #' If TRUE, multiple fractions from the same crop are organized in separate 
 #' columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 
@@ -498,7 +501,7 @@ harmonize_weather <- function(weather_daily=NULL,
 #' # not run: harv1 <- harmonize_harvest_dates(crop_fractions_as_columns = TRUE)
 #' # not run: harv2 <- harmonize_harvest_dates(crop_fractions_as_columns = FALSE)
 harmonize_harvest_dates <- function(harvest_dates = NULL,
-                                    public = FALSE,
+                                    public = getOption("drivesR.default.public"),
                                     crop_fractions_as_columns = FALSE,
                                     primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
                                     mytoken = getOption("drivesR.default.directustoken")
@@ -569,7 +572,8 @@ harmonize_harvest_dates <- function(harvest_dates = NULL,
 #' component crop information in separate columns.
 #' 
 #' @param public 
-#' TRUE if the user has public approved access, FALSE for internal DRIVES users.
+#' TRUE if the user has public approved access, FALSE for internal DRIVES users. 
+#' Can be set directly or though options.
 #' @param mytoken 
 #' Directus token formatted as "Bearer APITOKEN". Can be set with set_default_token().
 #' @returns
@@ -608,7 +612,7 @@ harmonize_harvest_dates <- function(harvest_dates = NULL,
 harmonize_planting_info <- function(planting_info = NULL,
                                     replant_dates = c("latest","rows","columns")[1],
                                     include_component_crops = TRUE,
-                                    public = FALSE,
+                                    public = getOption("drivesR.default.public"),
                                     mytoken = getOption("drivesR.default.directustoken")){
   if(is.null(planting_info)){
     tablename <- ifelse(public == TRUE,"public_planting_info","planting_info")

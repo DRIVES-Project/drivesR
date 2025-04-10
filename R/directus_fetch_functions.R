@@ -32,6 +32,7 @@ get_db_table <- function(table_name = "site_info",
                          in_batches = FALSE,
                          batchsize = NULL
                          ){
+  # TODO: integrate public and canadian options------
   ## Check arguments-----
   ## conditions to stop execution with incompatible arguments
   validToken <- test_api_token(mytoken = mytoken,
@@ -221,11 +222,12 @@ query_table_by_pk <- function(
     table_name = NULL,
     pkvec = NULL,
     pkfield = "uid",
-    public = FALSE,
+    public = getOption("drivesR.default.public"),
     mytoken = getOption("drivesR.default.directustoken")){
 
     # set table name as public or internal:
   if(public == TRUE & !grepl("dictionary", table_name)){
+    # TODO: set up Canadian system------
     tname <- paste0("public_",table_name)
   }else{
     tname <- table_name
