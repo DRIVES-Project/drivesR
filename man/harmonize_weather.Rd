@@ -7,7 +7,7 @@
 harmonize_weather(
   weather_daily = NULL,
   mytoken = getOption("drivesR.default.directustoken"),
-  public = FALSE
+  public = getOption("drivesR.default.public")
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ in the DRIVES database. If NULL, this table is downloaded from Directus.}
 with set_default_token().}
 
 \item{public}{TRUE if weather data is from the publicly available part of the DRIVES database.
-FALSE otherwise.}
+FALSE otherwise. Can be set directly or though options.}
 }
 \value{
 A data frame of mildly processed weather data with weather variables in separate columns

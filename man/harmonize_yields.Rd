@@ -16,7 +16,7 @@ for harvest index calculations and such.}
 harmonize_yields(
   crop_yields = NULL,
   crop_fractions_as_columns = FALSE,
-  public = FALSE,
+  public = getOption("drivesR.default.public"),
   primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
   mytoken = getOption("drivesR.default.directustoken")
 )
@@ -30,7 +30,7 @@ columns. If FALSE, multiple fractions from the same crop are organized in separa
 as in the database table.}
 
 \item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-database. FALSE otherwise.}
+database. FALSE otherwise. Can be set directly or though options.}
 
 \item{primary_crop_fractions}{A vector of crop fractions to select as the primary fraction, when there is more than one.
 So far, this only pertains to grain and tomato fruit. The default is set with the 

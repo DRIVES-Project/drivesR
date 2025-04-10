@@ -6,7 +6,7 @@
 \usage{
 harmonize_treatments_units(
   db = NULL,
-  public = FALSE,
+  public = getOption("drivesR.default.public"),
   mytoken = getOption("drivesR.default.directustoken")
 )
 }
@@ -16,7 +16,7 @@ treatment_id_components, and experimental_unit_treatments.
 If left NULL, these tables are imported from Directus.}
 
 \item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-database. FALSE otherwise.}
+database. FALSE otherwise. Can be set directly or though options.}
 
 \item{mytoken}{Directus token, formatted as "Bearer myapitoken". Can be set with set_default_token()}
 }

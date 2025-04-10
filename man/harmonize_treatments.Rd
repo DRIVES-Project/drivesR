@@ -6,7 +6,7 @@
 \usage{
 harmonize_treatments(
   db = NULL,
-  public = FALSE,
+  public = getOption("drivesR.default.public"),
   mytoken = getOption("drivesR.default.directustoken")
 )
 }
@@ -15,7 +15,7 @@ harmonize_treatments(
 If left NULL, these tables are imported from Directus.}
 
 \item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES database.
-FALSE otherwise.}
+FALSE otherwise. Can be set directly or though options.}
 
 \item{mytoken}{Directus API token, formatted as "Bearer myapitoken". Defaults to option set for "drivesR.default.directustoken"}
 }

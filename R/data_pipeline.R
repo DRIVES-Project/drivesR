@@ -832,3 +832,8 @@ harmonize_planting_info <- function(planting_info = NULL,
   }# closes 'columns'
   return(outdf)
 } # closes function
+
+# harmonize_yields_planting_harvest <- function(db = NULL,
+# ){
+#   
+# }

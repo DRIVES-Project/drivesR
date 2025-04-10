@@ -11,7 +11,7 @@ query_table_by_pk(
   table_name = NULL,
   pkvec = NULL,
   pkfield = "uid",
-  public = FALSE,
+  public = getOption("drivesR.default.public"),
   mytoken = getOption("drivesR.default.directustoken")
 )
 }

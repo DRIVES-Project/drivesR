@@ -7,7 +7,7 @@ Does some light processing of the harvest_dates table.}
 \usage{
 harmonize_harvest_dates(
   harvest_dates = NULL,
-  public = FALSE,
+  public = getOption("drivesR.default.public"),
   crop_fractions_as_columns = FALSE,
   primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
   mytoken = getOption("drivesR.default.directustoken")
@@ -18,7 +18,7 @@ harmonize_harvest_dates(
 If NULL, this table is downloaded from Directus.}
 
 \item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-database. FALSE otherwise.}
+database. FALSE otherwise. Can be set directly or though options.}
 
 \item{crop_fractions_as_columns}{If TRUE, multiple fractions from the same crop are organized in separate 
 columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 

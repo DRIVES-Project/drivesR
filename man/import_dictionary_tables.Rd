@@ -5,12 +5,13 @@
 \title{Import dictionary tables}
 \usage{
 import_dictionary_tables(
-  public = FALSE,
+  public = getOption("drivesR.default.public"),
   mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{
-\item{public}{True or false indicating whether tables are in the set approved for public access.}
+\item{public}{True or false indicating whether tables are in the set approved for public access.
+Can be set directly or though defaults}
 }
 \value{
 A list of three dictionary tables. One describing database tables, one 
