@@ -832,34 +832,4 @@ check_fk_values <- function(table_name = NULL,
   return(outlist)
 }# closes function
 
-#' Verify Directus API token
-#' Used within other functions to check for errors.
-#' @param mytoken 
-#' Directus API token, formatted as "Bearer APItoken."
-#' @param myurl
-#' Directus database url. Set with defaults as https://data.drives-network.org
-#' @param silent
-#' Indicates whether messages should be printed. Default FALSE.
-#' @returns
-#' TRUE or FALSE indicating whether mytoken  
-#' produces a successful api request. 
-#' @export
-#' @import httr
-#' @import glue
-#' @examples
-#' test_api_token(mytoken = "notavalidtoken", silent=FALSE)
-test_api_token <- function(mytoken = getOption("drivesR.default.directustoken"),
-                           myurl = getOption("drivesR.default.url"),
-                            silent = TRUE){
-  testreq <- httr::GET(glue::glue("{myurl}/collections"),
-       httr::add_headers(
-         "Authorization" = mytoken
-       )
-    )# ends GET
-  validCode <-testreq$status_code == 200
-  outmessage <- ifelse(validCode, "Valid API token","Invalid API token")
-  if(silent != TRUE){
-    message(outmessage)
-  }
-  return(validCode)
-}
+
