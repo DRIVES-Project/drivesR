@@ -836,4 +836,106 @@ check_fk_values <- function(table_name = NULL,
   return(outlist)
 }# closes function
 
+#' Order tables by foreign key dependencies
+#' This is used for posting items to collections with 
+#' foreign key constraints. This is to help determine
+#' the order of items to post to avoid foreign key violations.
+#' Tables with internal foreign keys should use order_rows_by_internal_fk
+#' @param column_dictionary 
+#' A subset of the column_dictionary describing tables to be ordered.
+#' @returns
+#' A data frame with table names in an order that is compatible with between-table
+#' foreign key constraints, along with a TRUE/FALSE column indicating which tables
+#' have internal foreign keys. 
+#' @export
+#' @import dplyr
+#'
+#' @examples
+order_tables_by_fk <- function(column_dictionary = NULL){
+  fkdict <- column_dictionary %>% group_by(table_name) %>%
+    summarize(num_fk_tables = length(unique(foreign_key_table[!is.na(foreign_key_table)])),
+              has_internal_fk = sum(table_name == foreign_key_table,na.rm=TRUE)>0,
+              fktables = list(unique(foreign_key_table[!is.na(foreign_key_table)])))
+  #make a queue
+  table_queue <- c()
+  waiting_area <- fkdict$table_name
+  
+  while(length(waiting_area) > 0) {# repeat until all tables are removed from waiting area
+    qTF <- c()
+    for(i in seq_along(waiting_area)){
+      mytable = waiting_area[i]  
+      addToQ <- FALSE
+      numfktabs = fkdict$num_fk_tables[which(fkdict$table_name==mytable)] 
+      if(numfktabs== 0){ # if there are no foreign key tables, add straight to queue
+        addToQ <- TRUE
+      }
+      if(numfktabs > 0){
+        fktabs <- fkdict$fktables[which(fkdict$table_name==mytable)] %>% unlist()
+        # if all FK tables are already queued, or self-referential, add to queue.
+        if(all(fktabs %in% c(mytable,table_queue))){
+          addToQ <- TRUE
+        }else{
+          addToQ <- FALSE
+        }
+      }#closes else
+      qTF <- c(qTF, addToQ)
+    } #closes for loop
+    # update queue
+    table_queue <- c(table_queue, waiting_area[qTF])
+    # update waiting area
+    waiting_area <- waiting_area[!qTF]
+  }# closes while
+  outdf <- data.frame(table_order = table_queue) %>%
+    left_join(fkdict, by = c("table_order" = "table_name"))
+  
+  return(outdf)
+}
 
+#' Order rows based on an internal foreign key
+#' For use in uploading rows to database tables. This
+#' specifies a row order for uploading that avoids violating
+#' internal foreign key constraints within a table. 
+#' @param inputdf
+#' A dataframe of rows to be added to a table with an 
+#' internal foreign key constraint. 
+#' @param idcol 
+#' The primary key column name (e.g., crop_id).
+#' @param fkcol 
+#' The internal foreign key column name (e.g., parent_crop_id)
+#'
+#' @returns
+#' A vector of row indices for the inputdf, indicating
+#' the order they should be added in.
+#' @export
+#'
+#' @examples
+#' #not run: roworder <- order_rows_by_internal_fk(inputdf = crop_info,idcol = "crop_id",fkcol = "parent_crop_id")
+#' # not run: walk(roworder,~post_rows("crop_info",inputdf[.x,] ))
+order_rows_by_internal_fk <- function(inputdf = NULL,
+                                      idcol = NULL,
+                                      fkcol = NULL){
+  waitingrows <- 1:nrow(inputdf)
+  rowqueue <- c()
+  while(length(waitingrows) > 0){
+    qTF <- c()
+    for(i in seq_along(waitingrows)){
+      # if internal fk value is empty, add to queue 
+      addToQ <- FALSE
+      if(is.na(inputdf[i,fkcol])){
+        addToQ <- TRUE
+      }
+      # if fk column is present
+      if(!is.na(inputdf[i,fkcol])){
+        #add to queue if fk value is in queued rows as pk
+        if(inputdf[i,fkcol] %in% inputdf[rowqueue,idcol]){
+          addToQ <- TRUE
+        }
+      }
+      qTF <- c(qTF, addToQ)
+    }# closes for loop.
+    #### update queue and waiting area
+    rowqueue <- c(rowqueue,waitingrows[qTF])
+    waitingrows <- waitingrows[!qTF]
+  }# closes while
+  return(rowqueue)
+}
