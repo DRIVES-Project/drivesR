@@ -673,7 +673,8 @@ harmonize_planting_info <- function(planting_info = NULL,
       valuecols = c(
         "component_crop_id",
         "variety_id",
-        "planting_rate"
+        "planting_rate",
+        "uid"
       )
       
       outdf <- tidyr::pivot_wider(platest, 
@@ -707,7 +708,7 @@ harmonize_planting_info <- function(planting_info = NULL,
                   mutate(variety_id = ifelse(num_components==1,variety_id,NA ),
                          planting_rate = ifelse(num_components==1,planting_rate,NA),
                          planting_units = ifelse(num_components==1,planting_units,NA)) %>%
-                  select(-uid,
+                  select(#-uid,
                         -is_latest_date,
                          -latest_date_index,
                          -component_crop_id,
@@ -736,7 +737,8 @@ harmonize_planting_info <- function(planting_info = NULL,
       valuecols = c(
         "component_crop_id",
         "variety_id",
-        "planting_rate"
+        "planting_rate",
+        "uid"
       )
       outdf <- pivot_wider(planting_info,
                            id_cols = all_of(idcols),
@@ -766,7 +768,7 @@ harmonize_planting_info <- function(planting_info = NULL,
         mutate(variety_id = ifelse(num_components==1,variety_id,NA ),
                planting_rate = ifelse(num_components==1,planting_rate,NA),
                planting_units = ifelse(num_components==1,planting_units,NA)) %>%
-        select(-uid,
+        select(#-uid,
               -component_crop_id,
                -component_crop_index,
                -actual_or_estimated_planting_date)          
@@ -791,7 +793,8 @@ harmonize_planting_info <- function(planting_info = NULL,
       "component_crop_id",
       "planting_date",
       "variety_id",
-      "planting_rate"
+      "planting_rate",
+      "uid"
     )
     outdf <- tidyr::pivot_wider(planting_info,
                                 id_cols = all_of(idcols),
@@ -822,7 +825,7 @@ harmonize_planting_info <- function(planting_info = NULL,
       mutate(variety_id = ifelse(num_components==1,variety_id,NA ),
              planting_rate = ifelse(num_components==1,planting_rate,NA),
              planting_units = ifelse(num_components==1,planting_units,NA)) %>%
-      select(-uid,
+      select(#-uid,
              -component_crop_id,
              -component_crop_index,
              -actual_or_estimated_planting_date)
@@ -840,7 +843,8 @@ harmonize_planting_info <- function(planting_info = NULL,
     valuecols = c(
       "planting_date",
       "planting_rate",
-      "variety_id"
+      "variety_id",
+      "uid"
     )# planting units and mateiral planted will be consolidated.
     outdf <- tidyr::pivot_wider(without_components,
                                 id_cols = all_of(idcols),
