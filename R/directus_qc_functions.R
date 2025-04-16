@@ -433,7 +433,11 @@ check_table_contents <- function(table_name = NULL,
   if(pk_in_inputdf & pk_all_full){
     ## pk options need to be checked.
     pkreq <- api_request("GET",glue::glue("items/{table_name}?fields={pkfield}&limit=-1"))
-    pkoptions <- get_table_from_req(pkreq)[[1]]## subset so it's a vector instead of a df.
+    pkreqdf <-  get_table_from_req(pkreq)
+    pkoptions <- NULL
+    if(length(pkreqdf) > 0){
+      pkoptions <- pkreqdf[[1]]## subset so it's a vector instead of a df.  
+    }
     pk_overlap <- any(inputdf[,pkfield] %in% pkoptions)
     pk_dups <- any(duplicated(inputdf[,pkfield]))
     if(pk_overlap & !pk_dups){
