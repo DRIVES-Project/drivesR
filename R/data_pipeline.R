@@ -526,10 +526,13 @@ harmonize_harvest_dates <- function(harvest_dates = NULL,
  ## Step 1: fill in missing actual_crop_id with expected_crop_id----
   # fill in missing crop fractions with 'none'
   nacrop <- which(is.na(harvest_dates$actual_crop_id))
-  harvest_dates$actual_crop_id[nacrop] <- harvest_dates$expected_crop_id[nacrop]
+  if(length(nacrop) > 0){
+    harvest_dates$actual_crop_id[nacrop] <- harvest_dates$expected_crop_id[nacrop]
+  }
   nafrac <- which(is.na(harvest_dates$harvested_fraction))
-  harvest_dates$harvested_fraction[nafrac] <- "none"
- 
+  if(length(nafrac) > 0){
+    harvest_dates$harvested_fraction[nafrac] <- "none"
+  }
   ## Step 2: if crop fractions are separated into columns-----
   if(crop_fractions_as_columns== TRUE){
     # add fraction_index (similar to harmonize_crop_yields)
@@ -545,16 +548,24 @@ harmonize_harvest_dates <- function(harvest_dates = NULL,
     harvest_dates$harvest_number <- harvest_dates$harvest_number + harvest_dates$fraction_index-1
     ## remove columns I added. 
     harvest_dates <- select(harvest_dates, -num_fractions,-primary_fraction,-fraction_index)
-    ## set up columns that should be pivoted to wide
-    valcols = c("harvest_date","harvested_fraction","harvest_notes","uid")
+    ## set up columns for pivoting to wide
+    idcols = c("site_id","unit_id","expected_crop_id","actual_crop_id","harvest_year","stand_year",
+               "rotation_phase","termination_date")
+    valcols = c("harvest_date","harvested_fraction","uid")
   }else{
-    valcols = c("harvest_date","harvest_notes","uid")
+    valcols = c("harvest_date","uid")
+    idcols = c("site_id","unit_id","expected_crop_id","actual_crop_id","harvest_year",
+               "harvested_fraction","stand_year",
+               "rotation_phase","termination_date")
   }
+  
   ## Step 3: pivot to wide ------
   namecols = c("harvest_number")
   wide_harvest <- tidyr::pivot_wider(harvest_dates, 
                               names_from = all_of(namecols),
-                              values_from = all_of(valcols))
+                              values_from = all_of(valcols),
+                              unused_fn = list(harvest_notes = ~paste(unique(.x[!is.na(.x)]),collapse=";"),
+                                               termination_notes = ~paste(unique(.x[!is.na(.x)]),collapse=";")))
   return(wide_harvest)
 }
 
