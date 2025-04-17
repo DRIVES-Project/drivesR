@@ -309,7 +309,7 @@ post_rows <- function(table_name = NULL,
 #' @export
 #'
 #' @examples
-post_rows_in_batches <- function(table_name = "crop_yields", batchsize = 1000, inputdf = NULL,mytoken = getOption("drivesR.default.directustoken")){
+post_rows_in_batches <- function(table_name = "crop_yields", inputdf = NULL,batchsize = 1000,mytoken = getOption("drivesR.default.directustoken")){
   nitems = nrow(inputdf)
   nbatches = ceiling(nitems/batchsize)
   start_i = 1
