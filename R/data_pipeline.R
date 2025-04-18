@@ -105,7 +105,7 @@ import_dictionary_tables <- function(public = getOption("drivesR.default.public"
 #' @import purrr
 #' @examples
 #' # not run: db <- import_db_tables()
-import_db_tables <- function(tablevec = NULL, 
+import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"), 
                              save_locally = FALSE,
                              import_from_local = FALSE,
                              savedir = ".", 
