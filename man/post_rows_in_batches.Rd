@@ -6,18 +6,18 @@
 \usage{
 post_rows_in_batches(
   table_name = "crop_yields",
-  batchsize = 1000,
   inputdf = NULL,
+  batchsize = 1000,
   mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{
 \item{table_name}{Table identifier in the database.}
 
+\item{inputdf}{Data frame of rows to be added. This should have passed quality control checks.}
+
 \item{batchsize}{Number of rows to be added at a time. Suggested amount is 1000 rows.
 Progress is printed to the console.}
-
-\item{inputdf}{Data frame of rows to be added. This should have passed quality control checks.}
 
 \item{mytoken}{Directus token. Can be set with set_default_token()}
 }

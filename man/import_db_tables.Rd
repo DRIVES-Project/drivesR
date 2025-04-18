@@ -5,7 +5,7 @@
 \title{Bulk download database tables}
 \usage{
 import_db_tables(
-  tablevec = NULL,
+  tablevec = getOption("drivesR.default.tablevec"),
   save_locally = FALSE,
   import_from_local = FALSE,
   savedir = ".",
