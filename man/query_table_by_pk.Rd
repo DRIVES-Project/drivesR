@@ -12,6 +12,7 @@ query_table_by_pk(
   pkvec = NULL,
   pkfield = "uid",
   public = getOption("drivesR.default.public"),
+  public_tables = getOption("drivesR.default.tablevec"),
   mytoken = getOption("drivesR.default.directustoken")
 )
 }
@@ -26,6 +27,9 @@ For most tables, this is 'uid'.}
 
 \item{public}{If TRUE, the function queries publicly available data tables. 
 Since this function is mostly for internal use, the default is FALSE.}
+
+\item{public_tables}{Vector of tables that receive the public_ prefix if public==TRUE.
+Set as a global default.}
 
 \item{mytoken}{Directus token, formatted as "Bearer APITOKEN". 
 Can be set with set_default_token.}

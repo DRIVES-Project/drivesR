@@ -2,16 +2,13 @@
 % Please edit documentation in R/data_pipeline.R
 \name{import_dictionary_tables}
 \alias{import_dictionary_tables}
-\title{Import dictionary tables}
+\title{Import dictionary tables
+These do not require an API key.}
 \usage{
-import_dictionary_tables(
-  public = getOption("drivesR.default.public"),
-  mytoken = getOption("drivesR.default.directustoken")
-)
+import_dictionary_tables(myurl = getOption("drivesR.default.url"))
 }
 \arguments{
-\item{public}{True or false indicating whether tables are in the set approved for public access.
-Can be set directly or though defaults}
+\item{myurl}{URL for the Directus database. Set as a default option (data.drives-network.org)}
 }
 \value{
 A list of three dictionary tables. One describing database tables, one 
@@ -19,6 +16,7 @@ describing columns within tables, and one describing categories within columns.
 }
 \description{
 Import dictionary tables
+These do not require an API key.
 }
 \examples{
 # not run: dict <- import_dictionary_tables()

@@ -74,10 +74,12 @@ get_db_table <- function(table_name = "site_info",
   ## conditions to stop execution with incompatible arguments
   validToken <- test_api_token(mytoken = mytoken,
                                myurl = myurl)
-  if(!validToken){
+  if(!validToken & !is.null(mytoken)){
     stop("Invalid Directus API token.")
   }
-  
+  if(is.null(mytoken)){
+    message("Directus API token set to NULL. Will only work for certain tables.")
+  }
   ## add public prefix if applicable 
   table_id <- ifelse(public == TRUE & table_name %in% public_tables,
                              paste0("public_", table_name), table_name)
@@ -278,7 +280,10 @@ get_table_from_req <- function(apirequest = NULL){
 #' For most tables, this is 'uid'. 
 #' @param public
 #' If TRUE, the function queries publicly available data tables. 
-#' Since this function is mostly for internal use, the default is FALSE. 
+#' Since this function is mostly for internal use, the default is FALSE.
+#' @param public_tables
+#' Vector of tables that receive the public_ prefix if public==TRUE.
+#' Set as a global default. 
 #' @param mytoken 
 #' Directus token, formatted as "Bearer APITOKEN". 
 #' Can be set with set_default_token. 
@@ -294,10 +299,11 @@ query_table_by_pk <- function(
     pkvec = NULL,
     pkfield = "uid",
     public = getOption("drivesR.default.public"),
+    public_tables = getOption("drivesR.default.tablevec"),
     mytoken = getOption("drivesR.default.directustoken")){
 
     # set table name as public or internal:
-  if(public == TRUE & !grepl("dictionary", table_name)){
+  if(public == TRUE & table_name %in% public_tables){
     # TODO: set up Canadian system------
     tname <- paste0("public_",table_name)
   }else{

@@ -50,31 +50,26 @@ expand_years <- function(mydf = NULL,
 
 
 #' Import dictionary tables
-#'
-#' @param public 
-#' True or false indicating whether tables are in the set approved for public access.
-#' Can be set directly or though defaults
+#' These do not require an API key.
+#' @param myurl 
+#' URL for the Directus database. Set as a default option (data.drives-network.org)
 #' @returns
 #' A list of three dictionary tables. One describing database tables, one 
 #' describing columns within tables, and one describing categories within columns. 
 #' @export
 #' @import purrr
+#' @import httr
 #' @examples
 #' # not run: dict <- import_dictionary_tables()
-import_dictionary_tables <- function(public = getOption("drivesR.default.public"),
-                                     mytoken = getOption("drivesR.default.directustoken")){
-  ## I'm a bit unclear on how I'm going to separate public and private tables. I 
-  # may need a separate set of dictionaries. For now, just pretend there's only 
-  # one set of dictionaries.
+import_dictionary_tables <- function(myurl = getOption("drivesR.default.url")){
+## dictionaries do not require an API key to access.
   dictvec <- paste0(c("table","column","category"),"_dictionary")
-  dictnames <- dictvec # keep names if public dictionaries are being used. 
-  if(public == TRUE){
-    dictvec <- paste0("public_",dictvec)
-  }
-  outlist <- purrr::map(dictvec, ~get_db_table(table_name = .x,mytoken = mytoken))
-  names(outlist) <- dictnames
+  outlist <- purrr::walk(dictvec, ~ suppressMessages(get_db_table(table_name = .x,mytoken = NULL)))
+  names(outlist) <- dictvec
   return(outlist)
 }
+
+
 
 
 #' Bulk download database tables
@@ -111,7 +106,8 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
                              savedir = ".", 
                              savename = "drives_dblist",
                              public = getOption("drivesR.default.public"),
-                             mytoken = getOption("drivesR.default.directustoken")){
+                             mytoken = getOption("drivesR.default.directustoken"),
+                             dataverse_api = NULL){
   if(import_from_local == TRUE){
     load(file.path(savedir,paste0(savename,".Rda")))
     cat(paste0("\nImported list db with tables:\n"))
@@ -127,14 +123,9 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
       ## remove internal directus tables.
       tablevec <- collection_info$collection[which(!grepl("^directus_", collection_info$collection))]
       } # ends if(is.null(tablevec)
-    if(!is.null(tablevec)){
-      ## if public == TRUE, add public prefix to all but dictionary tables. 
-      prefix <- ifelse(public == TRUE,"public_","") 
-      tablevec <- ifelse(!grepl("dictionary",tablevec),paste0(prefix,tablevec),tablevec)
-      # TODO: adapt public option for Canada-------
-    }
-    db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken))
-    names(db) <- gsub("^public_","",tablevec)## removes public prefix to table names, if present
+    
+    db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken,public = public, dataverse_api = dataverse_api))
+    names(db) <- tablevec ## 
     if(save_locally == TRUE){
       save(db, file = file.path(savedir, paste0(savename,".Rda")))
     }
