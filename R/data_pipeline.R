@@ -107,7 +107,7 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
                              savename = "drives_dblist",
                              public = getOption("drivesR.default.public"),
                              mytoken = getOption("drivesR.default.directustoken"),
-                             dataverse_api = NULL){
+                             dataverse_api = getOption("drivesR.default.dataversetoken")){
   if(!fetch_option %in% c("download.save","download.only","upload")){
     stop("fetch_option must be 'download.save', 'download.only', or 'upload'")
   }
