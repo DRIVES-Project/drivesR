@@ -38,7 +38,8 @@ get_column_dict_for_table <- function(table_name = "site_info",
 #' @param myurl 
 #' The database url. By default, "https://data.drives-network.org"
 #' @param mytoken 
-#' The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets
+#' The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets.
+#' This can be set with set_default_token.
 #' @param public_tables
 #' Vector of table names that receive the prefix 'public_' when public = TRUE.
 #' @param borealis_repo_info 
@@ -133,9 +134,7 @@ get_db_table <- function(table_name = "site_info",
 #' can remain as NULL.
 #' @param borealis_repo_info 
 #' A dataframe containing Borealis file identifiers for each table_name. 
-#' If NULL, this information is imported from Directus. 
-#' @param directus_token
-#' API token for importing borealis_repo_info (if NULL).
+#' If NULL, this information is imported from Directus. Set with set_default_token().
 #' @param directus_url
 #' URL for the Directus database (can be set with global options).
 #' @returns
@@ -151,7 +150,6 @@ get_canadian_data <- function(table_name = NULL,
                                   dataverse_doi = "doi:10.5683/SP3/QGLCKO",
                                   dataverse_api = getOption("drivesR.default.dataversetoken"),
                                   borealis_repo_info = NULL,
-                                  directus_token = getOption("drivesR.default.directustoken"),
                                   directus_url =getOption("drivesR.default.url") ){
   ## import borealis_repo_info if NULL
   if(is.null(borealis_repo_info)){
@@ -294,12 +292,10 @@ query_table_by_pk <- function(
     pkvec = NULL,
     pkfield = "uid",
     public = getOption("drivesR.default.public"),
-    public_tables = getOption("drivesR.default.tablevec"),
-    mytoken = getOption("drivesR.default.directustoken")){
+    public_tables = getOption("drivesR.default.tablevec")){
 
     # set table name as public or internal:
   if(public == TRUE & table_name %in% public_tables){
-    
     tname <- paste0("public_",table_name)
   }else{
     tname <- table_name

@@ -9,9 +9,7 @@ set by the user. To aid in merging with yield data.}
 harmonize_planting_info(
   planting_info = NULL,
   replant_dates = c("latest", "rows", "columns")[1],
-  include_component_crops = TRUE,
-  public = getOption("drivesR.default.public"),
-  mytoken = getOption("drivesR.default.directustoken")
+  include_component_crops = TRUE
 )
 }
 \arguments{
@@ -33,11 +31,6 @@ separate rows.
 \item{include_component_crops}{TRUE or FALSE indicating whether the output should include information about 
 components of crop mixtures (component_crop_id). If TRUE, the output dataframe will include
 component crop information in separate columns.}
-
-\item{public}{TRUE if the user has public approved access, FALSE for internal DRIVES users. 
-Can be set directly or though options.}
-
-\item{mytoken}{Directus token formatted as "Bearer APITOKEN". Can be set with set_default_token().}
 }
 \value{
 A dataframe of planting information arranged as either: 

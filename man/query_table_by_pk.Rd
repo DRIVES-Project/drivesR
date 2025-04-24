@@ -12,8 +12,7 @@ query_table_by_pk(
   pkvec = NULL,
   pkfield = "uid",
   public = getOption("drivesR.default.public"),
-  public_tables = getOption("drivesR.default.tablevec"),
-  mytoken = getOption("drivesR.default.directustoken")
+  public_tables = getOption("drivesR.default.tablevec")
 )
 }
 \arguments{

@@ -4,20 +4,11 @@
 \alias{harmonize_treatments}
 \title{Harmonize treatment components}
 \usage{
-harmonize_treatments(
-  db = NULL,
-  public = getOption("drivesR.default.public"),
-  mytoken = getOption("drivesR.default.directustoken")
-)
+harmonize_treatments(db = NULL)
 }
 \arguments{
 \item{db}{A list of database tables containing named dataframes treatment_id_info and treatment_id_components.
 If left NULL, these tables are imported from Directus.}
-
-\item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES database.
-FALSE otherwise. Can be set directly or though options.}
-
-\item{mytoken}{Directus API token, formatted as "Bearer myapitoken". Defaults to option set for "drivesR.default.directustoken"}
 }
 \value{
 A data frame with columns for site, year, treatmentID1, and treatmentID2 and all treatment types

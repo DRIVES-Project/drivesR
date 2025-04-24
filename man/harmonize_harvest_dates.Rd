@@ -7,18 +7,13 @@ Does some light processing of the harvest_dates table.}
 \usage{
 harmonize_harvest_dates(
   harvest_dates = NULL,
-  public = getOption("drivesR.default.public"),
   crop_fractions_as_columns = FALSE,
-  primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
-  mytoken = getOption("drivesR.default.directustoken")
+  primary_crop_fractions = getOption("drivesR.primary_crop_fractions")
 )
 }
 \arguments{
 \item{harvest_dates}{A data frame of the harvest_dates table from the DRIVES database. 
 If NULL, this table is downloaded from Directus.}
-
-\item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-database. FALSE otherwise. Can be set directly or though options.}
 
 \item{crop_fractions_as_columns}{If TRUE, multiple fractions from the same crop are organized in separate 
 columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 
@@ -28,8 +23,6 @@ helps to merge with the yield data.}
 \item{primary_crop_fractions}{A vector of crop fractions to select as the primary fraction, when there is more than one.
 So far, this only pertains to grain and tomato fruit. The default is set with the 
 option drivesR.primary_crop_fractions.}
-
-\item{mytoken}{Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token()}
 }
 \value{
 A data frame of harvest date data with minor changes with one row per unit/year/crop.

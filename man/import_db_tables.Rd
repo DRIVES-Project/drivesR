@@ -8,9 +8,7 @@ import_db_tables(
   tablevec = getOption("drivesR.default.tablevec"),
   fetch_option = c("download.save", "download.only", "upload")[1],
   savedir = ".",
-  savename = "drives_dblist",
-  public = getOption("drivesR.default.public"),
-  mytoken = getOption("drivesR.default.directustoken")
+  savename = "drives_dblist"
 )
 }
 \arguments{
@@ -27,12 +25,6 @@ Because the download step takes a while, this option saves time when re-running 
 \item{savedir}{Directory path for saving locally. Defaults to the working directory.}
 
 \item{savename}{File name for saving locally, excluding .Rda. Defaults to "drives_dblist"}
-
-\item{public}{TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-database. FALSE otherwise.
-Can be set directly or though options.}
-
-\item{mytoken}{Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token()}
 }
 \value{
 A list of DRIVES database tables.

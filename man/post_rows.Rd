@@ -4,18 +4,12 @@
 \alias{post_rows}
 \title{Add rows to a database table}
 \usage{
-post_rows(
-  table_name = NULL,
-  inputdf = NULL,
-  mytoken = getOption("drivesR.default.directustoken")
-)
+post_rows(table_name = NULL, inputdf = NULL)
 }
 \arguments{
 \item{table_name}{The name of the database table.}
 
 \item{inputdf}{The dataframe containing rows to be added. Contents should have been checked.}
-
-\item{mytoken}{Directus token, formatted as "Bearer mytoken."}
 }
 \value{
 Converts the input df to a json and runs an API post request on the specified table. 

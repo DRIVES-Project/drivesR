@@ -272,8 +272,6 @@ make_field_json <- function(column_dictionary_row = NULL){
 #' @param inputdf
 #' The dataframe containing rows to be added. Contents should have been checked.
 #'  
-#' @param mytoken 
-#' Directus token, formatted as "Bearer mytoken."
 #' @returns
 #' Converts the input df to a json and runs an API post request on the specified table. 
 #' The status code of that request is returned as a message.
@@ -281,10 +279,9 @@ make_field_json <- function(column_dictionary_row = NULL){
 #'
 #' @examples
 post_rows <- function(table_name = NULL,
-                      inputdf = NULL,
-                      mytoken = getOption("drivesR.default.directustoken")){
+                      inputdf = NULL){
   insert_json <- make_row_insert_json(inputdf)
-  myreq <- api_request("POST",glue::glue("items/{table_name}"),insert_json,mytoken = mytoken)
+  myreq <- api_request("POST",glue::glue("items/{table_name}"),insert_json)
   message(paste("POST request complete with status code",myreq$status_code))
 }
 
@@ -302,14 +299,12 @@ post_rows <- function(table_name = NULL,
 #' @param inputdf 
 #' Data frame of rows to be added. This should have passed quality control checks.
 #' 
-#' @param mytoken 
-#' Directus token. Can be set with set_default_token()
 #' @returns
 #' Silent.
 #' @export
 #'
 #' @examples
-post_rows_in_batches <- function(table_name = "crop_yields", inputdf = NULL,batchsize = 1000,mytoken = getOption("drivesR.default.directustoken")){
+post_rows_in_batches <- function(table_name = "crop_yields", inputdf = NULL,batchsize = 1000){
   nitems = nrow(inputdf)
   nbatches = ceiling(nitems/batchsize)
   start_i = 1
@@ -320,7 +315,7 @@ post_rows_in_batches <- function(table_name = "crop_yields", inputdf = NULL,batc
     end_i <- min(start_i + batchsize -1 , nitems)
     subsetdf <- inputdf[start_i:end_i,]
     insert_json <- make_row_insert_json(subsetdf)
-    myreq <- api_request("POST",glue::glue("items/{table_name}"),insert_json,mytoken = mytoken)
+    myreq <- api_request("POST",glue::glue("items/{table_name}"),insert_json)
     message(paste("Batch",batch_i,"of",nbatches,"status",myreq$status_code))
     #cat(paste0("\nstart_i = ",start_i,", end_i = ",end_i,", batch_i = ",batch_i))
     start_i <- end_i + 1

@@ -4,21 +4,11 @@
 \alias{harmonize_weather}
 \title{Harmonize daily weather data}
 \usage{
-harmonize_weather(
-  weather_daily = NULL,
-  mytoken = getOption("drivesR.default.directustoken"),
-  public = getOption("drivesR.default.public")
-)
+harmonize_weather(weather_daily = NULL)
 }
 \arguments{
 \item{weather_daily}{A dataframe corresponding to the weather_daily table
 in the DRIVES database. If NULL, this table is downloaded from Directus.}
-
-\item{mytoken}{Directus token, formatted as "Bearer myapitoken". This can be set 
-with set_default_token().}
-
-\item{public}{TRUE if weather data is from the publicly available part of the DRIVES database.
-FALSE otherwise. Can be set directly or though options.}
 }
 \value{
 A data frame of mildly processed weather data with weather variables in separate columns

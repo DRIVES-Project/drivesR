@@ -12,7 +12,6 @@ get_canadian_data(
   dataverse_doi = "doi:10.5683/SP3/QGLCKO",
   dataverse_api = getOption("drivesR.default.dataversetoken"),
   borealis_repo_info = NULL,
-  directus_token = getOption("drivesR.default.directustoken"),
   directus_url = getOption("drivesR.default.url")
 )
 }
@@ -30,9 +29,7 @@ before the repository data tables are published. Once they are published, this o
 can remain as NULL.}
 
 \item{borealis_repo_info}{A dataframe containing Borealis file identifiers for each table_name. 
-If NULL, this information is imported from Directus.}
-
-\item{directus_token}{API token for importing borealis_repo_info (if NULL).}
+If NULL, this information is imported from Directus. Set with set_default_token().}
 
 \item{directus_url}{URL for the Directus database (can be set with global options).}
 }

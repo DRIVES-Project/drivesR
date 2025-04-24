@@ -21,7 +21,8 @@ public or internal portions of the DRIVES database. This can be set as a global 
 
 \item{myurl}{The database url. By default, "https://data.drives-network.org"}
 
-\item{mytoken}{The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets}
+\item{mytoken}{The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets.
+This can be set with set_default_token.}
 
 \item{public_tables}{Vector of table names that receive the prefix 'public_' when public = TRUE.}
 
