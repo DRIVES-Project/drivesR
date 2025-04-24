@@ -4,8 +4,8 @@
 \name{drivesR-package}
 \alias{drivesR}
 \alias{drivesR-package}
-\title{drivesR: What the Package Does (Title Case)}
+\title{drivesR: Workflow for the DRIVES Database}
 \description{
-More about what it does (maybe more than one line) Use four spaces when indenting paragraphs within the Description.
+Contains various functions to access and harmonize data from the DRIVES database. Also contains functions used to prepare data, perform quality checks, and manage the database structure.
 }
 \keyword{internal}

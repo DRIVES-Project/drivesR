@@ -179,7 +179,7 @@ get_canadian_data <- function(table_name = NULL,
   if(breq$status_code != 200){
     stop("Request failed with status code ", breq$status_code)
   }
-  bdf <- read.table(text = content(breq,as = "text"),sep = "\t",header =TRUE, na.strings = "")
+  bdf <- utils::read.table(text = content(breq,as = "text"),sep = "\t",header =TRUE, na.strings = "")
   return(bdf)
 }
 

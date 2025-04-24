@@ -11,7 +11,8 @@ import_db_tables(
   savedir = ".",
   savename = "drives_dblist",
   public = getOption("drivesR.default.public"),
-  mytoken = getOption("drivesR.default.directustoken")
+  mytoken = getOption("drivesR.default.directustoken"),
+  dataverse_api = NULL
 )
 }
 \arguments{

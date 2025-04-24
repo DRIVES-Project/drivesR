@@ -170,7 +170,7 @@ harmonize_treatments <- function(db = NULL,
       prefix <- ifelse(public ==TRUE,"public_","")
       dltables <-  paste0(prefix, trttables)
       db <- import_db_tables(tablevec = dltables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
-      # TODO: adapt public option for Canada-------
+      
   }
   # add treatment_id_info to components
   treatment_id_components <- dplyr::left_join(db$treatment_id_components, db$treatment_id_info)
@@ -247,7 +247,7 @@ harmonize_treatments_units <- function(db = NULL,
     prefix <- ifelse(public ==TRUE,"public_","")
     dltables <-  paste0(prefix, trttables)
     db <- import_db_tables(dltables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
-    # TODO: adapt public option for Canada-------
+    
   }
   ## get harmonized treatments.
   tcw <- harmonize_treatments(db = db)
@@ -343,7 +343,7 @@ harmonize_yields <- function(crop_yields = NULL,
   if(is.null(crop_yields)){
     dltable <- ifelse(public == TRUE, "public_crop_yields","crop_yields")
     crop_yields <- get_db_table(dltable, mytoken = mytoken)
-    # TODO: adapt public option for Canada-------
+    
   }
   ## fill in NAs for actual_crop_id
   narows <- which(is.na(crop_yields$actual_crop_id))
@@ -427,7 +427,7 @@ harmonize_yields_treatments <- function(
     prefix <- ifelse(public==TRUE,"public_","")
     dltables <- paste0(prefix, ytrttables)
     db <- import_db_tables(dltables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
-    # TODO: adapt public option for Canada-------
+    
   }
   treatmentunits <- harmonize_treatments_units(db = db)
   yields <- harmonize_yields(crop_yields = db$crop_yields, 
@@ -466,7 +466,7 @@ harmonize_weather <- function(weather_daily=NULL,
     ## import from directus
     tablename <- ifelse(public == TRUE,"public_weather_daily","weather_daily")
     weather_daily <- get_db_table(tablename, mytoken = mytoken)
-    # TODO: adapt public option for Canada-------
+    
   }
   wide_weather <- tidyr::pivot_wider(weather_daily, 
                                      id_cols = c("site_id","year","date","day_of_year"),
@@ -512,7 +512,7 @@ harmonize_harvest_dates <- function(harvest_dates = NULL,
   if(is.null(harvest_dates)){
     tablename <- ifelse(public == TRUE,"public_harvest_dates","harvest_dates")
     harvest_dates <- get_db_table(tablename, mytoken = mytoken)
-    # TODO: adapt public option for Canada-------
+    
   }
  ## Step 1: fill in missing actual_crop_id with expected_crop_id----
   # fill in missing crop fractions with 'none'
@@ -631,7 +631,7 @@ harmonize_planting_info <- function(planting_info = NULL,
   if(is.null(planting_info)){
     tablename <- ifelse(public == TRUE,"public_planting_info","planting_info")
     planting_info <- get_db_table(tablename, mytoken = mytoken)
-    # TODO: adapt public option for Canada-------
+    
   }# closes if
   
   if(replant_dates == "latest"){
@@ -648,7 +648,7 @@ harmonize_planting_info <- function(planting_info = NULL,
     
     # double check:
     if(include_component_crops == TRUE){
-      ##  DONE latest Ycomp -------
+     
       # reshape with component crop info in separate columns
       idcols =c(
         "site_id",
@@ -677,7 +677,7 @@ harmonize_planting_info <- function(planting_info = NULL,
                                                    planting_notes = ~paste(unique(.x[!is.na(.x)]),collapse=";")))
     }
     if(include_component_crops == FALSE){
-      ## DONE latest Ncomp-------
+  
       # remove rows with component crop index > 1 
       ##(double check that this leaves 1 row per unit/year/crop. 
       # otherwise, use a different approach.)
@@ -713,7 +713,7 @@ harmonize_planting_info <- function(planting_info = NULL,
     ##"rows"-----
     if(include_component_crops == TRUE){
       # reshape with component crop info in separate columns
-      ##DONE "rows"Ycomp-----             
+                
       idcols = c(
         "site_id" ,
         "unit_id" ,
@@ -743,7 +743,7 @@ harmonize_planting_info <- function(planting_info = NULL,
       
       }
     if(include_component_crops == FALSE){
-      ### DONE"rows"Ncomp------
+    
       # remove rows with component crop index > 1 
       ##(double check that this leaves 1 row per unit/year/crop. 
       # otherwise, use a different approach.)
@@ -769,7 +769,7 @@ harmonize_planting_info <- function(planting_info = NULL,
   if(replant_dates == "columns"){
     ##"columns"-----
   if(include_component_crops == TRUE){
-    ##DONE "columns"Ycomp-----
+  -
     # reshape with component crop info in separate columns
     idcols = c(
       "site_id" ,
@@ -799,7 +799,7 @@ harmonize_planting_info <- function(planting_info = NULL,
     )   
   }
   if(include_component_crops == FALSE){
-    ##DONE"columns"Ncomp-----
+    
     # remove rows with component crop index > 1 
     ##(double check that this leaves 1 row per unit/year/crop. 
     # otherwise, use a different approach.)
