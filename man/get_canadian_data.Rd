@@ -10,7 +10,7 @@ get_canadian_data(
   table_name = NULL,
   dataverse_url = "https://borealisdata.ca",
   dataverse_doi = "doi:10.5683/SP3/QGLCKO",
-  dataverse_api = NULL,
+  dataverse_api = getOption("drivesR.default.dataversetoken"),
   borealis_repo_info = NULL,
   directus_token = getOption("drivesR.default.directustoken"),
   directus_url = getOption("drivesR.default.url")

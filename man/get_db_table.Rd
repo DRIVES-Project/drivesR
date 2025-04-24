@@ -11,7 +11,7 @@ get_db_table(
   mytoken = getOption("drivesR.default.directustoken"),
   public_tables = getOption("drivesR.default.tablevec"),
   borealis_repo_info = NULL,
-  dataverse_api = NULL
+  dataverse_api = getOption("drivesR.default.dataversetoken")
 )
 }
 \arguments{

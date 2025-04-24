@@ -68,7 +68,7 @@ get_db_table <- function(table_name = "site_info",
                          mytoken = getOption("drivesR.default.directustoken"),
                          public_tables = getOption("drivesR.default.tablevec"),
                          borealis_repo_info = NULL,
-                         dataverse_api = NULL
+                         dataverse_api = getOption("drivesR.default.dataversetoken")
                          ){
   ## Check arguments-----
   ## conditions to stop execution with incompatible arguments
@@ -154,7 +154,7 @@ get_db_table <- function(table_name = "site_info",
 get_canadian_data <- function(table_name = NULL,
                                   dataverse_url = "https://borealisdata.ca",
                                   dataverse_doi = "doi:10.5683/SP3/QGLCKO",
-                                  dataverse_api = NULL,
+                                  dataverse_api = getOption("drivesR.default.dataversetoken"),
                                   borealis_repo_info = NULL,
                                   directus_token = getOption("drivesR.default.directustoken"),
                                   directus_url =getOption("drivesR.default.url") ){
@@ -304,7 +304,7 @@ query_table_by_pk <- function(
 
     # set table name as public or internal:
   if(public == TRUE & table_name %in% public_tables){
-    # TODO: set up Canadian system------
+    
     tname <- paste0("public_",table_name)
   }else{
     tname <- table_name
