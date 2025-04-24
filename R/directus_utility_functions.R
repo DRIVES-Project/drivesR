@@ -27,7 +27,12 @@ httr_dry_run <- function(r) {
 #' Only works in R studio.
 #' 
 #' @param mytoken 
-#' User-specific API token formated as "Bearer {myAPI token"}
+#' User-specific API token. For directus, this is formated as "Bearer {myAPI token"}.
+#' For Dataverse, it's a string of letters and numbers.
+#' @param api
+#' Sets which API to set the token for. Default is "Directus". "Dataverse" 
+#' is also an option (for troubleshooting non-published tables in the Canadian
+#' repository).
 #' @returns
 #' Send
 #' Resets default api token for relevant functions in drivesR. 
@@ -42,8 +47,13 @@ httr_dry_run <- function(r) {
 #' # Not run: set_default_token(directus_token)
 #' getOption("drivesR.default.directustoken") # shows new default
 #' 
-set_default_token <- function(usertoken){
-  options("drivesR.default.directustoken"= usertoken)
+set_default_token <- function(usertoken, api = c("Directus","Dataverse")[1]){
+  if(api == "Directus"){
+    options("drivesR.default.directustoken"= usertoken)
+  }
+  if(api == "Dataverse"){
+    options("drivesR.default.dataversetoken"= usertoken)
+  }
 }
 
 #' Set default public access settings
