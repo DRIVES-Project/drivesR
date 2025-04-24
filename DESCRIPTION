@@ -1,6 +1,6 @@
 Package: drivesR
 Type: Package
-Title: Workflow for the DRIVES Database
+Title: DRIVES Database Workflow
 Version: 0.1.0
 Author: person("Katherine","Muller",,"katherine.muller@usda.gov", role = c("aut","cre"), comment = c(ORCID = "MYORCID"))
 Maintainer: The package maintainer <katherine.muller2010@gmail.com>
