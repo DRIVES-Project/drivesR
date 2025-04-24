@@ -472,8 +472,8 @@ harmonize_weather <- function(weather_daily=NULL,
                               public = getOption("drivesR.default.public")){
   if(is.null(weather_daily)){
     ## import from directus
-    tablename <- ifelse(public == TRUE,"public_weather_daily","weather_daily")
-    weather_daily <- get_db_table(tablename, mytoken = mytoken)
+    #tablename <- ifelse(public == TRUE,"public_weather_daily","weather_daily")
+    weather_daily <- get_db_table("weather_daily", mytoken = mytoken)
     
   }
   wide_weather <- tidyr::pivot_wider(weather_daily, 
@@ -518,8 +518,8 @@ harmonize_harvest_dates <- function(harvest_dates = NULL,
                                     mytoken = getOption("drivesR.default.directustoken")
                                     ){
   if(is.null(harvest_dates)){
-    tablename <- ifelse(public == TRUE,"public_harvest_dates","harvest_dates")
-    harvest_dates <- get_db_table(tablename, mytoken = mytoken)
+    #tablename <- ifelse(public == TRUE,"public_harvest_dates","harvest_dates")
+    harvest_dates <- get_db_table("harvest_dates", mytoken = mytoken)
     
   }
  ## Step 1: fill in missing actual_crop_id with expected_crop_id----
@@ -637,8 +637,8 @@ harmonize_planting_info <- function(planting_info = NULL,
                                     public = getOption("drivesR.default.public"),
                                     mytoken = getOption("drivesR.default.directustoken")){
   if(is.null(planting_info)){
-    tablename <- ifelse(public == TRUE,"public_planting_info","planting_info")
-    planting_info <- get_db_table(tablename, mytoken = mytoken)
+    #tablename <- ifelse(public == TRUE,"public_planting_info","planting_info")
+    planting_info <- get_db_table("planting_info", mytoken = mytoken)
     
   }# closes if
   
