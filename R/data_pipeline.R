@@ -77,12 +77,13 @@ import_dictionary_tables <- function(myurl = getOption("drivesR.default.url")){
 #' @param tablevec
 #' A vector of table names to download. If NULL, the function downloads all DRIVES tables
 #' available to the user.  
-#' @param save_locally 
-#' TRUE or FALSE indicating whether the downloaded tables should be 
-#' saved to an R data object.
-#' @param import_from_local
-#' If TRUE, the function reads in an R data object with the path savedir and savename
-#' instead of downloading the tables from directus. 
+#' @param fetch_option 
+#' Indicates how tables are fetched and stored. Options are:
+#' "download.save": Tables are imported via Directus API and saved as a list object in 
+#' an Rda file. 
+#' "download.only": Tables are imported via the Directus API into an object in the global environment.
+#' "upload": The function loads an R data object with the path specified by savedir and savename.
+#' Because the download step takes a while, this option saves time when re-running a the script.  
 #' @param savedir 
 #' Directory path for saving locally. Defaults to the working directory.
 #' @param savename 
@@ -101,20 +102,22 @@ import_dictionary_tables <- function(myurl = getOption("drivesR.default.url")){
 #' @examples
 #' # not run: db <- import_db_tables()
 import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"), 
-                             save_locally = FALSE,
-                             import_from_local = FALSE,
+                             fetch_option =c("download.save","download.only","upload")[1],
                              savedir = ".", 
                              savename = "drives_dblist",
                              public = getOption("drivesR.default.public"),
                              mytoken = getOption("drivesR.default.directustoken"),
                              dataverse_api = NULL){
-  if(import_from_local == TRUE){
+  if(!fetch_option %in% c("download.save","download.only","upload")){
+    stop("fetch_option must be 'download.save', 'download.only', or 'upload'")
+  }
+  if(fetch_option == "upload"){
     load(file.path(savedir,paste0(savename,".Rda")))
     cat(paste0("\nImported list db with tables:\n"))
     purrr::walk(names(db), function(x){cat(paste0("\n",x))})
     return(db)
   }
-  if(import_from_local == FALSE){
+  if(fetch_option %in% c("download.save","download.only")){
     if(is.null(tablevec)){ 
       ## query the database for all table names available to the user.
       ## Note: I tried excluding internal directus collections as a query, but it 
@@ -126,7 +129,7 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
     
     db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken,public = public, dataverse_api = dataverse_api))
     names(db) <- tablevec ## 
-    if(save_locally == TRUE){
+    if(fetch_option == "download.save"){
       save(db, file = file.path(savedir, paste0(savename,".Rda")))
     }
     return(db)

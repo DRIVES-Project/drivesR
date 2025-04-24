@@ -6,8 +6,7 @@
 \usage{
 import_db_tables(
   tablevec = getOption("drivesR.default.tablevec"),
-  save_locally = FALSE,
-  import_from_local = FALSE,
+  fetch_option = c("download.save", "download.only", "upload")[1],
   savedir = ".",
   savename = "drives_dblist",
   public = getOption("drivesR.default.public"),
@@ -19,11 +18,12 @@ import_db_tables(
 \item{tablevec}{A vector of table names to download. If NULL, the function downloads all DRIVES tables
 available to the user.}
 
-\item{save_locally}{TRUE or FALSE indicating whether the downloaded tables should be 
-saved to an R data object.}
-
-\item{import_from_local}{If TRUE, the function reads in an R data object with the path savedir and savename
-instead of downloading the tables from directus.}
+\item{fetch_option}{Indicates how tables are fetched and stored. Options are:
+"download.save": Tables are imported via Directus API and saved as a list object in 
+an Rda file. 
+"download.only": Tables are imported via the Directus API into an object in the global environment.
+"upload": The function loads an R data object with the path specified by savedir and savename.
+Because the download step takes a while, this option saves time when re-running a the script.}
 
 \item{savedir}{Directory path for saving locally. Defaults to the working directory.}
 
