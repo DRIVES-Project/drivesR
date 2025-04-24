@@ -88,12 +88,6 @@ import_dictionary_tables <- function(myurl = getOption("drivesR.default.url")){
 #' Directory path for saving locally. Defaults to the working directory.
 #' @param savename 
 #' File name for saving locally, excluding .Rda. Defaults to "drives_dblist"
-##' @param public 
-#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise.
-#' Can be set directly or though options. 
-#' @param mytoken
-#' Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token()
 #' @returns
 #' A list of DRIVES database tables. 
 #' @export
@@ -104,9 +98,7 @@ import_dictionary_tables <- function(myurl = getOption("drivesR.default.url")){
 import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"), 
                              fetch_option =c("download.save","download.only","upload")[1],
                              savedir = ".", 
-                             savename = "drives_dblist",
-                             public = getOption("drivesR.default.public"),
-                             mytoken = getOption("drivesR.default.directustoken")){
+                             savename = "drives_dblist"){
   if(!fetch_option %in% c("download.save","download.only","upload")){
     stop("fetch_option must be 'download.save', 'download.only', or 'upload'")
   }
@@ -124,18 +116,19 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
       ## query the database for all table names available to the user.
       ## Note: I tried excluding internal directus collections as a query, but it 
       # didn't work.
-      collection_info <- get_db_info(mytarget = "collections",output_format = "data.frame",mytoken = mytoken )
+      collection_info <- get_db_info(mytarget = "collections",output_format = "data.frame" )
       ## remove internal directus tables.
       tablevec <- collection_info$collection[which(!grepl("^directus_", collection_info$collection))]
+      tablevec <- gsub("^public_","", tablevec)
       } # ends if(is.null(tablevec)
     
-    db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken,public = public))
+    db <- purrr::map(tablevec, ~get_db_table(table_name = .x))
     names(db) <- tablevec ## 
     if(fetch_option == "download.save"){
       save(db, file = file.path(savedir, paste0(savename,".Rda")))
     }
     return(db)
-  }# ends if(save_locally == FALSE)
+  }# ends if fetch option includes download.
 }# ends function
 
 
@@ -146,11 +139,6 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
 #' @param db
 #' A list of database tables containing named dataframes treatment_id_info and treatment_id_components.
 #' If left NULL, these tables are imported from Directus.
-#' @param public 
-#' TRUE if data are to be downloaded from the publicly available part of the DRIVES database.
-#' FALSE otherwise. Can be set directly or though options.
-#' @param mytoken 
-#' Directus API token, formatted as "Bearer myapitoken". Defaults to option set for "drivesR.default.directustoken"
 #' @returns
 #' A data frame with columns for site, year, treatmentID1, and treatmentID2 and all treatment types
 #' described in the table site_treatment_type_info
@@ -160,9 +148,7 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
 #' @import purrr
 #' @examples
 #' #not run: tcw <- harmonize_treatments()
-harmonize_treatments <- function(db = NULL, 
-                                 public = getOption("drivesR.default.public"),
-                                 mytoken = getOption("drivesR.default.directustoken")){
+harmonize_treatments <- function(db = NULL){
   # if db is supplied, check for required tables. 
   trttables <- c("treatment_id_info","treatment_id_components")
   if(!is.null(db)){
@@ -174,10 +160,8 @@ harmonize_treatments <- function(db = NULL,
     # Import from directus
       #prefix <- ifelse(public ==TRUE,"public_","")
       #dltables <-  paste0(prefix, trttables)
-      db <- import_db_tables(tablevec = trttables, 
-                             mytoken = mytoken,
-                             fetch_option = "download.only",
-                             public = public)
+      db <- import_db_tables(tablevec = trttables,
+                             fetch_option = "download.only")
       
   }
   # add treatment_id_info to components
@@ -229,11 +213,6 @@ harmonize_treatments <- function(db = NULL,
 #' A list of database tables containing named dataframes treatment_id_info,
 #' treatment_id_components, and experimental_unit_treatments.
 #' If left NULL, these tables are imported from Directus.
-#' @param public 
-#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise. Can be set directly or though options.
-#' @param mytoken 
-#' Directus token, formatted as "Bearer myapitoken". Can be set with set_default_token()
 #' @returns
 #' A data frame with one row per unit ID per year and all treatment components in columns. 
 #' @export
@@ -241,9 +220,7 @@ harmonize_treatments <- function(db = NULL,
 #' @import dplyr
 #' @examples
 #' # not run: trt_units <- harmonize_treatment_units()
-harmonize_treatments_units <- function(db = NULL,
-                                       public = getOption("drivesR.default.public"),
-                                       mytoken = getOption("drivesR.default.directustoken")){
+harmonize_treatments_units <- function(db = NULL){
   trttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments")
   if(!is.null(db)){
     if(any(!trttables %in% names(db))){
@@ -254,7 +231,7 @@ harmonize_treatments_units <- function(db = NULL,
   if(is.null(db)){
     #prefix <- ifelse(public ==TRUE,"public_","")
     #dltables <-  paste0(prefix, trttables)
-    db <- import_db_tables(trttables, mytoken = mytoken, fetch_option = "download.only")
+    db <- import_db_tables(trttables, fetch_option = "download.only")
     
   }
   ## get harmonized treatments.
@@ -452,14 +429,6 @@ harmonize_yields_treatments <- function(
 #' A dataframe corresponding to the weather_daily table
 #' in the DRIVES database. If NULL, this table is downloaded from Directus.
 #'  
-#' @param mytoken
-#' Directus token, formatted as "Bearer myapitoken". This can be set 
-#'  with set_default_token(). 
-#'   
-#' @param public 
-#' TRUE if weather data is from the publicly available part of the DRIVES database.
-#' FALSE otherwise. Can be set directly or though options.
-#' 
 #' @returns
 #' A data frame of mildly processed weather data with weather variables in separate columns
 #' (instead of in separate rows as in the database). The processed table also excludes
@@ -467,13 +436,10 @@ harmonize_yields_treatments <- function(
 #' @export
 #' @import tidyr
 #' @examples
-harmonize_weather <- function(weather_daily=NULL,
-                              mytoken = getOption("drivesR.default.directustoken"),
-                              public = getOption("drivesR.default.public")){
+harmonize_weather <- function(weather_daily=NULL){
   if(is.null(weather_daily)){
     ## import from directus
-    #tablename <- ifelse(public == TRUE,"public_weather_daily","weather_daily")
-    weather_daily <- get_db_table("weather_daily", mytoken = mytoken)
+    weather_daily <- get_db_table("weather_daily")
     
   }
   wide_weather <- tidyr::pivot_wider(weather_daily, 
@@ -489,16 +455,11 @@ harmonize_weather <- function(weather_daily=NULL,
 #' @param harvest_dates 
 #' A data frame of the harvest_dates table from the DRIVES database. 
 #' If NULL, this table is downloaded from Directus.
-#' @param public 
-#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise. Can be set directly or though options.
 #' @param crop_fractions_as_columns
 #' If TRUE, multiple fractions from the same crop are organized in separate 
 #' columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 
 #' as in the database table. Although multiple crop fractions are rare, this option
 #' helps to merge with the yield data.
-#' @param mytoken
-#' Directus API token, formatted as "Bearer apitoken". Can be set with set_default_token() 
 #' @param primary_crop_fractions
 #' A vector of crop fractions to select as the primary fraction, when there is more than one.
 #' So far, this only pertains to grain and tomato fruit. The default is set with the 
@@ -512,15 +473,11 @@ harmonize_weather <- function(weather_daily=NULL,
 #' # not run: harv1 <- harmonize_harvest_dates(crop_fractions_as_columns = TRUE)
 #' # not run: harv2 <- harmonize_harvest_dates(crop_fractions_as_columns = FALSE)
 harmonize_harvest_dates <- function(harvest_dates = NULL,
-                                    public = getOption("drivesR.default.public"),
                                     crop_fractions_as_columns = FALSE,
-                                    primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
-                                    mytoken = getOption("drivesR.default.directustoken")
+                                    primary_crop_fractions = getOption("drivesR.primary_crop_fractions")
                                     ){
   if(is.null(harvest_dates)){
-    #tablename <- ifelse(public == TRUE,"public_harvest_dates","harvest_dates")
-    harvest_dates <- get_db_table("harvest_dates", mytoken = mytoken)
-    
+    harvest_dates <- get_db_table("harvest_dates")
   }
  ## Step 1: fill in missing actual_crop_id with expected_crop_id----
   # fill in missing crop fractions with 'none'
@@ -592,12 +549,6 @@ harmonize_harvest_dates <- function(harvest_dates = NULL,
 #' TRUE or FALSE indicating whether the output should include information about 
 #' components of crop mixtures (component_crop_id). If TRUE, the output dataframe will include
 #' component crop information in separate columns.
-#' 
-#' @param public 
-#' TRUE if the user has public approved access, FALSE for internal DRIVES users. 
-#' Can be set directly or though options.
-#' @param mytoken 
-#' Directus token formatted as "Bearer APITOKEN". Can be set with set_default_token().
 #' @returns
 #' A dataframe of planting information arranged as either: 
 #' 1) one row per unit_id/harvest_year/actual_crop_id (if replant_dates is "latest" or "columns")
@@ -633,12 +584,9 @@ harmonize_harvest_dates <- function(harvest_dates = NULL,
 
 harmonize_planting_info <- function(planting_info = NULL,
                                     replant_dates = c("latest","rows","columns")[1],
-                                    include_component_crops = TRUE,
-                                    public = getOption("drivesR.default.public"),
-                                    mytoken = getOption("drivesR.default.directustoken")){
+                                    include_component_crops = TRUE){
   if(is.null(planting_info)){
-    #tablename <- ifelse(public == TRUE,"public_planting_info","planting_info")
-    planting_info <- get_db_table("planting_info", mytoken = mytoken)
+    planting_info <- get_db_table("planting_info")
     
   }# closes if
   
@@ -858,7 +806,79 @@ harmonize_planting_info <- function(planting_info = NULL,
   return(outdf)
 } # closes function
 
-# harmonize_yields_planting_harvest <- function(db = NULL,
-# ){
-#   
-# }
+#' Harmonize yield with planting and harvest dates.
+#'
+#' @param db 
+#' Can be provided as a named list of database tables
+#' with crop_yields, harvest_dates, and planting_info.
+#' If NULL (the default) these tables are downloaded from 
+#' Directus.
+#'
+#' @returns
+#' A harmonized data frame with one row per unit/year/crop. 
+#' ... multiple fractions per from are included in separate columns
+#'  with the suffix _f1, _f2, etc. 
+#' ...does not show component crops or multiple planting dates. 
+#' ... shows multiple harvest dates.
+#' @export
+#' @import dplyr
+#' @import tidyr
+#' @examples
+#' # not run: set_default_token("Bearer blahblahblah")
+#' # not run: yph <- harmonize_yield_planting_harvest() # no db.
+#' # not run: yph <- harmonize_yield_planting_harvest(db) # if list is in the environment.
+harmonize_yields_planting_harvest <- function(db = NULL){
+  dbtables <- c("crop_yields","harvest_dates","planting_info")
+  if(!is.null(db)){
+    if(any(!dbtables %in% names(db))){
+      stop(paste0("List supplied to db must contain data frames named ",paste(dbtables, collapse=", ") ))
+    }
+  }
+  if(is.null(db)){
+    db <- import_db_tables(dbtables, fetch_option = "download.only")
+  }
+  # harmonize each table. 
+  yield <- harmonize_yields(crop_yields= db$crop_yields, crop_fractions_as_columns = FALSE)
+  harvest <- harmonize_harvest_dates(harvest_dates = db$harvest_dates,crop_fractions_as_columns = FALSE)
+  planting <- harmonize_planting_info(planting_info = db$planting_info,replant_dates = "latest", include_component_crops = FALSE)
+  
+  ## change uid column name
+  names(yield)[which(names(yield)=="uid")] <- "crop_yields_uid"
+  names(harvest) <- gsub("^uid","harvest_dates_uid", names(harvest))
+  names(planting) <- gsub("uid","planting_info_uid", names(planting))
+  
+  # merge yield and harvest
+  yield_harv <- dplyr::left_join(yield, harvest, 
+                          by = c("site_id","unit_id",
+                                 "rotation_phase",
+                                 "stand_year",
+                                 "harvest_year","expected_crop_id","actual_crop_id","measured_fraction"="harvested_fraction"),)
+  #pivot wider by crop fraction
+  yield_harv <- yield_harv %>% group_by(site_id,actual_crop_id,unit_id,harvest_year)%>%
+    mutate(num_fractions = length(unique(measured_fraction)))
+  cond1 <- yield_harv$num_fractions==1 | yield_harv$measured_fraction %in% primary_crop_fractions
+  yield_harv$primary_fraction <- cond1
+  yield_harv <- yield_harv %>% group_by(site_id, actual_crop_id,unit_id, harvest_year) %>%
+    mutate(fraction_index = ifelse(primary_fraction,1,2:length(unique(measured_fraction))))
+  idcolvec =  c("site_id","unit_id","harvest_year","expected_crop_id",
+                "actual_crop_id","stand_year","num_harvests","rotation_phase",
+                "stand_year","cover_crop",
+                "termination_date",
+                "termination_notes")
+  valuevec <- setdiff(names(yield_harv), c(idcolvec,"fraction_index","num_fractions","primary_fraction"))
+  wide_yield_harv <- tidyr::pivot_wider(yield_harv, 
+                                 id_cols = all_of(idcolvec),
+                                 names_from = "fraction_index",
+                                 values_from = all_of(valuevec),
+                                 names_sep = "_f",
+                                 unused_fn = list(data_processing_note = ~paste(unique(.x[!is.na(.x)]),collapse=";"),
+                                                  harvest_notes = ~paste(unique(.x[!is.na(.x)]),collapse=";"))
+  ) %>% select_if(function(x) !all(is.na(x)))  ## remove empty columns.
+
+  # merge with planting data
+  mergenames <- intersect(names(wide_yield_harv), names(planting))
+  wide_planting_yield_harv <- left_join(wide_yield_harv, planting, 
+                                        by = mergenames)
+  
+  return(wide_planting_yield_harv)
+}
