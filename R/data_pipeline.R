@@ -106,8 +106,7 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
                              savedir = ".", 
                              savename = "drives_dblist",
                              public = getOption("drivesR.default.public"),
-                             mytoken = getOption("drivesR.default.directustoken"),
-                             dataverse_api = getOption("drivesR.default.dataversetoken")){
+                             mytoken = getOption("drivesR.default.directustoken")){
   if(!fetch_option %in% c("download.save","download.only","upload")){
     stop("fetch_option must be 'download.save', 'download.only', or 'upload'")
   }
@@ -130,7 +129,7 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
       tablevec <- collection_info$collection[which(!grepl("^directus_", collection_info$collection))]
       } # ends if(is.null(tablevec)
     
-    db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken,public = public, dataverse_api = dataverse_api))
+    db <- purrr::map(tablevec, ~get_db_table(table_name = .x,mytoken = mytoken,public = public))
     names(db) <- tablevec ## 
     if(fetch_option == "download.save"){
       save(db, file = file.path(savedir, paste0(savename,".Rda")))
@@ -175,7 +174,10 @@ harmonize_treatments <- function(db = NULL,
     # Import from directus
       #prefix <- ifelse(public ==TRUE,"public_","")
       #dltables <-  paste0(prefix, trttables)
-      db <- import_db_tables(tablevec = trttables, mytoken = mytoken,fetch_option = "download.only")
+      db <- import_db_tables(tablevec = trttables, 
+                             mytoken = mytoken,
+                             fetch_option = "download.only",
+                             public = public)
       
   }
   # add treatment_id_info to components
@@ -347,8 +349,8 @@ harmonize_yields <- function(crop_yields = NULL,
                              mytoken = getOption("drivesR.default.directustoken")){
   
   if(is.null(crop_yields)){
-    dltable <- ifelse(public == TRUE, "public_crop_yields","crop_yields")
-    crop_yields <- get_db_table(dltable, mytoken = mytoken)
+    #dltable <- ifelse(public == TRUE, "public_crop_yields","crop_yields")
+    crop_yields <- get_db_table("crop_yields", mytoken = mytoken, public = public)
     
   }
   ## fill in NAs for actual_crop_id

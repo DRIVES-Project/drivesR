@@ -10,8 +10,7 @@ get_db_table(
   myurl = getOption("drivesR.default.url"),
   mytoken = getOption("drivesR.default.directustoken"),
   public_tables = getOption("drivesR.default.tablevec"),
-  borealis_repo_info = NULL,
-  dataverse_api = getOption("drivesR.default.dataversetoken")
+  borealis_repo_info = NULL
 )
 }
 \arguments{
@@ -28,9 +27,6 @@ public or internal portions of the DRIVES database. This can be set as a global 
 
 \item{borealis_repo_info}{A dataframe containing Borealis file identifiers for each table_name. 
 If NULL, this information is imported from Directus.}
-
-\item{dataverse_api}{API key for the Borealis repository. Included for pre-publication troubleshooting. 
-Once tables are published, this can be left as NULL.}
 }
 \value{
 A data frame containing all rows and columns of the specified table. 

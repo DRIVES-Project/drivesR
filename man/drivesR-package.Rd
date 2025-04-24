@@ -4,7 +4,7 @@
 \name{drivesR-package}
 \alias{drivesR}
 \alias{drivesR-package}
-\title{drivesR: Workflow for the DRIVES Database}
+\title{drivesR: DRIVES Database Workflow}
 \description{
 Contains various functions to access and harmonize data from the DRIVES database. Also contains functions used to prepare data, perform quality checks, and manage the database structure.
 }
