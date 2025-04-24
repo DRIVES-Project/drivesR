@@ -777,7 +777,6 @@ harmonize_planting_info <- function(planting_info = NULL,
   if(replant_dates == "columns"){
     ##"columns"-----
   if(include_component_crops == TRUE){
-  -
     # reshape with component crop info in separate columns
     idcols = c(
       "site_id" ,
