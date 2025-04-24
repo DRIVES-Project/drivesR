@@ -111,6 +111,9 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
   if(!fetch_option %in% c("download.save","download.only","upload")){
     stop("fetch_option must be 'download.save', 'download.only', or 'upload'")
   }
+  if(fetch_option != "download.only" & !dir.exists(savedir)){
+    stop("savedir must be a valid directory if saving or uploading data.")    
+  }
   if(fetch_option == "upload"){
     load(file.path(savedir,paste0(savename,".Rda")))
     cat(paste0("\nImported list db with tables:\n"))
@@ -170,9 +173,9 @@ harmonize_treatments <- function(db = NULL,
   }
     if(is.null(db)){
     # Import from directus
-      prefix <- ifelse(public ==TRUE,"public_","")
-      dltables <-  paste0(prefix, trttables)
-      db <- import_db_tables(tablevec = dltables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
+      #prefix <- ifelse(public ==TRUE,"public_","")
+      #dltables <-  paste0(prefix, trttables)
+      db <- import_db_tables(tablevec = trttables, mytoken = mytoken,fetch_option = "download.only")
       
   }
   # add treatment_id_info to components
@@ -247,9 +250,9 @@ harmonize_treatments_units <- function(db = NULL,
     }
   }
   if(is.null(db)){
-    prefix <- ifelse(public ==TRUE,"public_","")
-    dltables <-  paste0(prefix, trttables)
-    db <- import_db_tables(dltables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
+    #prefix <- ifelse(public ==TRUE,"public_","")
+    #dltables <-  paste0(prefix, trttables)
+    db <- import_db_tables(trttables, mytoken = mytoken, fetch_option = "download.only")
     
   }
   ## get harmonized treatments.
@@ -427,9 +430,9 @@ harmonize_yields_treatments <- function(
     }
   }
   if(is.null(db)){
-    prefix <- ifelse(public==TRUE,"public_","")
-    dltables <- paste0(prefix, ytrttables)
-    db <- import_db_tables(dltables, mytoken = mytoken,save_locally = FALSE, import_from_local = FALSE)
+    #prefix <- ifelse(public==TRUE,"public_","")
+    #dltables <- paste0(prefix, ytrttables)
+    db <- import_db_tables(ytrttables, mytoken = mytoken, fetch_option = "download.only")
     
   }
   treatmentunits <- harmonize_treatments_units(db = db)
