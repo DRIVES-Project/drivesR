@@ -2,16 +2,7 @@
 % Please edit documentation in R/data_pipeline.R
 \name{harmonize_yields}
 \alias{harmonize_yields}
-\title{Harmonize crop yields
-Performs initial data processing steps for crop yield data. 
-These include:
-- Filling in missing actual_crop_id with expected_crop_id. 
-- Calculating dry yield from yield and yield_percent_moisture (for crops 
-with yields reported at standardized moisture).
-- Optionally, the function can reshape the data into a wide format,
-with multiple crop fractions (e.g., grain and straw) in separate columns instead of
-separate rows, as they are organized in the database. This option may be convenient 
-for harvest index calculations and such.}
+\title{Harmonize crop yields}
 \usage{
 harmonize_yields(
   crop_yields = NULL,
@@ -48,7 +39,6 @@ data describing fractions from the same crop will be described in separate colum
 suffix _1 for the primary fraction and _2, _3, etc. for other fractions.
 }
 \description{
-Harmonize crop yields
 Performs initial data processing steps for crop yield data. 
 These include:
 - Filling in missing actual_crop_id with expected_crop_id. 
