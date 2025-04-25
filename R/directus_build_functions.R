@@ -81,8 +81,11 @@ api_request <- function(myverb = "POST",
   
   validToken <- test_api_token(mytoken = mytoken,
                                myurl = myurl)
-  if(!validToken){
+  if(!validToken & !is.null(mytoken)){
     stop("Invalid Directus API token.")
+  }
+  if(is.null(mytoken)){
+    message("Directus API token set to NULL. Will only work for dictionary tables.")
   }
   #require(httr)  
   if(!is.null(jsonbody)){
