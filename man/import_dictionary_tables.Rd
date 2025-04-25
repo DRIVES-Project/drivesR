@@ -5,7 +5,7 @@
 \title{Import dictionary tables
 These do not require an API key.}
 \usage{
-import_dictionary_tables(myurl = getOption("drivesR.default.url"))
+import_dictionary_tables()
 }
 \arguments{
 \item{myurl}{URL for the Directus database. Set as a default option (data.drives-network.org)}
