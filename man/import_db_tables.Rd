@@ -6,9 +6,10 @@
 \usage{
 import_db_tables(
   tablevec = getOption("drivesR.default.tablevec"),
-  fetch_option = c("download.save", "download.only", "upload")[1],
+  fetch_option = c("download.save", "download.only", "save.only", "upload")[1],
+  save_option = c("list", "rds", "csv")[1],
   savedir = ".",
-  savename = "drives_dblist"
+  savename = "drives"
 )
 }
 \arguments{
@@ -19,19 +20,46 @@ available to the user.}
 "download.save": Tables are imported via Directus API and saved as a list object in 
 an Rda file. 
 "download.only": Tables are imported via the Directus API into an object in the global environment.
-"upload": The function loads an R data object with the path specified by savedir and savename.
+"save.only": Tables are downloaded one-by-one and saved to the local path, without remaining in the
+global environment. This may be helpful for systems with limited working memory.
+"upload": The function loads tables from the path specified by savedir and savename into 
+a list in the global environment.
 Because the download step takes a while, this option saves time when re-running a the script.}
+
+\item{save_option}{Determines how files are saved on the local system. Options are "list" (the default), "rds", 
+and "csv". The "list" option combines tables into a single named list, db, saved as an RData
+file. The "rds" and "csv" options save each table to a separate R data or csv file within the directory
+specified under savedir. Although the list option is more convenient for coding, it requires 
+sufficient RAM to store all the data in working memory. If working memory is limiting, 
+it may be better to load tables individually, as needed. 
+
+If the fetch_option is "upload", the save_option should match how they are stored in the 
+local file system.}
 
 \item{savedir}{Directory path for saving locally. Defaults to the working directory.}
 
-\item{savename}{File name for saving locally, excluding .Rda. Defaults to "drives_dblist"}
+\item{savename}{File prefix for saving locally. If the save_option is "list", 
+this is the entire file name, excluding extensions. Defaults to "drives".
+If the save_option is "rds" or "csv", the file name will be the prefix followed by the 
+table name, separated by "_" (e.g., drives_crop_yields.csv).}
 }
 \value{
-A list of DRIVES database tables.
+A named list of DRIVES database tables.
 }
 \description{
 Bulk download database tables
 }
 \examples{
-# not run: db <- import_db_tables()
+# importing tables to a list in the R envirnoment without saving:
+# not run: db <- import_db_tables(fetch_option = "download.only",save_option = "list")
+
+# saving tables to separate files without keeping them in the R environment:
+# not run: db <- import_db_tables(fetch_option = "save.only",save_option = "csv")
+# in this case, the object db will be NULL.
+
+# importing tables into a list in the R envinvment while saving as separate files:
+# not run: db <- import_db_tables(fetch_option = "download.only",save_option = "csv")
+ 
+# uploading previously-saved tables into a named list:
+ # not run: db <- import_db_tables(fetch_option = "upload",save_option = "csv")
 }
