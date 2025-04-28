@@ -27,36 +27,84 @@ httr_dry_run <- function(r) {
 #' Only works in R studio.
 #' 
 #' @param mytoken 
-#' User-specific API token formated as "Bearer {myAPI token"}
+#' User-specific API token. For directus, this is formated as "Bearer {myAPI token"}.
+#' For Dataverse, it's a string of letters and numbers.
+#' @param api
+#' Sets which API to set the token for. Default is "Directus". "Dataverse" 
+#' is also an option (for troubleshooting non-published tables in the Canadian
+#' repository).
 #' @returns
 #' Send
-#' Resets default api token for relevant functions in drivesR by sending commands to the R console.
-#' For now, it just specifies relevant functions in separate lines of code. 
-#' There's probably a fancier way to do this with lists or whatever.
+#' Resets default api token for relevant functions in drivesR. 
 #' @export
-#' @import glue
-#' @importFrom rstudioapi sendToConsole
 #' @examples
 #' directus_token = "Bearer abunchofnumbersandletters"
 #' ## This token should be read from a script or text file that is not synced to github
 #' 
 #' # see what defaults are before and after running
-#' formals(api_request)$mytoken
+#' formals(api_request)$mytoken # shows name of option used to set default.
+#' getOption("drivesR.default.directustoken") # shows default option.
 #' # Not run: set_default_token(directus_token)
-#' formals(api_request)$mytoken
+#' getOption("drivesR.default.directustoken") # shows new default
 #' 
-set_default_token <- function(usertoken){
-  apifuns <- c("api_request",
-               "get_db_table",
-               "get_db_info",
-               "check_dictionary",
-               "check_categories",
-               "check_column_names",
-               "check_table_contents",
-               "post_rows_in_batches")
-  for(af in apifuns){
-    mycode = glue::glue("formals({af})$mytoken <- '{usertoken}'")
-    rstudioapi::sendToConsole(mycode)  
+set_default_token <- function(usertoken, api = c("Directus","Dataverse")[1]){
+  if(api == "Directus"){
+    options("drivesR.default.directustoken"= usertoken)
   }
-  
+  if(api == "Dataverse"){
+    options("drivesR.default.dataversetoken"= usertoken)
+  }
+}
+
+#' Set default public access settings
+#' This can be used to change the default public access settings
+#' from what is set up during package loading. 
+#' For the publicly-released package, the default will be
+#' public access.
+#' 
+#' @param public 
+#' TRUE for public access, FALSE for private access.
+#' @returns
+#' Changes the option for "drivesR.default.directustoken"
+#' that is used by various functions.  
+#' @export
+#'
+#' @examples
+set_public_access<- function(public = TRUE){
+  if(!public %in% c(TRUE,FALSE) | length(public) != 1){
+    stop("function argument 'public' must be TRUE or FALSE")
+  }
+  options("drivesR.default.public" = public)
+}
+
+#' Verify Directus API token
+#' Used within other functions to check for errors.
+#' @param mytoken 
+#' Directus API token, formatted as "Bearer APItoken."
+#' @param myurl
+#' Directus database url. Set with defaults as https://data.drives-network.org
+#' @param silent
+#' Indicates whether messages should be printed. Default FALSE.
+#' @returns
+#' TRUE or FALSE indicating whether mytoken  
+#' produces a successful api request. 
+#' @export
+#' @import httr
+#' @import glue
+#' @examples
+#' test_api_token(mytoken = "notavalidtoken", silent=FALSE)
+test_api_token <- function(mytoken = getOption("drivesR.default.directustoken"),
+                           myurl = getOption("drivesR.default.url"),
+                           silent = TRUE){
+  testreq <- httr::GET(glue::glue("{myurl}/collections"),
+                       httr::add_headers(
+                         "Authorization" = mytoken
+                       )
+  )# ends GET
+  validCode <-testreq$status_code == 200
+  outmessage <- ifelse(validCode, "Valid API token","Invalid API token")
+  if(silent != TRUE){
+    message(outmessage)
+  }
+  return(validCode)
 }

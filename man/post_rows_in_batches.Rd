@@ -6,20 +6,20 @@
 \usage{
 post_rows_in_batches(
   table_name = "crop_yields",
-  batchsize = 1000,
   inputdf = NULL,
-  mytoken
+  batchsize = 1000
 )
 }
 \arguments{
 \item{table_name}{Table identifier in the database.}
 
-\item{batchsize}{Number of rows to be added at a time. Suggested amount is 1000 rows.
-Progress is printed to the console.}
-
 \item{inputdf}{Data frame of rows to be added. This should have passed quality control checks.}
 
-\item{mytoken}{Directus token. Can be set with set_default_token()}
+\item{batchsize}{Number of rows to be added at a time. Suggested amount is 1000 rows.
+Progress is printed to the console.}
+}
+\value{
+Silent.
 }
 \description{
 To get around issues of posting limits.
