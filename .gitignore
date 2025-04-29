@@ -35,3 +35,5 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 drivesR.Rproj
+directus_creds.R
+vignettes/images
