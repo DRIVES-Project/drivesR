@@ -5,17 +5,15 @@
 \title{Check table contents before import}
 \usage{
 check_table_contents(
-  table_name = "site_info",
+  table_name = NULL,
   inputdf = NULL,
-  mytoken = "Bearer {myAPItoken}"
+  mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{
 \item{table_name}{Name of the table in Directus}
 
 \item{inputdf}{data frame intended for the Directus table}
-
-\item{mytoken}{User-specific Directus token. Can set with set_default_token()}
 }
 \value{
 A nested data frame (tibble) with results for each constraint. 
@@ -40,7 +38,7 @@ The constraints checked are:
 2) max_length (if applicable)
 3) is_unique
 4) data type.
-Column names and foreign key values are checked with a different function.
+Column names and foreign key values are checked with different functions.
 }
 \examples{
 #not run: mydf <- read.csv("site_info_to_add.csv")

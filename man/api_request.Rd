@@ -10,8 +10,8 @@ api_request(
   myverb = "POST",
   mytarget = "collections",
   jsonbody = NULL,
-  myurl = "https://data.drives-network.org",
-  mytoken = "Bearer {myAPItoken}"
+  myurl = getOption("drivesR.default.url"),
+  mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{
@@ -22,7 +22,7 @@ api_request(
 \item{jsonbody}{A JSON object containing the content of the request, if applicable. For POST and PATCH, this is content you want to modify.
 For SEARCH, the content will be some kind of filter query. This argument will typically be NULL for DELTE and GET requests.}
 
-\item{myurl}{Root URL for the DRIVES database.}
+\item{myurl}{Root URL for the DRIVES database. Set as a default when the package loads ("https://data.drives-network.org/)}
 
 \item{mytoken}{API token for the user. This is formatted as "Bearer {APItoken}" (without the curly brackets).
 It is recommended that the user make a script that loads the API token and database URL.}
@@ -41,12 +41,12 @@ https://directus.io/docs/api
 }
 \examples{
 # Accessing database content (here, it is information about collections)
-collectionsreq <- api_request("GET", mytarget = "collections")
-collectionjson <- jsonlite::toJSON(httr::content(collectionsreq), pretty=TRUE, auto_unbox = TRUE) 
+# not run: collectionsreq <- api_request("GET", mytarget = "collections")
+# not run: collectionjson <- jsonlite::toJSON(httr::content(collectionsreq), pretty=TRUE, auto_unbox = TRUE) 
 
 # Modifying database content (here it is adding a new collection)
-testcollection <- make_collection_json()# default with sample data dictionary 
-new_collection_req <- api_request("POST", "collections",testcollection)
+#not run: testcollection <- make_collection_json()# default with sample data dictionary 
+#not run: new_collection_req <- api_request("POST", "collections",testcollection)
 
 }
 \seealso{

@@ -7,8 +7,8 @@
 get_db_info(
   mytarget = "collections",
   output_format = c("data.frame", "json")[1],
-  myurl = "https://data.drives-network.org",
-  mytoken = "Bearer {myAPItoken}",
+  myurl = getOption("drivesR.default.url"),
+  mytoken = getOption("drivesR.default.directustoken"),
   flatten = FALSE
 )
 }
@@ -35,8 +35,8 @@ A dataframe (default) or json string with schema and other metadata information 
 Fetch schema information from directus
 }
 \examples{
-collection_info <- get_db_info("collections")
-site_field_info <- get_db_info("fields/site_info")
-foreign_key_info <- get_db_info("relations")
+# collection_info <- get_db_info("collections")
+# site_field_info <- get_db_info("fields/site_info")
+# foreign_key_info <- get_db_info("relations")
 
 }

@@ -1,0 +1,174 @@
+---
+title: "Workflow for using DRIVES database tables"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Workflow for using DRIVES database tables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+#TODO: overview
+This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database. 
+- Something about how the package provide easy-to-use functions that interact with the Directus API via the httr package. It does not require the user to understand how to structure API requests. 
+
+- url for database
+- url for website
+- overview of contents (1-2 sentences). Crop yields, 
+weather, management etc. 
+- Summary tables can be found at {url for repository}
+- Something about how the full database is available
+to DRIVES project members and approved collaborators. 
+Most collaborating sites have agreed to make all or part of their data available to the public, on the condition that they agree to data use terms.
+
+## Installation
+- github instructions
+```{r, installation}
+
+```
+
+
+## Accessing the DRIVES database
+###TODO 
+- describe what can be accessed with or without an API key.
+    - data dictionaries.
+- describe how to obtain an API key.
+  - Link and instructions for data use survey.
+- link and login process for Directus database.
+
+### Directus API key:
+####TODO
+The Directus API key is a string of random letters and numbers. For this package, the Directus API key must be provided in the format, "Bearer APIKEY". 
+
+It's best practice never to hard-code an API key into a script. We recommend making a setup script that is sourced by other scripts. If you're using github, be sure to add this to your ".gitignore". Alternatively, you can use this script to read a file from a non-indexed location.
+
+The code below generates an empty script file in your working directory.
+```{r creds}
+usethis::edit_file("directus_creds.R")
+```
+
+Then, populate the file with something like this, replacing MYAPI key with the API key you received.
+```{r}
+directus_token = "Bearer MYAPIKEY"
+```
+
+## Setup steps
+If you format your setup script as described above, you should include these lines of code at the beginning of every any script that downloads DRIVES tables:
+
+```{r setup, warning=FALSE}
+library(drivesR)
+source("directus_creds.R")
+set_default_token(directus_token)
+```
+
+The last line sets the global option for the Directus token that is used by functions in the drivesR package. You can view this option with getOption("drivesR.default.directus.token").
+
+## Downloading DRIVES tables. 
+### TODO
+The drivesR package has several options for accessing the DRIVES database.
+
+Once you have a Directus login, you can view and download data tables via the Directus Data Studio IDE (LINK). 
+
+The examples below use dictionary tables because they do not require an API key.
+
+1) Download individual tables.
+
+```{r get_db_table}
+
+
+```
+
+2) Download multiple tables at once.
+
+
+```{r import_db_tables, eval=FALSE}
+tablevec <- c("crop_yields","site_info","experimental_unit_treatments")
+
+```
+
+
+
+By default, this function downloads all tables available for public access, excluding dictionaries. You can see the default tables with this code:
+```{r, default.tablevec}
+options("drivesR.default.tablevec")
+
+```
+
+You can also specify particular tables you want to download:
+
+```{r , eval=FALSE}
+tablevec <- c("crop_yields","site_info","experimental_unit_treatments")
+
+```
+
+
+
+## Database metadata
+The three data dictionaries contain detailed descriptions about tables, columns within tables, and categorical variables. The column dictionary includes the details for the database schema, including primary keys and foreign key relationships. 
+Dictionary tables can be downloaded individually, using the get_db_table function, or all at once as a list with import_dictionary_tables.
+```{r import_dictionary_tables, eval=FALSE}
+## separate:
+table_dictionary <- get_db_table("table_dictionary")
+column_dictionary <- get_db_table("column_dictionary")
+
+## together:
+dict <- import_dictionary_tables()
+```
+
+If you're interested in seeing how the database is structured in Directus, you can use this function to access metadata for any endpoint in the API. The example below shows metadata for the table dictionary. For more information on directus API structure, see {LINK}.
+
+One detail to note is that non-dictionary tables have a prefix "public_" for tables with public user API access. This only comes up when specifying API endpoints directly, as shown below.
+```{r}
+table_dict_info <- get_db_info(mytarget = "fields/table_dictionary/data_type",
+                             output_format = "json")
+print(table_dict_info)
+```
+
+
+
+
+
+## Harmonizing DRIVES tables
+### TODO
+The DRIVES database was designed to be flexible for various end-uses while preserving as much information as possible among diverse experiments. Different information is split into different tables to provide a high level of detail with limited redundancy. While useful for curating data, this design adds a layer of difficulty for analyzing the data. We have developed a set of data harmonization functions that reshapes and combines data so it is easier to use. 
+
+- something about how level of detail goes down as things get combined...
+- different options may be appropriate for different end uses. 
+
+### Crop yields:
+In the database, crop yield data are stored with multiple crop fractions (e.g., grain and straw) in separate rows. The harmonize_yields function 
+```{r, harmonize_yields, eval=FALSE}
+## without pre-downloaded tables:
+yields <- harmonize_yields()
+## with pre-downloaded tables:
+
+```
+
+### Experimental treatments:
+- also include list treatments by management practice.
+```{r, harmonize_treatments, eval=FALSE}
+
+```
+
+### Experimental units and treatments
+```{r, harmonize_treatments_units, eval=FALSE}
+
+```
+
+
+
+```{r, harmonize_planting_info, eval=FALSE}
+
+```
+
+```{r, harmonize_harvest_dates, eval=FALSE}
+
+```
+
+
