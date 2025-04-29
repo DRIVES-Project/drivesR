@@ -14,8 +14,7 @@ harmonize_planting_info(
 }
 \arguments{
 \item{planting_info}{A data frame of the planting_info table from the DRIVES database.
-If NULL, this will be downloaded from the Directus database based on the 
-arguments provided under 'public' and 'mytoken'.}
+If NULL, this will be downloaded from the Directus database.}
 
 \item{replant_dates}{Indicates how multiple planting dates should be organized in the output. 
 There are three options: latest, rows, and columns.

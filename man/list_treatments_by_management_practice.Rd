@@ -4,16 +4,11 @@
 \alias{list_treatments_by_management_practice}
 \title{List treatment components by management practice.}
 \usage{
-list_treatments_by_management_practice(
-  site_treatment_type_info = NULL,
-  mytoken = getOption("drivesR.default.directustoken")
-)
+list_treatments_by_management_practice(site_treatment_type_info = NULL)
 }
 \arguments{
 \item{site_treatment_type_info}{A data frame with the site_treatment_type_info table. If left as
 NULL, this table is imported from directus.}
-
-\item{mytoken}{Directus token, formatted as "Bearer myapitoken". Set by set_default_token().}
 }
 \value{
 A named list of treatment types corresponding to a set of core management practices described for

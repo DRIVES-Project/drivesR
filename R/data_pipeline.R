@@ -352,8 +352,6 @@ harmonize_treatments_units <- function(db = NULL){
 #' @param site_treatment_type_info 
 #' A data frame with the site_treatment_type_info table. If left as
 #' NULL, this table is imported from directus. 
-#' @param mytoken 
-#' Directus token, formatted as "Bearer myapitoken". Set by set_default_token().
 #' @returns
 #' A named list of treatment types corresponding to a set of core management practices described for
 #' all sites. Useful for identifying columns in harmonized dataframes with all treatment types. 
@@ -364,10 +362,9 @@ harmonize_treatments_units <- function(db = NULL){
 #' # not run: harmonized_treatments <- harmonize_treatments()
 #' # If I want to do something with N fertility treatments, for example.
 #' #not run: nfert <- harmonized_treatments[,c("site_id","treatmentID2","year",management_practice_list$`N fertility`)]
-list_treatments_by_management_practice <- function(site_treatment_type_info = NULL,
-                                                   mytoken = getOption("drivesR.default.directustoken")){
+list_treatments_by_management_practice <- function(site_treatment_type_info = NULL){
   if(is.null(site_treatment_type_info)){
-    site_treatment_type_info <- get_db_table("site_treatment_type_info",mytoken = mytoken)
+    site_treatment_type_info <- get_db_table("site_treatment_type_info")
   }
   management_practice_list <- tapply(site_treatment_type_info$treatment_type,
                                      site_treatment_type_info$management_practice, unique)
@@ -389,15 +386,10 @@ list_treatments_by_management_practice <- function(site_treatment_type_info = NU
 #' @param crop_yields 
 #' A data frame of the crop_yields table from the DRIVES database. If left as NULL, 
 #' this table will be downloaded via the Directus API.
-#' @param mytoken 
-#' Directus token, formatted as "Bearer myapitoken". Can be set with set_default_token().
 #' @param crop_fractions_as_columns
 #' If TRUE, multiple fractions from the same crop are organized in separate 
 #' columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 
 #' as in the database table.
-#' @param public 
-#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise. Can be set directly or though options.
 #' @param primary_crop_fractions
 #' A vector of crop fractions to select as the primary fraction, when there is more than one.
 #' So far, this only pertains to grain and tomato fruit. The default is set with the 
@@ -418,13 +410,10 @@ list_treatments_by_management_practice <- function(site_treatment_type_info = NU
 #' # not run: wideyield <- harmonize_yields(crop_fractions_as_columns = TRUE)
 harmonize_yields <- function(crop_yields = NULL,
                              crop_fractions_as_columns = FALSE,
-                             public = getOption("drivesR.default.public"),
-                             primary_crop_fractions = getOption("drivesR.primary_crop_fractions"),
-                             mytoken = getOption("drivesR.default.directustoken")){
+                             primary_crop_fractions = getOption("drivesR.primary_crop_fractions")){
   
   if(is.null(crop_yields)){
-    #dltable <- ifelse(public == TRUE, "public_crop_yields","crop_yields")
-    crop_yields <- get_db_table("crop_yields", mytoken = mytoken, public = public)
+    crop_yields <- get_db_table("crop_yields")
     
   }
   ## fill in NAs for actual_crop_id
@@ -478,11 +467,6 @@ harmonize_yields <- function(crop_yields = NULL,
 #' #' If TRUE, multiple fractions from the same crop are organized in separate 
 #' columns. If FALSE, multiple fractions from the same crop are organized in separate rows, 
 #' as in the database table. 
-#' @param public
-#' TRUE if data are to be downloaded from the publicly available part of the DRIVES 
-#' database. FALSE otherwise. Can be set directly or though options.
-#' @param mytoken 
-#' Directus token, formatted as "Bearer myapitoken". Set by set_default_token().
 #' @returns
 #' A dataframe of yield data combined with experimental treatment data, with each treatment
 #' type in a separate column. 
@@ -496,9 +480,7 @@ harmonize_yields <- function(crop_yields = NULL,
 #' # not run: wideyield <- harmonize_yields(crop_fractions_as_columns = TRUE)
 harmonize_yields_treatments <- function(
     db = NULL,
-    crop_fractions_as_columns = FALSE,
-    public =  getOption("drivesR.default.public"),
-    mytoken = getOption("drivesR.default.directustoken")){
+    crop_fractions_as_columns = FALSE){
   ytrttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields")
   if(!is.null(db)){
     if(any(!ytrttables %in% names(db))){
@@ -506,15 +488,12 @@ harmonize_yields_treatments <- function(
     }
   }
   if(is.null(db)){
-    #prefix <- ifelse(public==TRUE,"public_","")
-    #dltables <- paste0(prefix, ytrttables)
-    db <- import_db_tables(ytrttables, mytoken = mytoken, fetch_option = "download.only")
+    db <- import_db_tables(ytrttables, fetch_option = "download.only")
     
   }
   treatmentunits <- harmonize_treatments_units(db = db)
   yields <- harmonize_yields(crop_yields = db$crop_yields, 
-                             crop_fractions_as_columns = crop_fractions_as_columns,
-                             mytoken = mytoken)
+                             crop_fractions_as_columns = crop_fractions_as_columns)
   outyield <- dplyr::left_join(yields, treatmentunits, by = c("site_id","unit_id","harvest_year"="year"))
   return(outyield)
 }
@@ -628,8 +607,7 @@ harmonize_harvest_dates <- function(harvest_dates = NULL,
 #' set by the user. To aid in merging with yield data.
 #' @param planting_info 
 #' A data frame of the planting_info table from the DRIVES database.
-#' If NULL, this will be downloaded from the Directus database based on the 
-#' arguments provided under 'public' and 'mytoken'.
+#' If NULL, this will be downloaded from the Directus database.
 #' @param replant_dates
 #' Indicates how multiple planting dates should be organized in the output. 
 #' There are three options: latest, rows, and columns.

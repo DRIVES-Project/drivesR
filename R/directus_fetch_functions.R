@@ -277,11 +277,6 @@ get_table_from_req <- function(apirequest = NULL){
 #' @param public_tables
 #' Vector of tables that receive the public_ prefix if public==TRUE.
 #' Set as a global default. 
-#' @param mytoken 
-#' Directus token, formatted as "Bearer APITOKEN". 
-#' Can be set with set_default_token. 
-#' @param myurl 
-#' Directus URL. Set at package loading ("https://data.drives-network.org").
 #' @returns
 #' @export
 #'

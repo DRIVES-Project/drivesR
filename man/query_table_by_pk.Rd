@@ -29,11 +29,6 @@ Since this function is mostly for internal use, the default is FALSE.}
 
 \item{public_tables}{Vector of tables that receive the public_ prefix if public==TRUE.
 Set as a global default.}
-
-\item{mytoken}{Directus token, formatted as "Bearer APITOKEN". 
-Can be set with set_default_token.}
-
-\item{myurl}{Directus URL. Set at package loading ("https://data.drives-network.org").}
 }
 \description{
 Fetch table contents by primary keys
