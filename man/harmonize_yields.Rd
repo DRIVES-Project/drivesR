@@ -37,6 +37,7 @@ These include:
 - Filling in missing actual_crop_id with expected_crop_id. 
 - Calculating dry yield from yield and yield_percent_moisture (for crops 
 with yields reported at standardized moisture).
+- Adding a TRUE FALSE column for cover crops.
 - Optionally, the function can reshape the data into a wide format,
 with multiple crop fractions (e.g., grain and straw) in separate columns instead of
 separate rows, as they are organized in the database. This option may be convenient 

@@ -4,7 +4,10 @@
 \alias{harmonize_yields_planting_harvest}
 \title{Harmonize yield with planting and harvest dates.}
 \usage{
-harmonize_yields_planting_harvest(db = NULL)
+harmonize_yields_planting_harvest(
+  db = NULL,
+  primary_crop_fractions = getOption("drivesR.primary_crop_fractions")
+)
 }
 \arguments{
 \item{db}{Can be provided as a named list of database tables

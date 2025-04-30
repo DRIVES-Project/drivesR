@@ -2,8 +2,7 @@
 % Please edit documentation in R/data_pipeline.R
 \name{harmonize_harvest_dates}
 \alias{harmonize_harvest_dates}
-\title{Harmonize harvest dates
-Does some light processing of the harvest_dates table.}
+\title{Harmonize harvest dates}
 \usage{
 harmonize_harvest_dates(
   harvest_dates = NULL,
@@ -29,7 +28,6 @@ A data frame of harvest date data with minor changes with one row per unit/year/
 Multiple harvests are separated into columns. Multiple
 }
 \description{
-Harmonize harvest dates
 Does some light processing of the harvest_dates table.
 }
 \examples{
