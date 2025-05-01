@@ -80,9 +80,9 @@ delete_rows <- function(table_name = NULL,
 #' "id"=c(6,7,8), 
 #' "cat_name"= c("Thing1","Thing2","Thing3"),
 #' "cat_age" = c(1,2,3))
-#' ## Not run: testpatch <- 
-#' ##modify_rows(table_name = "test_cat_info", editdf = testdf2, idcol = "id")
-#' ## print(testpatch) # NULL with no errors.
+#' # Not run: testpatch <- 
+#' #modify_rows(table_name = "test_cat_info", editdf = testdf2, idcol = "id")
+#' # print(testpatch) # NULL with no errors.
 #' 
 modify_rows <- function(table_name = NULL, 
                       editdf = NULL,
