@@ -18,8 +18,13 @@ all sites. Useful for identifying columns in harmonized dataframes with all trea
 Uses information in the site_treatment_type_info table
 }
 \examples{
-#not run: management_practice_list <- list_treatments_by_management_practice()
-# not run: harmonized_treatments <- harmonize_treatments()
-# If I want to do something with N fertility treatments, for example.
-#not run: nfert <- harmonized_treatments[,c("site_id","treatmentID2","year",management_practice_list$`N fertility`)]
+#not run: management_practice_list <- 
+# list_treatments_by_management_practice()
+# not run: harmonized_treatments <- 
+# harmonize_treatments()
+# If I want to do something with N fertility treatments, 
+#for example.
+#not run: nfert <- harmonized_treatments[,c("site_id",
+                                           #"treatmentID2","year"
+                                          #,management_practice_list$`N fertility)]
 }

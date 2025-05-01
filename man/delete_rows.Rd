@@ -8,8 +8,7 @@ delete_rows(
   table_name = NULL,
   pkvec = NULL,
   check_only = TRUE,
-  pkfield = "uid",
-  mytoken = getOption("drivesR.default.directustoken")
+  pkfield = "uid"
 )
 }
 \arguments{
@@ -21,8 +20,6 @@ delete_rows(
 The default is TRUE as a protective measure.}
 
 \item{pkfield}{Name of the primary key column. The default is "uid."}
-
-\item{mytoken}{Directus api token, formatted as "Bearer myapitoken"}
 }
 \value{
 If check_only = TRUE, returns a data frame of the table subset corresponding to the primary 

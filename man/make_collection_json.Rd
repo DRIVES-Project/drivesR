@@ -21,7 +21,10 @@ A character string for the corresponding data type recognized by the Directus AP
 Make a collection schema json object from data dictionary tables
 }
 \examples{
-my_collection_json <- make_collection_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_cat_info"),],
+my_collection_json <- 
+make_collection_json(columndf = 
+                   test_column_dict[which(test_column_dict$table_name==
+                                            "test_cat_info"),],
                                             test_table_dict[1,])
 
 

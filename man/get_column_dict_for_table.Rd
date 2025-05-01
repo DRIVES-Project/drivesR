@@ -13,7 +13,7 @@ get_column_dict_for_table(
 \arguments{
 \item{table_name}{}
 
-\item{myurl}{}
+\item{myurl}{Base url for the Directus database.}
 }
 \description{
 Get column dictionary for a specified table

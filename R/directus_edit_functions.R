@@ -11,8 +11,6 @@
 #' The default is TRUE as a protective measure.
 #' @param pkfield
 #' Name of the primary key column. The default is "uid."
-#' @param mytoken
-#' Directus api token, formatted as "Bearer myapitoken"
 #' @returns
 #' If check_only = TRUE, returns a data frame of the table subset corresponding to the primary 
 #' keys in pkvec. if check_only = FALSE, the function performs delete operations on primary keys
@@ -29,14 +27,12 @@
 delete_rows <- function(table_name = NULL, 
                         pkvec = NULL,
                         check_only = TRUE,
-                        pkfield = "uid",
-                        mytoken = getOption("drivesR.default.directustoken")){
+                        pkfield = "uid"){
   if(check_only == TRUE){
     # query for primary key.
     checkdf <- query_table_by_pk(table_name = table_name,
                                  pkvec = pkvec,
-                                 pkfield = pkfield,
-                                 mytoken = mytoken)
+                                 pkfield = pkfield)
       ## with only one row, empty values are coded as null.
       # they need to be converted to NAs.
       # I looked for more elegant solutions, but couldn't find anything.
@@ -45,7 +41,7 @@ delete_rows <- function(table_name = NULL,
   
   if(check_only == FALSE){
     for(pk in pkvec){
-      api_request("DELETE",glue::glue("items/{table_name}/{pk}"),mytoken = mytoken)
+      api_request("DELETE",glue::glue("items/{table_name}/{pk}"))
     }# closes for loop
   }# closes if 
 } #closes function
@@ -70,18 +66,28 @@ delete_rows <- function(table_name = NULL,
 #' @export
 #'
 #' @examples
-#' testdf1 <- data.frame("id"=c(6,7,8), "cat_name"= c("Thing1","Thing2","Thing3"),"cat_age" = c(1,2,"spam"))
-#' # Not run: testpatch <- modify_rows(table_name = "test_cat_info", editdf = testdf1, idcol = "id")
-#' # print(testpatch) # id 8 will have a status_code 500 error due to non-integer in cat_age
-#' testdf2 <- data.frame("id"=c(6,7,8), "cat_name"= c("Thing1","Thing2","Thing3"),"cat_age" = c(1,2,3))
-#' # Not run: testpatch <- modify_rows(table_name = "test_cat_info", editdf = testdf2, idcol = "id")
-#' # print(testpatch) # NULL with no errors.
+#' testdf1 <- data.frame(
+#' "id"=c(6,7,8),
+#' "cat_name"= c("Thing1","Thing2","Thing3"),
+#'  "cat_age" = c(1,2,"spam"))
+#' # Not run: testpatch <- modify_rows(
+#' #table_name = "test_cat_info", 
+#' #editdf = testdf1, idcol = "id")
+#' # print(testpatch) 
+#' # id 8 will have a status_code 500 
+#' #error due to non-integer in cat_age
+#' testdf2 <- data.frame(
+#' "id"=c(6,7,8), 
+#' "cat_name"= c("Thing1","Thing2","Thing3"),
+#' "cat_age" = c(1,2,3))
+#' ## Not run: testpatch <- 
+#' ##modify_rows(table_name = "test_cat_info", editdf = testdf2, idcol = "id")
+#' ## print(testpatch) # NULL with no errors.
 #' 
 modify_rows <- function(table_name = NULL, 
                       editdf = NULL,
                       batchsize = 1000,
-                      idcol = "uid",
-                      mytoken = getOption("drivesR.default.directustoken")){
+                      idcol = "uid"){
   nitems = nrow(editdf)
   nbatches = ceiling(nitems/batchsize)
   start_i = 1
@@ -94,7 +100,7 @@ modify_rows <- function(table_name = NULL,
     fixjson <- make_row_insert_json(subsetdf)  
     fixreq <- api_request("PATCH",
                           glue::glue("items/{table_name}"),
-                          fixjson,mytoken = mytoken)
+                          fixjson)
     if(fixreq$status_code != 200){
       addrows <- data.frame(pk = subsetdf[,idcol], status_code = fixreq$status_code)
       problemrows <- rbind(problemrows, addrows)

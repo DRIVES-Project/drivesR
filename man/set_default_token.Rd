@@ -7,12 +7,12 @@
 set_default_token(usertoken, api = c("Directus", "Dataverse")[1])
 }
 \arguments{
+\item{usertoken}{User-specific API token. For directus, this is formated as "Bearer {myAPI token"}.
+For Dataverse, it's a string of letters and numbers.}
+
 \item{api}{Sets which API to set the token for. Default is "Directus". "Dataverse" 
 is also an option (for troubleshooting non-published tables in the Canadian
 repository).}
-
-\item{mytoken}{User-specific API token. For directus, this is formated as "Bearer {myAPI token"}.
-For Dataverse, it's a string of letters and numbers.}
 }
 \value{
 Send

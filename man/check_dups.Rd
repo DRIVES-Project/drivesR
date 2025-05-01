@@ -28,7 +28,10 @@ depending on the choice for dupTFmatchesInput.
 Subset a dataframe for rows that are duplicated across a set of columns.
 }
 \examples{
-testdf <- data.frame("col1" = c("spam","eggs","spam","spam"),"col2" = c(1,2,1,1),"col3" = c("cat","fish","dog","cat"),"col4" = c(1,2,3,4))
+testdf <- data.frame("col1" = c("spam","eggs","spam","spam"),
+                     "col2" = c(1,2,1,1),
+                     "col3" = c("cat","fish","dog","cat"),
+                     "col4" = c(1,2,3,4))
 check_dups(testdf, checkcols = c("col1","col2"))
 check_dups(testdf, checkcols = c(1,2,3))
 }

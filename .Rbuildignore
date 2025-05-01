@@ -4,3 +4,4 @@
 ^data-raw$
 ^directus_creds.R$
 ^.*\directus_creds.R$
+vignettes/images

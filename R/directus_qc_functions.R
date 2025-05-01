@@ -374,8 +374,7 @@ check_column_names <- function(table_name = "site_info", inputdf = NULL, mytoken
 #' #not run: mydf <- read.csv("site_info_to_add.csv")
 #' #not run: checkdf <-  check_table_contents("site_info", inputdf = mydf)
 check_table_contents <- function(table_name = NULL,
-                                 inputdf = NULL, 
-                                 mytoken = getOption("drivesR.default.directustoken")){
+                                 inputdf = NULL){
   pass_message <- "pass"
   fail_message <- "fail"
   na_message <- "constraint does not apply"
@@ -390,7 +389,7 @@ check_table_contents <- function(table_name = NULL,
                  problem_list = NA,
                  dtype_problem_list = NA)
   # Fetch schema information for table
-  table_info <- get_db_info(glue::glue("fields/{table_name}"),flatten=TRUE,mytoken = mytoken)
+  table_info <- get_db_info(glue::glue("fields/{table_name}"),flatten=TRUE)
   
   #0)  Primary key------
   checkrow <- emptycheckrow
@@ -778,7 +777,8 @@ check_treatment_years <- function(db = NULL){
 #' Data frame containing foreign key colulmns.
 #' @param mytoken 
 #' Directus token.
-#'
+#' @param myurl
+#' Directus base url.
 #' @returns
 #' A list of columns with foreign key constraints and 
 #' a dataframe of subsetted rows from inputdf that violate
@@ -789,7 +789,8 @@ check_treatment_years <- function(db = NULL){
 #' @export
 #'
 #' @examples
-#' # not run: fkcheck <- check_fk_values("crop_variety_info", inputdf = staged_df)
+#' # not run: fkcheck <- check_fk_values(
+#' #"crop_variety_info", inputdf = staged_df)
 check_fk_values <- function(table_name = NULL,
                             inputdf = NULL,
                             mytoken = getOption("drivesR.default.directustoken"),
@@ -909,7 +910,8 @@ order_tables_by_fk <- function(column_dictionary = NULL){
 #' @export
 #'
 #' @examples
-#' #not run: roworder <- order_rows_by_internal_fk(inputdf = crop_info,idcol = "crop_id",fkcol = "parent_crop_id")
+#' #not run: roworder <- order_rows_by_internal_fk(
+#' #inputdf = crop_info,idcol = "crop_id",fkcol = "parent_crop_id")
 #' # not run: walk(roworder,~post_rows("crop_info",inputdf[.x,] ))
 order_rows_by_internal_fk <- function(inputdf = NULL,
                                       idcol = NULL,

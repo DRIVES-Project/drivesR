@@ -4,13 +4,7 @@
 \alias{modify_rows}
 \title{Modify content in existing rows}
 \usage{
-modify_rows(
-  table_name = NULL,
-  editdf = NULL,
-  batchsize = 1000,
-  idcol = "uid",
-  mytoken = getOption("drivesR.default.directustoken")
-)
+modify_rows(table_name = NULL, editdf = NULL, batchsize = 1000, idcol = "uid")
 }
 \arguments{
 \item{table_name}{Table identifier within Directus}
@@ -30,11 +24,22 @@ For a large number of rows, it may be a good idea to run content changes through
 QC functions before performing this step.
 }
 \examples{
-testdf1 <- data.frame("id"=c(6,7,8), "cat_name"= c("Thing1","Thing2","Thing3"),"cat_age" = c(1,2,"spam"))
-# Not run: testpatch <- modify_rows(table_name = "test_cat_info", editdf = testdf1, idcol = "id")
-# print(testpatch) # id 8 will have a status_code 500 error due to non-integer in cat_age
-testdf2 <- data.frame("id"=c(6,7,8), "cat_name"= c("Thing1","Thing2","Thing3"),"cat_age" = c(1,2,3))
-# Not run: testpatch <- modify_rows(table_name = "test_cat_info", editdf = testdf2, idcol = "id")
-# print(testpatch) # NULL with no errors.
+testdf1 <- data.frame(
+"id"=c(6,7,8),
+"cat_name"= c("Thing1","Thing2","Thing3"),
+ "cat_age" = c(1,2,"spam"))
+# Not run: testpatch <- modify_rows(
+#table_name = "test_cat_info", 
+#editdf = testdf1, idcol = "id")
+# print(testpatch) 
+# id 8 will have a status_code 500 
+#error due to non-integer in cat_age
+testdf2 <- data.frame(
+"id"=c(6,7,8), 
+"cat_name"= c("Thing1","Thing2","Thing3"),
+"cat_age" = c(1,2,3))
+## Not run: testpatch <- 
+##modify_rows(table_name = "test_cat_info", editdf = testdf2, idcol = "id")
+## print(testpatch) # NULL with no errors.
 
 }

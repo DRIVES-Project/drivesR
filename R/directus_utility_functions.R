@@ -26,7 +26,7 @@ httr_dry_run <- function(r) {
 #' Set a user-specific API token as the default for functions making API requests. 
 #' Only works in R studio.
 #' 
-#' @param mytoken 
+#' @param usertoken 
 #' User-specific API token. For directus, this is formated as "Bearer {myAPI token"}.
 #' For Dataverse, it's a string of letters and numbers.
 #' @param api

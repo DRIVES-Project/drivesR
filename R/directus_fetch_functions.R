@@ -2,7 +2,7 @@
 #' Get column dictionary for a specified table
 #' As an alternative to subsetting.
 #' @param table_name 
-#' @param myurl 
+#' @param myurl Base url for the Directus database.
 #'
 #' @returns
 #' @export

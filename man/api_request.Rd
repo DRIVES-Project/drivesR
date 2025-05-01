@@ -42,11 +42,14 @@ https://directus.io/docs/api
 \examples{
 # Accessing database content (here, it is information about collections)
 # not run: collectionsreq <- api_request("GET", mytarget = "collections")
-# not run: collectionjson <- jsonlite::toJSON(httr::content(collectionsreq), pretty=TRUE, auto_unbox = TRUE) 
+# not run: collectionjson <- jsonlite::toJSON(httr::content(collectionsreq),
+# pretty=TRUE, auto_unbox = TRUE) 
 
 # Modifying database content (here it is adding a new collection)
-#not run: testcollection <- make_collection_json()# default with sample data dictionary 
-#not run: new_collection_req <- api_request("POST", "collections",testcollection)
+#not run: testcollection <- make_collection_json()
+# default with sample data dictionary 
+# not run: new_collection_req <- api_request("POST", "collections",
+# testcollection)
 
 }
 \seealso{

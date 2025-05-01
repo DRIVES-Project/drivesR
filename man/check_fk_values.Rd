@@ -17,6 +17,8 @@ check_fk_values(
 \item{inputdf}{Data frame containing foreign key colulmns.}
 
 \item{mytoken}{Directus token.}
+
+\item{myurl}{Directus base url.}
 }
 \value{
 A list of columns with foreign key constraints and 
@@ -29,5 +31,6 @@ key columns.
 Check foreign key values for a staged table.
 }
 \examples{
-# not run: fkcheck <- check_fk_values("crop_variety_info", inputdf = staged_df)
+# not run: fkcheck <- check_fk_values(
+#"crop_variety_info", inputdf = staged_df)
 }

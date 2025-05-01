@@ -4,11 +4,7 @@
 \alias{check_table_contents}
 \title{Check table contents before import}
 \usage{
-check_table_contents(
-  table_name = NULL,
-  inputdf = NULL,
-  mytoken = getOption("drivesR.default.directustoken")
-)
+check_table_contents(table_name = NULL, inputdf = NULL)
 }
 \arguments{
 \item{table_name}{Name of the table in Directus}
