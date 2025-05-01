@@ -38,7 +38,7 @@ devtools::install_github("DRIVES-Project/drivesR")
 
 ## Example
 
-Detailed instrcutions and examples can be found in the vignette:
+Detailed instructions and examples can be found in the vignette:
 
 ``` r
 library(drivesR)
