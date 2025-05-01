@@ -35,8 +35,6 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 drivesR.Rproj
-
 #Configuration scripts containing private information
 */directus_creds.R
 directus_creds.R
-inst/doc
