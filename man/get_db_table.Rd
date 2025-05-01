@@ -6,27 +6,34 @@
 \usage{
 get_db_table(
   table_name = "site_info",
-  myurl = "https://data.drives-network.org",
-  mytoken = "Bearer {myAPItoken}",
-  in_batches = FALSE,
-  batchsize = NULL
+  public = getOption("drivesR.default.public"),
+  myurl = getOption("drivesR.default.url"),
+  mytoken = getOption("drivesR.default.directustoken"),
+  public_tables = getOption("drivesR.default.tablevec"),
+  borealis_repo_info = NULL
 )
 }
 \arguments{
 \item{table_name}{The table identifier within Directus}
 
+\item{public}{TRUE or FALSE indicating whether the table should be read from the 
+public or internal portions of the DRIVES database. This can be set as a global option.}
+
 \item{myurl}{The database url. By default, "https://data.drives-network.org"}
 
-\item{mytoken}{The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets}
+\item{mytoken}{The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets.
+This can be set with set_default_token.}
 
-\item{in_batches}{When set to FALSE, all rows are imported with a single API call. When set to TRUE,
-rows are imported in batches specified by batchsize. Batched import may be useful 
-for large tables.}
+\item{public_tables}{Vector of table names that receive the prefix 'public_' when public = TRUE.}
 
-\item{batchsize}{Sets the number of rows per batch-import when in_batches = TRUE.}
+\item{borealis_repo_info}{A dataframe containing Borealis file identifiers for each table_name. 
+If NULL, this information is imported from Directus.}
 }
 \value{
-A data frame containing all rows and columns of the specified table.
+A data frame containing all rows and columns of the specified table. 
+If public is set to TRUE, the data will exclude sites and years not approved 
+for public access. Also, data from Canadian sites will be fetched from a 
+Canadian-hosted repository (Borealis).
 }
 \description{
 Fetch an entire table from Directus

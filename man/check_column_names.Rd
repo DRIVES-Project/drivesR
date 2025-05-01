@@ -2,22 +2,27 @@
 % Please edit documentation in R/directus_qc_functions.R
 \name{check_column_names}
 \alias{check_column_names}
-\title{Check column names}
+\title{Check column names for a staged table.}
 \usage{
-check_column_names(table_name = "site_info", inputdf = NULL, mytoken = mytoken)
+check_column_names(
+  table_name = "site_info",
+  inputdf = NULL,
+  mytoken = getOption("drivesR.default.directustoken")
+)
 }
 \arguments{
 \item{table_name}{Table identifier, such as "site_info"}
 
 \item{inputdf}{Dataframe to be evaluated.}
 
-\item{mytoken}{Directus token. Can be set in the function or through set_default_token()}
+\item{mytoken}{directus API token, as "Bearer apitoken"}
 }
 \value{
 A dataframe of checks, outcomes, and relevant fields.
 }
 \description{
-Quality control step to check column names in a data frame to be imported into Directus.
+Quality control step to check that column names in a data frame to be imported into Directus
+match what is in the table schema.
 }
 \examples{
 #Not run: check_column_names("site_info", mydf)

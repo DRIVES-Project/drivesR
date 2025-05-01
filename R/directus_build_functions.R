@@ -17,14 +17,14 @@ pg_to_directus_type <- function(pgtype){
                                        "numeric",
                                        "array",
                                        "date"
-                                      ),
-                           dir_type = c("integer",
-                                        "text",
-                                        "string",
-                                        "boolean",
-                                        "float",
-                                        "text",
-                                        "date"))
+  ),
+  dir_type = c("integer",
+               "text",
+               "string",
+               "boolean",
+               "float",
+               "text",
+               "date"))
   if(length(pgtype) > 1){
     stop("pgtype must be of length 1")
   }
@@ -48,7 +48,7 @@ pg_to_directus_type <- function(pgtype){
 #' @param mytarget
 #' The part of the URL string pointing to the content you want to read or modify. 
 #' @param myurl 
-#' Root URL for the DRIVES database. 
+#' Root URL for the DRIVES database. Set as a default when the package loads ("https://data.drives-network.org/)
 #' @param mytoken 
 #' API token for the user. This is formatted as "Bearer {APItoken}" (without the curly brackets).
 #' It is recommended that the user make a script that loads the API token and database URL.
@@ -65,19 +65,31 @@ pg_to_directus_type <- function(pgtype){
 #' @import glue
 #' @examples
 #' # Accessing database content (here, it is information about collections)
-#' collectionsreq <- api_request("GET", mytarget = "collections")
-#' collectionjson <- jsonlite::toJSON(httr::content(collectionsreq), pretty=TRUE, auto_unbox = TRUE) 
+#' # not run: collectionsreq <- api_request("GET", mytarget = "collections")
+#' # not run: collectionjson <- jsonlite::toJSON(httr::content(collectionsreq),
+#' # pretty=TRUE, auto_unbox = TRUE) 
 #' 
 #' # Modifying database content (here it is adding a new collection)
-#' testcollection <- make_collection_json()# default with sample data dictionary 
-#' new_collection_req <- api_request("POST", "collections",testcollection)
+#' #not run: testcollection <- make_collection_json()
+#' # default with sample data dictionary 
+#' # not run: new_collection_req <- api_request("POST", "collections",
+#' # testcollection)
 #' 
 #' @seealso [${1:make_collection_json}()]
 api_request <- function(myverb = "POST",
-                         mytarget = "collections",
-                         jsonbody = NULL ,
-                         myurl = "https://data.drives-network.org",
-                         mytoken = "Bearer {myAPItoken}"){
+                        mytarget = "collections",
+                        jsonbody = NULL ,
+                        myurl = getOption("drivesR.default.url"),
+                        mytoken = getOption("drivesR.default.directustoken")){
+  
+  validToken <- test_api_token(mytoken = mytoken,
+                               myurl = myurl)
+  if(!validToken & !is.null(mytoken)){
+    stop("Invalid Directus API token.")
+  }
+  if(is.null(mytoken)){
+    message("Directus API token set to NULL. Will only work for dictionary tables.")
+  }
   #require(httr)  
   if(!is.null(jsonbody)){
     VERB(myverb,
@@ -111,7 +123,10 @@ api_request <- function(myverb = "POST",
 #' @import jsonlite
 #'
 #' @examples
-#' my_collection_json <- make_collection_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_cat_info"),],
+#' my_collection_json <- 
+#' make_collection_json(columndf = 
+#'                    test_column_dict[which(test_column_dict$table_name==
+#'                                             "test_cat_info"),],
 #'                                             test_table_dict[1,])
 #' 
 #' 
@@ -158,11 +173,13 @@ make_collection_json <- function(columndf = test_column_dict[which(test_column_d
 #' 
 #' @examples
 #' 
-#' testrel <- make_relations_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_favorite_toy"),],
-#'                                tablerow = test_table_dict[2,])
+#' #testrel <- make_relations_json(columndf = 
+#'  #                                 test_column_dict[
+#'   #                                which(test_column_dict$table_name=="test_favorite_toy"),],
+#'  #                                tablerow = test_table_dict[2,])
 #
 #' # If the table has multiple foreign keys, you can use this in a loop (lapply doesn't work)
-#' rel_req <- api_request("POST",mytarget = "relations",jsonbody = testrel[[1]])
+#' #not run: rel_req <- api_request("POST",mytarget = "relations",jsonbody = testrel[[1]])
 #' 
 #' 
 #' @import jsonlite
@@ -185,8 +202,8 @@ make_relations_json <- function(columndf = test_column_dict[which(test_column_di
                                      on_delete = delete_action
                        ),
                        meta = NA
-                  )
-       return(jsonlite::toJSON(rel_list, pretty=TRUE, auto_unbox = TRUE))
+      )
+      return(jsonlite::toJSON(rel_list, pretty=TRUE, auto_unbox = TRUE))
     })
     return(rel_json)
   }
@@ -208,9 +225,75 @@ make_relations_json <- function(columndf = test_column_dict[which(test_column_di
 #' insert_json <- make_row_insert_json(testdf)
 #' # example with API request:
 #' test_insert <- make_row_insert_json(test_cat_info)
-#' insert_req <- api_request("POST","items/test_cat_info",test_insert)
+#' # insert_req <- api_request("POST","items/test_cat_info",test_insert)
 make_row_insert_json <- function(mydf){
   jsonlite::toJSON(mydf, pretty = TRUE, auto_unbox=TRUE)
+}
+
+
+#' Convert column dictionary content into json-formatted field schema.
+#' This is for adding fields to existing collections. Once 
+#' a collection exists, only one field can be added at a time with 
+#' an API request.
+#'
+#' @param column_dictionary_row 
+#' A row from the column dictionary, filled out with information for 
+#' the new field.
+#' @returns
+#' A json-formatted object containing schema information for a new field in an 
+#' existing collection.
+#' 
+#' @export
+#'
+#' @examples
+#' column_dictionary <- test_column_dict
+#' ## model the new field on an existing field (for demo purposes)
+#' newrow <- test_column_dict[which(test_column_dict$column_name == "cat_name"),]
+#' newrow$column_id <- "test_cat_info:favorite_food"
+#' newrow$column_name <- "favorite_food"
+#' newrowjson <- make_field_json(newrow)
+#' # not run: newfieldreq <- api_request("POST",mytarget ="fields/test_cat_info",jsonbody= newrowjson)
+make_field_json <- function(column_dictionary_row = NULL){
+  if(nrow(as.data.frame(column_dictionary_row)) != 1){
+    stop("Input must be a single-row data frame.")
+  }
+  fieldlist <- list(collection = column_dictionary_row$table_name, 
+                    field = column_dictionary_row$column_name,
+                    type = pg_to_directus_type(column_dictionary_row$postgres_data_type) ,
+                    meta = list( note = column_dictionary_row$description,
+                                 sort = column_dictionary_row$column_order),
+                    schema = list(is_primary_key = column_dictionary_row$primary_key,
+                                  is_nullable = column_dictionary_row$nullable,
+                                  is_unique = column_dictionary_row$unique_value,
+                                  has_auto_increment = column_dictionary_row$auto_increment
+                    ))  
+  
+  fieldjson <- jsonlite::toJSON(fieldlist, pretty = TRUE, auto_unbox = TRUE) 
+  return(fieldjson)  
+}
+
+
+#' Add rows to a database table
+#' 
+#' This adds all rows in an input dataframe in a single API request. To add
+#' more than 100 rows, use post_rows_in_batches. For use in an interactive R session.
+#'    
+#' @param table_name 
+#' The name of the database table.  
+#' @param inputdf
+#' The dataframe containing rows to be added. Contents should have been checked.
+#'  
+#' @returns
+#' Converts the input df to a json and runs an API post request on the specified table. 
+#' The status code of that request is returned as a message.
+#' @export
+#'
+#' @examples
+post_rows <- function(table_name = NULL,
+                      inputdf = NULL){
+  insert_json <- make_row_insert_json(inputdf)
+  myreq <- api_request("POST",glue::glue("items/{table_name}"),insert_json)
+  message(paste("POST request complete with status code",myreq$status_code))
 }
 
 #' Post rows in batches
@@ -227,25 +310,25 @@ make_row_insert_json <- function(mydf){
 #' @param inputdf 
 #' Data frame of rows to be added. This should have passed quality control checks.
 #' 
-#' @param mytoken 
-#' Directus token. Can be set with set_default_token()
 #' @returns
+#' Silent.
 #' @export
 #'
 #' @examples
-post_rows_in_batches <- function(table_name = "crop_yields", batchsize = 1000, inputdf = NULL,mytoken){
+post_rows_in_batches <- function(table_name = "crop_yields", inputdf = NULL,batchsize = 1000){
   nitems = nrow(inputdf)
-  nbatches = ceiling(batchsize/nitems)
+  nbatches = ceiling(nitems/batchsize)
   start_i = 1
   end_i = 0
   batch_i = 1
   
   while(end_i < nitems){
-    end_i <- min(start_i + batchsize , nitems)
-    subsetdf <- importlist[[mytable]][start_i:end_i,]
+    end_i <- min(start_i + batchsize -1 , nitems)
+    subsetdf <- inputdf[start_i:end_i,]
     insert_json <- make_row_insert_json(subsetdf)
-    myreq <- api_request("POST",glue::glue("items/{mytable}"),insert_json,mytoken = mytoken)
-    print(paste(batch_i,"of",nbatches,"status",myreq$status_code))
+    myreq <- api_request("POST",glue::glue("items/{table_name}"),insert_json)
+    message(paste("Batch",batch_i,"of",nbatches,"status",myreq$status_code))
+    #cat(paste0("\nstart_i = ",start_i,", end_i = ",end_i,", batch_i = ",batch_i))
     start_i <- end_i + 1
     batch_i <- batch_i + 1
   }
