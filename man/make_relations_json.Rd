@@ -32,10 +32,10 @@ Make relations json schema objects from data dictionary tables
 }
 \examples{
 
-#not run: testrel <- make_relations_json(columndf = 
-#                                  test_column_dict[
-#                                  which(test_column_dict$table_name=="test_favorite_toy"),],
-#                                tablerow = test_table_dict[2,])
+#testrel <- make_relations_json(columndf = 
+ #                                 test_column_dict[
+  #                                which(test_column_dict$table_name=="test_favorite_toy"),],
+ #                                tablerow = test_table_dict[2,])
 # If the table has multiple foreign keys, you can use this in a loop (lapply doesn't work)
 #not run: rel_req <- api_request("POST",mytarget = "relations",jsonbody = testrel[[1]])
 
