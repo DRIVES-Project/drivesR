@@ -778,7 +778,8 @@ check_treatment_years <- function(db = NULL){
 #' Data frame containing foreign key colulmns.
 #' @param mytoken 
 #' Directus token.
-#'
+#' @param myurl
+#' Directus base url.
 #' @returns
 #' A list of columns with foreign key constraints and 
 #' a dataframe of subsetted rows from inputdf that violate
@@ -789,7 +790,8 @@ check_treatment_years <- function(db = NULL){
 #' @export
 #'
 #' @examples
-#' # not run: fkcheck <- check_fk_values("crop_variety_info", inputdf = staged_df)
+#' # not run: fkcheck <- check_fk_values(
+#' #"crop_variety_info", inputdf = staged_df)
 check_fk_values <- function(table_name = NULL,
                             inputdf = NULL,
                             mytoken = getOption("drivesR.default.directustoken"),
@@ -909,7 +911,8 @@ order_tables_by_fk <- function(column_dictionary = NULL){
 #' @export
 #'
 #' @examples
-#' #not run: roworder <- order_rows_by_internal_fk(inputdf = crop_info,idcol = "crop_id",fkcol = "parent_crop_id")
+#' #not run: roworder <- order_rows_by_internal_fk(
+#' #inputdf = crop_info,idcol = "crop_id",fkcol = "parent_crop_id")
 #' # not run: walk(roworder,~post_rows("crop_info",inputdf[.x,] ))
 order_rows_by_internal_fk <- function(inputdf = NULL,
                                       idcol = NULL,

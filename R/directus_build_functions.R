@@ -66,11 +66,14 @@ pg_to_directus_type <- function(pgtype){
 #' @examples
 #' # Accessing database content (here, it is information about collections)
 #' # not run: collectionsreq <- api_request("GET", mytarget = "collections")
-#' # not run: collectionjson <- jsonlite::toJSON(httr::content(collectionsreq), pretty=TRUE, auto_unbox = TRUE) 
+#' # not run: collectionjson <- jsonlite::toJSON(httr::content(collectionsreq),
+#' # pretty=TRUE, auto_unbox = TRUE) 
 #' 
 #' # Modifying database content (here it is adding a new collection)
-#' #not run: testcollection <- make_collection_json()# default with sample data dictionary 
-#' #not run: new_collection_req <- api_request("POST", "collections",testcollection)
+#' #not run: testcollection <- make_collection_json()
+#' # default with sample data dictionary 
+#' # not run: new_collection_req <- api_request("POST", "collections",
+#' # testcollection)
 #' 
 #' @seealso [${1:make_collection_json}()]
 api_request <- function(myverb = "POST",
@@ -120,7 +123,10 @@ api_request <- function(myverb = "POST",
 #' @import jsonlite
 #'
 #' @examples
-#' my_collection_json <- make_collection_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_cat_info"),],
+#' my_collection_json <- 
+#' make_collection_json(columndf = 
+#'                    test_column_dict[which(test_column_dict$table_name==
+#'                                             "test_cat_info"),],
 #'                                             test_table_dict[1,])
 #' 
 #' 
@@ -167,7 +173,9 @@ make_collection_json <- function(columndf = test_column_dict[which(test_column_d
 #' 
 #' @examples
 #' 
-#' #not run: testrel <- make_relations_json(columndf = test_column_dict[which(test_column_dict$table_name=="test_favorite_toy"),],
+#' #not run: testrel <- make_relations_json(columndf = 
+#'                                   test_column_dict[
+#'                                   which(test_column_dict$table_name=="test_favorite_toy"),],
 #' #                                tablerow = test_table_dict[2,])
 #
 #' # If the table has multiple foreign keys, you can use this in a loop (lapply doesn't work)

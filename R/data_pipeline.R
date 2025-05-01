@@ -358,10 +358,15 @@ harmonize_treatments_units <- function(db = NULL){
 #' @export
 #'
 #' @examples
-#' #not run: management_practice_list <- list_treatments_by_management_practice()
-#' # not run: harmonized_treatments <- harmonize_treatments()
-#' # If I want to do something with N fertility treatments, for example.
-#' #not run: nfert <- harmonized_treatments[,c("site_id","treatmentID2","year",management_practice_list$`N fertility`)]
+#' #not run: management_practice_list <- 
+#' # list_treatments_by_management_practice()
+#' # not run: harmonized_treatments <- 
+#' # harmonize_treatments()
+#' # If I want to do something with N fertility treatments, 
+#' #for example.
+#' #not run: nfert <- harmonized_treatments[,c("site_id",
+#'                                            #"treatmentID2","year"
+#'                                           #,management_practice_list$`N fertility)]
 list_treatments_by_management_practice <- function(site_treatment_type_info = NULL){
   if(is.null(site_treatment_type_info)){
     site_treatment_type_info <- get_db_table("site_treatment_type_info")
