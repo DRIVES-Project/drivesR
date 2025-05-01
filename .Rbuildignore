@@ -6,3 +6,7 @@
 ^.*\directus_creds.R$
 vignettes/images
 ^README\.Rmd$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
