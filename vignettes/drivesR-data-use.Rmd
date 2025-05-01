@@ -1,5 +1,5 @@
 ---
-title: "Workflow for using DRIVES database tables"
+title: "Workflow for using DRIVES database tables with drivesR"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Workflow for using DRIVES database tables}
@@ -14,10 +14,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Overview
 This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [data.drives-network.org](https://data.drives-network.org). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVE project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
 
-This package has two main purposes for users interested in analyzing DRIVES data. First, it provides easy-to-use functions to download data tables from the Directus API. Second, it provides harmonization functions to combine and reshape tables to facilitate analysis. 
+This package has two main purposes for users interested in analyzing DRIVES data. First, it provides easy-to-use functions to download data tables from the Directus API. Second, it provides harmonization functions to combine and reshape tables for analysis. 
 
 As of May 2025, access to DRIVES database tables requires an API key. Project members and collaborators can request an API key from the DRIVES data manager, which will provide full read access. Other users must complete our [data use survey](https://www.drives-network.org/data-request) and agree to our data use terms to receive an API key. The latter will be assigned a role called "approved public access." This role has read access to a subset of the data excluding sites and site years embargoed from public access. 
 
@@ -103,17 +102,17 @@ The argument "fetch_option" controls whether tables are imported as a list to th
 ```{r import_db_tables2, eval=FALSE}
 db <- import_db_tables(fetch_option = "download.save",
                        #fetch_option = "upload",
-                       savedir = "myChosenFolder",
-                       savename = "drives")
+                       savedir = "data",
+                       savename = "sampledblist")
 ```
 
 Then, you can move the comment and rerun the same code to load the tables from the local directory:
 
-```{r import_db_tables3, eval=FALSE}
+```{r import_db_tables3, eval=TRUE}
 db <- import_db_tables(#fetch_option = "download.save",
                        fetch_option = "upload",
-                       savedir = "myChosenFolder",
-                       savename = "drives")
+                       savedir = "data",
+                       savename = "sampledblist")
 ```
 
 Importing tables into a list in the global R environment is convenient for downstream analysis, but can take up a lot of working memory. If working memory is limiting, you can bypass this step by setting the fetch_option as "save.only". 
@@ -163,19 +162,21 @@ yields <- harmonize_yields()
 ## with pre-downloaded tables:
 crop_yields <- get_db_table("crop_yields")
 yields <- harmonize_yields(crop_yields)
+## or, if in a list:
+yields <- harmonize_yields(db$crop_yields)
 ```
 
 The function performs some light processing steps, such as calculating dry yields and adding a TRUE or FALSE column for cover crops. It also provides the option to keep crop fractions from the same crop/unit/year (e.g. grain and straw) in separate rows, to rearrange them into columns. 
 ```{r harmonize2, eval = TRUE} 
 ## crop fractions in rows
-crop_yields <- get_db_table("crop_yields")
-yields <- harmonize_yields(crop_yields)
-longyields <- harmonize_yields(crop_yields,
+#crop_yields <- get_db_table("crop_yields")
+yields <- harmonize_yields(db$crop_yields) # could be a separate dataframe or part of a list
+longyields <- harmonize_yields(db$crop_yields,
                                crop_fractions_as_columns = FALSE)
 dim(longyields)
 names(longyields)
 ## crop fractions in columns
-wideyields <- harmonize_yields(crop_yields,
+wideyields <- harmonize_yields(db$crop_yields,
                                crop_fractions_as_columns = TRUE)
 dim(wideyields)
 names(wideyields) # columns include suffix _1 for the primary fraction and _2, _3, etc. for other fractions.
@@ -225,9 +226,9 @@ trtunit <- harmonize_treatments_units()
 
 The full dataframe with all treatment components may be a little daunting. We made a function list_treatment_types_by_management_practice to help subset column names corresponding to particular management practices. This uses information in the site_treatment_type_info table. The function accepts this table as an argument, or fetches it from the database. 
 
-```{r list_treatments_by_management_practice}
-trt <- harmonize_treatments()
-trtlist <- list_treatments_by_management_practice()
+```{r list_treatments_by_management_practice, eval = TRUE}
+trt <- harmonize_treatments(db)
+trtlist <- list_treatments_by_management_practice(db$site_treatment_type_info)
 # lets say I wanted to extract information on N fertility treatments
 trtcolz <- trtlist$`N fertility`
 trtsubset <- trt[c("site_id","year", trtcolz)]
@@ -245,17 +246,17 @@ Multiple planting dates can be retained in separate rows or columns, or trimmed 
 
 Like other harmonization functions, it can accept the planting_info table as an input or fetch it from the database.
 ```{r harmonize_planting_info, eval=TRUE}
-planting_info <- get_db_table("planting_info")
-p1 <- harmonize_planting_info(planting_info, replant_dates = "latest",include_component_crops = TRUE)
+#planting_info <- get_db_table("planting_info") # can be a separate table or part of a list.
+p1 <- harmonize_planting_info(db$planting_info, replant_dates = "latest",include_component_crops = TRUE)
 dim(p1)
 names(p1)# names have a numbered suffix for component crops in mixtures.
 # And since replant_dates = 'latest', there is an added column replantedTF indicating whether a unit was replanted.
 
-p2 <- harmonize_planting_info(planting_info, replant_dates = "rows",include_component_crops = FALSE)
+p2 <- harmonize_planting_info(db$planting_info, replant_dates = "rows",include_component_crops = FALSE)
 dim(p2)
 names(p2) # All planting dates are included and organized under a date_index column. Since include_component_crops is FALSE, there is an added column num_components providing the number of component crops within each actual_crop_id.
 
-p3 <- harmonize_planting_info(planting_info, replant_dates = "columns",include_component_crops = TRUE)
+p3 <- harmonize_planting_info(db$planting_info, replant_dates = "columns",include_component_crops = TRUE)
 dim(p3)
 names(p3) # names include suffixes d and c for planting dates and component crops, respectively.
 
@@ -267,40 +268,62 @@ The harmonize_harvest_dates function reshapes the harvest_dates table so multipl
 
 Like other harmonization functions, it can accept the planting_info table as an input or fetch it from the database
 ```{r harmonize_harvest_dates, eval=TRUE}
-harvest_dates <- get_db_table("harvest_dates")
-h1 <- harmonize_harvest_dates(harvest_dates, crop_fractions_as_columns = FALSE)
+#harvest_dates <- get_db_table("harvest_dates")# can be a separate table or part of a list.
+h1 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = FALSE)
 dim(h1)
 names(h1)
 
-h2 <- harmonize_harvest_dates(harvest_dates, crop_fractions_as_columns = TRUE)
+h2 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = TRUE)
 dim(h2) # only slightly different.
 names(h2)
 ```
 
+## 6) Weather
+The DRIVES database contains two tables pertaining to weather:
+ **weather_daily** contains daily weather station data for min and max precipitation and cumulative precipitation. Missing observations are supplied from gridded data from [Daymet](https://daymet.ornl.gov/). The table is organized in a long format, with weather variables in separate rows.
+ **weather_station_info** provides information on weather station identifiers used in the weather_daily data. This includes their lat-lon coordinates and urls for data access (if applicable). 
 
-## 4) Putting it all together
+The *harmonize_weather* function converts the daily weather table from long to wide and removes columns that are not useful in a wide format.
+```{r harmonize_weather, eval=TRUE}
+#weather_daily <- get_db_table("weather_daily")# can be a separate table or part of a list.
+str(db$weather_daily) # long version
+weatherdf <- harmonize_weather(db$weather_daily)
+str(weatherdf) # wide simplified version
+
+```
+
+
+## 5) Putting it all together
 The *harmonize_yields_treatments* function combines the harmonization steps for treatments, units, and yields and merges them together. It includes the option to keep crop fractions in separate rows or reorganize them into columns. It can operate on a list of pre-downloaded tables, or fetch the tables from Directus. 
 
-```{r harmonize_yields_treatments, eval=FALSE}
-db <- import_db_tables(c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields"),fetch_option = "download.only")
-hyt <- harmonize_yields_treatments(db, crop_fractions_as_columns = TRUE) # column names will have numbered suffixes for crop fractions.
+```{r harmonize_yields_treatments, eval=TRUE}
+# db <- import_db_tables(c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields"),fetch_option = "download.only")
+hyt <- harmonize_yields_treatments(db, crop_fractions_as_columns = TRUE) 
+names(hyt) #names will have numbered suffixes for crop fractions.
+dim(hyt)
+
+hyt <- harmonize_yields_treatments(db, crop_fractions_as_columns = FALSE)  
+names(hyt) 
+dim(hyt)
 
 ```
 
 The *harmonize_yields_planting_harvest* function combines the harmonization steps for yields, planting info, and harvest dates. The only argument is the input list of data tables, which are fetched from Directus if NULL. Details on component crops and multiple planting dates from planting_info are excluded. Multiple harvest dates are included as separate columns, as in *harmonize_harvest_dates*. Multiple fractions per crop are included as separate columns with suffixes _f1, _f2, etc. 
 
-```{r harmonize_yields_planting_harvest, eval=FALSE}
-db <- import_db_tables(c("crop_yields","planting_info","harvest_dates"),fetch_option = "download.only")
+```{r harmonize_yields_planting_harvest, eval=TRUE}
+names(db) # full list including yield, planting, and harvest data. 
 yph <- harmonize_yields_planting_harvest(db)
-
+dim(yph)
+names(yph)
 ```
 
 
-The *harmonize_yields_planting_harvest_treatments* function combines the harmonization steps for yields, planting info, harvest dates, and experimental treatments to create one giant data table. The only argument is the input list of data tables, which are fetched from Directus if NULL. If don't mind losing some details, you can skip all the previous data download and harmonization steps and just use this function. The code below fetches the tables from the database and puts them all together. You can provide a list of previously downloaded database tables as an input.
+The *harmonize_yields_planting_harvest_treatments* function combines the harmonization steps for yields, planting info, harvest dates, and experimental treatments to create one giant data table. The only argument is the input list of data tables, which are fetched from Directus if NULL. If don't mind losing some details, you can skip all the previous data download and harmonization steps (excluding weather data) and just use this function. The code below fetches the tables from the database and puts them all together. You can provide a list of previously downloaded database tables as an input.
 
-```{r harmonize_yields_planting_harvest_treatments, eval=FALSE}
-monsterdf <- harmonize_yields_planting_harvest_treatments()
+```{r harmonize_yields_planting_harvest_treatments, eval=TRUE}
+monsterdf <- harmonize_yields_planting_harvest_treatments(db)
 dim(monsterdf)
+names(monsterdf)
 ```
 
 
