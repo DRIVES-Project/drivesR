@@ -8,4 +8,11 @@
 \description{
 Contains various functions to access and harmonize data from the DRIVES database. Also contains functions used to prepare data, perform quality checks, and manage the database structure.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://drives-project.github.io/drivesR/}
+}
+
+}
 \keyword{internal}
