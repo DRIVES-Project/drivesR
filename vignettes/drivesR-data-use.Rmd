@@ -2,7 +2,7 @@
 title: "Workflow for using DRIVES database tables with drivesR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Workflow for using DRIVES database tables}
+  %\VignetteIndexEntry{Workflow for using DRIVES database tables with drivesR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
