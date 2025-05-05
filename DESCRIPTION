@@ -2,7 +2,7 @@ Package: drivesR
 Type: Package
 Title: DRIVES Database Workflow
 Version: 0.1.0
-Author: person("Katherine","Muller",,"katherine.muller@usda.gov", role = c("aut","cre"), comment = c(ORCID = "MYORCID"))
+Authors@R: c(person(given = "Katherine",family = "Muller", role = c("aut","cre"), comment = c(ORCID = "0000-0001-9144-3867")))
 Maintainer: The package maintainer <katherine.muller2010@gmail.com>
 Description: Contains various functions to access and harmonize data
   from the DRIVES database. Also contains functions used to prepare data, 
