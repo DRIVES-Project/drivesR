@@ -280,7 +280,8 @@ harmonize_treatments <- function(db = NULL){
   mergenames <- c("site_id","treatmentID1","year")## cols to merge on
   step1names <- c("treatmentID2","entryPhase") # cols added in step 1
   step2names <- setdiff(names(tc2w), c(mergenames,step1names)) # cols overwritten in step 2.
-  tcw <- dplyr::left_join(tc2w, tc1w, by = mergenames, suffix = c(".t2",".t1")) %>% as.data.frame()
+  #tcw <- dplyr::left_join(tc2w, tc1w, by = mergenames, suffix = c(".t2",".t1")) %>% as.data.frame()
+  tcw <- dplyr::full_join(tc2w, tc1w, by = mergenames, suffix = c(".t2",".t1")) %>% as.data.frame()
   ## overlapping treatment components will be given .t2 from tc2 and .t1 from tc1
   ## step 2: overwrite any columns specified differently in components of treatmentID2 
   # (usually due to discrepencies in rotation sequences across phases)
