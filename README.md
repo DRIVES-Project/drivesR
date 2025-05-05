@@ -38,12 +38,7 @@ devtools::install_github("DRIVES-Project/drivesR")
 
 ## Example
 
-Detailed instructions and examples can be found in the vignette:
-
-``` r
-library(drivesR)
-#> Warning: replacing previous import 'jsonlite::flatten' by 'purrr::flatten' when
-#> loading 'drivesR'
-vignette("drivesR-data-use")
-#> Warning: vignette 'drivesR-data-use' not found
-```
+This
+[vignette](https://drives-project.github.io/drivesR/articles/drivesR-data-use.html)
+provides detailed instructions and examples for accessing and
+harmonizing DRIVES data tables.
