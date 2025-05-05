@@ -36,7 +36,6 @@ library(drivesR)
  You can use the username and password to log in to the [Directus Data Studio Application](https://data.drives-network.org/admin/login), where you can change your password and view tables through the graphical interface. While you can download tables from this application, we recommend doing so through the drivesR package. The API key is all you need to access the data through the drivesR package. 
  
 
-## Directus API key:
 After you complete the request process, you will receive a Directus API key set to your user permissions. This is a string of random letters and numbers. For use with this package, the Directus API key must be formatted, "Bearer APIKEY". 
 
 It's best practice never to hard-code an API key into a script. We recommend making a setup script that is sourced by other scripts (be sure to add this to your .gitignore if you're using github). Alternatively, you can use this script to read the API key from a non-indexed location.
@@ -54,7 +53,11 @@ directus_token = "Bearer MYAPIKEY"
 ## Setup steps
 If you format your setup script as described above, you should include these lines of code at the beginning of every any script that downloads DRIVES tables:
 
-```{r setup1, warning=FALSE}
+```{r silent_setup, include = FALSE}
+library(drivesR)
+```
+
+```{r setup1, eval=FALSE}
 library(drivesR)
 source("directus_creds.R")
 set_default_token(directus_token)
@@ -76,9 +79,9 @@ The drivesR package has several options for accessing DRIVES database tables
 1) _Download individual tables._
 The *get_db_table* function uses table names as inputs. 
 
-```{r get_db_table}
+```{r get_db_table, eval= FALSE}
 crop_info <- get_db_table("crop_info")
-str(crop_info)
+
 ```
 
 You can see the names of tables available for public access by running this code after the package is loaded (this excludes dictionary tables that are available without an API key).
@@ -142,7 +145,7 @@ dict <- import_dictionary_tables()
 
 If you're interested in seeing how the database is structured in Directus, you can use the *get_db_info* function to view metadata for any endpoint in the API. The example below shows metadata for the table dictionary. The output can be formatted as a json or a dataframe. The json option is a clearer representation of how information is structured in Directus. See [https://directus.io/docs/api](https://directus.io/docs/api). For more information on the Directus API. 
 
-```{r get_db_info}
+```{r get_db_info, eval = TRUE}
 table_dict_info <- get_db_info(mytarget = "collections/table_dictionary",
                              output_format = "json")
 print(table_dict_info)
