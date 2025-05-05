@@ -7,7 +7,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
 
+```
 
 This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [data.drives-network.org](https://data.drives-network.org). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVE project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
 
@@ -18,8 +24,7 @@ As of May 2025, access to DRIVES database tables requires an API key. Project me
 
 # Installation
 To install the drivesR package, use the install_github function from the devtools package. 
-
-``` r
+```{r installation, eval=FALSE}
 devtools::install_github("DRIVES-project/drivesR", ref = "main")
 library(drivesR)
 ```
@@ -37,24 +42,23 @@ After you complete the request process, you will receive a Directus API key set 
 It's best practice never to hard-code an API key into a script. We recommend making a setup script that is sourced by other scripts (be sure to add this to your .gitignore if you're using github). Alternatively, you can use this script to read the API key from a non-indexed location.
 
 The code below generates an empty script file in your working directory that opens in R studio.
-
-``` r
+```{r creds1, eval = FALSE}
 usethis::edit_file("directus_creds.R")
 ```
 
 Once you have an empty script file, you can add something like this, replacing MYAPI key with the API key you received.
-
-``` r
+```{r creds2, eval = FALSE}
 directus_token = "Bearer MYAPIKEY"
 ```
 
 ## Setup steps
 If you format your setup script as described above, you should include these lines of code at the beginning of every any script that downloads DRIVES tables:
 
+```{r silent_setup, include = FALSE}
+library(drivesR)
+```
 
-
-
-``` r
+```{r setup1, eval=TRUE}
 library(drivesR)
 source("directus_creds.R")
 set_default_token(directus_token)
@@ -63,8 +67,7 @@ set_default_token(directus_token)
 The last line sets the global option for the Directus token that is used by functions in the drivesR package. You can view this option with getOption("drivesR.default.directus.token").
 
 DRIVES collaborators and project members with full read-access will need to add one extra line:
-
-``` r
+```{r setup2, eval= FALSE}
 set_public_access(public = FALSE)
 ```
 By default, the drivesR package reads from data tables with approved public access privileges, which excludes certain sites and site-years. This function allows approved users to access the full database. 
@@ -77,35 +80,15 @@ The drivesR package has several options for accessing DRIVES database tables
 1) _Download individual tables._
 The *get_db_table* function uses table names as inputs. 
 
-
-``` r
+```{r get_db_table, eval= TRUE}
 crop_info <- get_db_table("crop_info")
 str(crop_info)
-#> 'data.frame':	91 obs. of  11 variables:
-#>  $ crop_id            : chr  "alfalfa" "alfalfa mix" "alfalfa plus" "annual grass-forb mix" ...
-#>  $ parent_crop_id     : chr  "alfalfa plus" "alfalfa plus" NA "annual mix" ...
-#>  $ species_name       : chr  "Medicago sativa L." NA NA NA ...
-#>  $ is_a_mix           : logi  FALSE TRUE TRUE TRUE TRUE TRUE ...
-#>  $ family             : chr  "Fabaceae" NA NA NA ...
-#>  $ perenniality       : chr  "perennial" "perennial" "perennial" "annual" ...
-#>  $ photosynthetic_mode: chr  "C3" NA NA NA ...
-#>  $ seasonality        : chr  "warm season" NA NA NA ...
-#>  $ base_temp_c        : int  5 NA NA NA NA NA NA NA NA NA ...
-#>  $ max_temp_c         : num  43.3 NA NA NA NA NA NA NA NA NA ...
-#>  $ gdd_references     : chr  "Parsons et al 2006" NA NA NA ...
 ```
 
 You can see the names of tables available for public access by running this code after the package is loaded (this excludes dictionary tables that are available without an API key).
-
-``` r
+```{r default.tablevec}
 options("drivesR.default.tablevec")
-#> $drivesR.default.tablevec
-#>  [1] "crop_info"                    "crop_variety_info"            "crop_yields"                 
-#>  [4] "experimental_unit_info"       "experimental_unit_treatments" "harvest_dates"               
-#>  [7] "planting_info"                "rotation_id_info"             "rotation_phases"             
-#> [10] "site_info"                    "site_treatment_level_info"    "site_treatment_type_info"    
-#> [13] "treatment_id_components"      "treatment_id_info"            "weather_daily"               
-#> [16] "weather_station_info"
+
 ```
 
 
@@ -113,16 +96,14 @@ options("drivesR.default.tablevec")
 The *import_db_tables* function accesses multiple tables at once. This can be used in several ways depending on your workflow and system limitations. 
 
 The argument "tablevec" determines which database tables are downloaded. By default, the function downloads all tables in *getOption("drivesR.default.tablevec")*. If set to NULL, the function will download all tables available to your user role. You can also provide a vector of table names. 
-
-``` r
+```{r import_db_tables1, eval=FALSE}
 db <- import_db_tables(tablevec =  c("crop_yields","site_info","experimental_unit_treatments"))
 ```
 For the remaining examples, we'll assume the default "tablevec" option. 
 
 The argument "fetch_option" controls whether tables are imported as a list to the global R environment ("download.only"), saved to a specified directory ("save.only"), or both ("download.only"). It also has the option to read tables from a local directory after they have been downloaded ("upload"). The latter option allows you to rerun the same code without having to repeat the time-consuming step of downloading the tables. For example, you could run the following code to download tables into a list in your global R environment and saved as an RData file on your local directory:  
 
-
-``` r
+```{r import_db_tables2, eval=FALSE}
 db <- import_db_tables(fetch_option = "download.save",
                        #fetch_option = "upload",
                        savedir = "data",
@@ -131,39 +112,18 @@ db <- import_db_tables(fetch_option = "download.save",
 
 Then, you can move the comment and rerun the same code to load the tables from the local directory:
 
-
-``` r
+```{r import_db_tables3, eval=TRUE}
 db <- import_db_tables(#fetch_option = "download.save",
                        fetch_option = "upload",
                        savedir = "data",
                        savename = "sampledblist")
-#> 
-#> Imported list db with tables:
-#> 
-#> crop_info
-#> crop_variety_info
-#> crop_yields
-#> experimental_unit_info
-#> experimental_unit_treatments
-#> harvest_dates
-#> planting_info
-#> rotation_id_info
-#> rotation_phases
-#> site_info
-#> site_treatment_level_info
-#> site_treatment_type_info
-#> treatment_id_components
-#> treatment_id_info
-#> weather_daily
-#> weather_station_info
 ```
 
 Importing tables into a list in the global R environment is convenient for downstream analysis, but can take up a lot of working memory. If working memory is limiting, you can bypass this step by setting the fetch_option as "save.only". 
   The save_option argument allows you to specify how you want the tables saved. The default is an R data object with a list of tables ("list"). You can also save tables as separate rds or csv files. For systems with limited working memory, it may work better to save tables as separate files and load individual tables as needed.    
 
 Users who plan to work with the data tables outside of R may want to save the tables into separate CSV files locally:
-
-``` r
+```{r import_db_tables4, eval=FALSE}
 db <- import_db_tables(fetch_option = "save.only",
                        save_option = "csv",
                        savedir = "myChosenFolder",
@@ -175,8 +135,7 @@ db <- import_db_tables(fetch_option = "save.only",
 The database contains three data dictionary tables with detailed descriptions about tables, columns within tables, and categorical variables. The column dictionary includes the details used to generate the database schema, including primary keys and foreign key relationships. 
 
 Dictionary tables can be downloaded individually, using the *get_db_table* function, or all at once as a list with *import_dictionary_tables*.
-
-``` r
+```{r import_dictionary_tables, eval=FALSE}
 ## separate:
 table_dictionary <- get_db_table("table_dictionary")
 column_dictionary <- get_db_table("column_dictionary")
@@ -187,44 +146,10 @@ dict <- import_dictionary_tables()
 
 If you're interested in seeing how the database is structured in Directus, you can use the *get_db_info* function to view metadata for any endpoint in the API. The example below shows metadata for the table dictionary. The output can be formatted as a json or a dataframe. The json option is a clearer representation of how information is structured in Directus. See [https://directus.io/docs/api](https://directus.io/docs/api). For more information on the Directus API. 
 
-
-``` r
+```{r get_db_info, eval = TRUE}
 table_dict_info <- get_db_info(mytarget = "collections/table_dictionary",
                              output_format = "json")
 print(table_dict_info)
-#> {
-#>     "data": {
-#>         "collection": "table_dictionary",
-#>         "meta": {
-#>             "collection": "table_dictionary",
-#>             "icon": null,
-#>             "note": "Describes tables within the DRIVES database (you're reading it now!). \n One row per table. ",
-#>             "display_template": null,
-#>             "hidden": false,
-#>             "singleton": false,
-#>             "translations": null,
-#>             "archive_field": null,
-#>             "archive_app_filter": true,
-#>             "archive_value": null,
-#>             "unarchive_value": null,
-#>             "sort_field": null,
-#>             "accountability": "all",
-#>             "color": null,
-#>             "item_duplication_fields": null,
-#>             "sort": null,
-#>             "group": null,
-#>             "collapse": "open",
-#>             "preview_url": null,
-#>             "versioning": false
-#>         },
-#>         "schema": {
-#>             "schema": "public",
-#>             "name": "table_dictionary",
-#>             "comment": null
-#>         }
-#>     }
-#> }
-#> 
 ```
 One detail to note is that non-dictionary tables with approved public viewer access have a prefix "public_". This only comes up when viewing tables in the [Directus Studio App](https://data.drives-network.org/admin/login) or specifying API endpoints directly, as shown below. 
 
@@ -235,8 +160,7 @@ The DRIVES database was designed to be flexible for various end-uses and preserv
 ### 1) Crop yields:
 The *harmonize_yields* function performs useful operations on the crop_yields table. If the table is already downloaded, it can be used as an argument. Otherwise, the function downloads the table using the Directus API. 
 
-
-``` r
+```{r harmonize_yields, eval=FALSE}
 ## without pre-downloaded tables:
 yields <- harmonize_yields()
 ## with pre-downloaded tables:
@@ -247,42 +171,19 @@ yields <- harmonize_yields(db$crop_yields)
 ```
 
 The function performs some light processing steps, such as calculating dry yields and adding a TRUE or FALSE column for cover crops. It also provides the option to keep crop fractions from the same crop/unit/year (e.g. grain and straw) in separate rows, to rearrange them into columns. 
-
-``` r
+```{r harmonize2, eval = TRUE} 
 ## crop fractions in rows
 #crop_yields <- get_db_table("crop_yields")
 yields <- harmonize_yields(db$crop_yields) # could be a separate dataframe or part of a list
 longyields <- harmonize_yields(db$crop_yields,
                                crop_fractions_as_columns = FALSE)
 dim(longyields)
-#> [1] 65839    18
 names(longyields)
-#>  [1] "uid"                         "site_id"                     "unit_id"                    
-#>  [4] "harvest_year"                "rotation_phase"              "stand_year"                 
-#>  [7] "num_harvests"                "expected_crop_id"            "actual_crop_id"             
-#> [10] "measured_fraction"           "removed_from_field_tf"       "dry_yield_kg_ha"            
-#> [13] "yield_kg_ha"                 "yield_percent_moisture"      "moisture_type"              
-#> [16] "percent_moisture_at_harvest" "data_processing_note"        "cover_crop"
 ## crop fractions in columns
 wideyields <- harmonize_yields(db$crop_yields,
                                crop_fractions_as_columns = TRUE)
 dim(wideyields)
-#> [1] 47021    40
 names(wideyields) # columns include suffix _1 for the primary fraction and _2, _3, etc. for other fractions.
-#>  [1] "site_id"                       "unit_id"                       "harvest_year"                 
-#>  [4] "actual_crop_id"                "stand_year"                    "num_harvests"                 
-#>  [7] "rotation_phase"                "uid_1"                         "uid_2"                        
-#> [10] "uid_3"                         "expected_crop_id_1"            "expected_crop_id_2"           
-#> [13] "expected_crop_id_3"            "measured_fraction_1"           "measured_fraction_2"          
-#> [16] "measured_fraction_3"           "removed_from_field_tf_1"       "removed_from_field_tf_2"      
-#> [19] "removed_from_field_tf_3"       "dry_yield_kg_ha_1"             "dry_yield_kg_ha_2"            
-#> [22] "dry_yield_kg_ha_3"             "yield_kg_ha_1"                 "yield_kg_ha_2"                
-#> [25] "yield_kg_ha_3"                 "yield_percent_moisture_1"      "yield_percent_moisture_2"     
-#> [28] "yield_percent_moisture_3"      "moisture_type_1"               "moisture_type_2"              
-#> [31] "moisture_type_3"               "percent_moisture_at_harvest_1" "percent_moisture_at_harvest_2"
-#> [34] "percent_moisture_at_harvest_3" "data_processing_note_1"        "data_processing_note_2"       
-#> [37] "data_processing_note_3"        "cover_crop_1"                  "cover_crop_2"                 
-#> [40] "cover_crop_3"
 ```
 
 
@@ -306,8 +207,7 @@ Information about experimental treatments and design is organized across multipl
 - **experimental_unit_treatments**: Indicates which treatment_ids were applied to which experimental units in which years, organized as start year and end year.  
 
 The *harmonize_treatments* function takes information from *treatment_id_info* and *treatment_id_components* and expands them into a time-series data set with one row per treatment_id/year and separate columns for each treatment component. This can be useful for exploratory analysis of experimental designs. The function accepts a list of database tables named *treatment_id_info* and *treatment_id_components*. If those are not provided, it fetches those tables from the Directus database.
-
-``` r
+```{r harmonize_treatments, eval=FALSE}
 ## tables provided
 trt <- harmonize_treatments(db) # db is a named list with 'treatment_id_info' and 'treatment_id_components'
 
@@ -318,34 +218,26 @@ trt <- harmonize_treatments()
 
 
 The harmonize_treatments_units function produces a dataframe with one row per unit_id and year, and separate columns for each treatment id and component. This structure allows it to be merged with yield data. Similar to other harmonization functions, it accepts a named list or fetches tables from the database.
-
-``` r
+```{r harmonize_treatments_units, eval=FALSE}
 ## tables provided
 trtunit <- harmonize_treatments_units(db) # db is a named list with 'treatment_id_info', 'treatment_id_components', and 'experimental_unit_treatments'
 
 # tables not provided
 trtunit <- harmonize_treatments_units()
 
+
 ```
 
 The full dataframe with all treatment components may be a little daunting. We made a function list_treatment_types_by_management_practice to help subset column names corresponding to particular management practices. This uses information in the site_treatment_type_info table. The function accepts this table as an argument, or fetches it from the database. 
 
-
-``` r
+```{r list_treatments_by_management_practice, eval = TRUE}
 trt <- harmonize_treatments(db)
-#> Joining with `by = join_by(treatment_id)`
 trtlist <- list_treatments_by_management_practice(db$site_treatment_type_info)
 # lets say I wanted to extract information on N fertility treatments
 trtcolz <- trtlist$`N fertility`
 trtsubset <- trt[c("site_id","year", trtcolz)]
 head(trtsubset)
-#>   site_id year         N fertility nutrient management system N rate soil amendment grassland N addition
-#> 1   CATCE 2013 low input synthetic                       <NA>   <NA>           <NA>                 <NA>
-#> 2   CATCE 2014 low input synthetic                       <NA>   <NA>           <NA>                 <NA>
-#> 3   CATCE 2015 low input synthetic                       <NA>   <NA>           <NA>                 <NA>
-#> 4   CATCE 2016 low input synthetic                       <NA>   <NA>           <NA>                 <NA>
-#> 5   CATCE 2017 low input synthetic                       <NA>   <NA>           <NA>                 <NA>
-#> 6   CATCE 2018 low input synthetic                       <NA>   <NA>           <NA>                 <NA>
+
 ```
 
 ## 3) Management data
@@ -357,64 +249,21 @@ The harmonize_planting_info function offers several options to simplify the plan
 Multiple planting dates can be retained in separate rows or columns, or trimmed to include only the latest planting date. Component crops within mixtures can be retained as separate columns or excluded. See ?harmonize_planting_info for details on options and output. 
 
 Like other harmonization functions, it can accept the planting_info table as an input or fetch it from the database.
-
-``` r
+```{r harmonize_planting_info, eval=TRUE}
 #planting_info <- get_db_table("planting_info") # can be a separate table or part of a list.
 p1 <- harmonize_planting_info(db$planting_info, replant_dates = "latest",include_component_crops = TRUE)
 dim(p1)
-#> [1] 44537    53
 names(p1)# names have a numbered suffix for component crops in mixtures.
-#>  [1] "site_id"              "unit_id"              "harvest_year"         "expected_crop_id"    
-#>  [5] "actual_crop_id"       "stand_year"           "rotation_phase"       "planting_date"       
-#>  [9] "date_index"           "replantedTF"          "component_crop_id_2"  "component_crop_id_1" 
-#> [13] "component_crop_id_3"  "component_crop_id_5"  "component_crop_id_4"  "component_crop_id_6" 
-#> [17] "component_crop_id_10" "component_crop_id_9"  "component_crop_id_7"  "component_crop_id_8" 
-#> [21] "variety_id_2"         "variety_id_1"         "variety_id_3"         "variety_id_5"        
-#> [25] "variety_id_4"         "variety_id_6"         "variety_id_10"        "variety_id_9"        
-#> [29] "variety_id_7"         "variety_id_8"         "planting_rate_2"      "planting_rate_1"     
-#> [33] "planting_rate_3"      "planting_rate_5"      "planting_rate_4"      "planting_rate_6"     
-#> [37] "planting_rate_10"     "planting_rate_9"      "planting_rate_7"      "planting_rate_8"     
-#> [41] "uid_2"                "uid_1"                "uid_3"                "uid_5"               
-#> [45] "uid_4"                "uid_6"                "uid_10"               "uid_9"               
-#> [49] "uid_7"                "uid_8"                "planting_units"       "material_planted"    
-#> [53] "planting_notes"
 # And since replant_dates = 'latest', there is an added column replantedTF indicating whether a unit was replanted.
 
 p2 <- harmonize_planting_info(db$planting_info, replant_dates = "rows",include_component_crops = FALSE)
 dim(p2)
-#> [1] 45019    18
 names(p2) # All planting dates are included and organized under a date_index column. Since include_component_crops is FALSE, there is an added column num_components providing the number of component crops within each actual_crop_id.
-#>  [1] "uid"                 "site_id"             "unit_id"             "expected_crop_id"    "actual_crop_id"     
-#>  [6] "stand_year"          "rotation_phase"      "phase_year_planting" "harvest_year"        "planting_year"      
-#> [11] "planting_date"       "variety_id"          "planting_rate"       "planting_units"      "material_planted"   
-#> [16] "planting_notes"      "date_index"          "num_components"
 
 p3 <- harmonize_planting_info(db$planting_info, replant_dates = "columns",include_component_crops = TRUE)
 dim(p3)
-#> [1] 44537    85
 names(p3) # names include suffixes d and c for planting dates and component crops, respectively.
-#>  [1] "site_id"                  "unit_id"                  "expected_crop_id"         "actual_crop_id"          
-#>  [5] "stand_year"               "rotation_phase"           "harvest_year"             "component_crop_id_d1_c2" 
-#>  [9] "component_crop_id_d1_c1"  "component_crop_id_d2_c1"  "component_crop_id_d1_c3"  "component_crop_id_d3_c1" 
-#> [13] "component_crop_id_d1_c5"  "component_crop_id_d1_c4"  "component_crop_id_d1_c6"  "component_crop_id_d1_c10"
-#> [17] "component_crop_id_d1_c9"  "component_crop_id_d1_c7"  "component_crop_id_d1_c8"  "component_crop_id_d3_c2" 
-#> [21] "component_crop_id_d2_c2"  "component_crop_id_d4_c1"  "planting_date_d1_c2"      "planting_date_d1_c1"     
-#> [25] "planting_date_d2_c1"      "planting_date_d1_c3"      "planting_date_d3_c1"      "planting_date_d1_c5"     
-#> [29] "planting_date_d1_c4"      "planting_date_d1_c6"      "planting_date_d1_c10"     "planting_date_d1_c9"     
-#> [33] "planting_date_d1_c7"      "planting_date_d1_c8"      "planting_date_d3_c2"      "planting_date_d2_c2"     
-#> [37] "planting_date_d4_c1"      "variety_id_d1_c2"         "variety_id_d1_c1"         "variety_id_d2_c1"        
-#> [41] "variety_id_d1_c3"         "variety_id_d3_c1"         "variety_id_d1_c5"         "variety_id_d1_c4"        
-#> [45] "variety_id_d1_c6"         "variety_id_d1_c10"        "variety_id_d1_c9"         "variety_id_d1_c7"        
-#> [49] "variety_id_d1_c8"         "variety_id_d3_c2"         "variety_id_d2_c2"         "variety_id_d4_c1"        
-#> [53] "planting_rate_d1_c2"      "planting_rate_d1_c1"      "planting_rate_d2_c1"      "planting_rate_d1_c3"     
-#> [57] "planting_rate_d3_c1"      "planting_rate_d1_c5"      "planting_rate_d1_c4"      "planting_rate_d1_c6"     
-#> [61] "planting_rate_d1_c10"     "planting_rate_d1_c9"      "planting_rate_d1_c7"      "planting_rate_d1_c8"     
-#> [65] "planting_rate_d3_c2"      "planting_rate_d2_c2"      "planting_rate_d4_c1"      "uid_d1_c2"               
-#> [69] "uid_d1_c1"                "uid_d2_c1"                "uid_d1_c3"                "uid_d3_c1"               
-#> [73] "uid_d1_c5"                "uid_d1_c4"                "uid_d1_c6"                "uid_d1_c10"              
-#> [77] "uid_d1_c9"                "uid_d1_c7"                "uid_d1_c8"                "uid_d3_c2"               
-#> [81] "uid_d2_c2"                "uid_d4_c1"                "planting_notes"           "planting_units"          
-#> [85] "material_planted"
+
 ```
 
 *harvest_dates* provides harvest dates for every unit/year/crop where available. It includes separate rows for multiple harvest dates (typical for forages) and for crop fractions harvested on different dates (rare). 
@@ -422,32 +271,15 @@ names(p3) # names include suffixes d and c for planting dates and component crop
 The harmonize_harvest_dates function reshapes the harvest_dates table so multiple harvests are in separate columns (one row per unit/year/crop). It has an option to put crop fractions with different harvest dates in separate columns (rarely an issue).
 
 Like other harmonization functions, it can accept the planting_info table as an input or fetch it from the database
-
-``` r
+```{r harmonize_harvest_dates, eval=TRUE}
 #harvest_dates <- get_db_table("harvest_dates")# can be a separate table or part of a list.
 h1 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = FALSE)
 dim(h1)
-#> [1] 45299    26
 names(h1)
-#>  [1] "site_id"            "unit_id"            "expected_crop_id"   "actual_crop_id"     "stand_year"        
-#>  [6] "rotation_phase"     "phase_year_harvest" "harvest_year"       "harvested_fraction" "harvest_notes"     
-#> [11] "termination_date"   "termination_notes"  "harvest_date_1"     "harvest_date_2"     "harvest_date_3"    
-#> [16] "harvest_date_4"     "harvest_date_5"     "harvest_date_6"     "harvest_date_7"     "uid_1"             
-#> [21] "uid_2"              "uid_3"              "uid_4"              "uid_5"              "uid_6"             
-#> [26] "uid_7"
 
 h2 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = TRUE)
 dim(h2) # only slightly different.
-#> [1] 45267    32
 names(h2)
-#>  [1] "site_id"              "unit_id"              "expected_crop_id"     "actual_crop_id"      
-#>  [5] "stand_year"           "rotation_phase"       "phase_year_harvest"   "harvest_year"        
-#>  [9] "harvest_notes"        "termination_date"     "termination_notes"    "harvest_date_1"      
-#> [13] "harvest_date_2"       "harvest_date_3"       "harvest_date_4"       "harvest_date_5"      
-#> [17] "harvest_date_6"       "harvest_date_7"       "harvested_fraction_1" "harvested_fraction_2"
-#> [21] "harvested_fraction_3" "harvested_fraction_4" "harvested_fraction_5" "harvested_fraction_6"
-#> [25] "harvested_fraction_7" "uid_1"                "uid_2"                "uid_3"               
-#> [29] "uid_4"                "uid_5"                "uid_6"                "uid_7"
 ```
 
 ## 6) Weather
@@ -456,159 +288,46 @@ The DRIVES database contains two tables pertaining to weather:
  **weather_station_info** provides information on weather station identifiers used in the weather_daily data. This includes their lat-lon coordinates and urls for data access (if applicable). 
 
 The *harmonize_weather* function converts the daily weather table from long to wide and removes columns that are not useful in a wide format.
-
-``` r
+```{r harmonize_weather, eval=TRUE}
 #weather_daily <- get_db_table("weather_daily")# can be a separate table or part of a list.
 str(db$weather_daily) # long version
-#> 'data.frame':	732322 obs. of  9 variables:
-#>  $ uid               : int  95329 95330 95331 95332 95333 95334 95335 95336 95337 95338 ...
-#>  $ site_id           : chr  "CATCE" "CATCE" "CATCE" "CATCE" ...
-#>  $ weather_station_id: chr  "CATCE_ST2" "CATCE_ST2" "CATCE_ST2" "CATCE_ST2" ...
-#>  $ year              : int  1978 1978 1978 1978 1978 1978 1978 1978 1978 1978 ...
-#>  $ date              : chr  "1978-01-01" "1978-01-01" "1978-01-01" "1978-01-02" ...
-#>  $ day_of_year       : int  1 1 1 2 2 2 3 3 3 4 ...
-#>  $ variable          : chr  "air_temp_min_c" "air_temp_max_c" "precip_mm" "air_temp_min_c" ...
-#>  $ value             : num  4.4 13.9 0 7.8 15 1.3 7.8 13.9 4.6 8.3 ...
-#>  $ flag              : chr  NA NA NA NA ...
 weatherdf <- harmonize_weather(db$weather_daily)
 str(weatherdf) # wide simplified version
-#> tibble [244,108 × 7] (S3: tbl_df/tbl/data.frame)
-#>  $ site_id       : chr [1:244108] "CATCE" "CATCE" "CATCE" "CATCE" ...
-#>  $ year          : int [1:244108] 1978 1978 1978 1978 1978 1978 1978 1978 1978 1978 ...
-#>  $ date          : chr [1:244108] "1978-01-01" "1978-01-02" "1978-01-03" "1978-01-04" ...
-#>  $ day_of_year   : int [1:244108] 1 2 3 4 5 6 7 8 9 10 ...
-#>  $ air_temp_min_c: num [1:244108] 4.4 7.8 7.8 8.3 10 9.4 5.6 10 11.7 10 ...
-#>  $ air_temp_max_c: num [1:244108] 13.9 15 13.9 11.7 12.8 13.3 15 13.9 14.4 16.1 ...
-#>  $ precip_mm     : num [1:244108] 0 1.3 4.6 4.3 29.7 23.1 0.3 1.3 24.9 4.3 ...
+
 ```
 
 
 ## 5) Putting it all together
 The *harmonize_yields_treatments* function combines the harmonization steps for treatments, units, and yields and merges them together. It includes the option to keep crop fractions in separate rows or reorganize them into columns. It can operate on a list of pre-downloaded tables, or fetch the tables from Directus. 
 
-
-``` r
+```{r harmonize_yields_treatments, eval=TRUE}
 # db <- import_db_tables(c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields"),fetch_option = "download.only")
 hyt <- harmonize_yields_treatments(db, crop_fractions_as_columns = TRUE) 
-#> Joining with `by = join_by(treatment_id)`
-#> Joining with `by = join_by(treatment_id)`
 names(hyt) #names will have numbered suffixes for crop fractions.
-#>  [1] "site_id"                       "unit_id"                       "harvest_year"                 
-#>  [4] "actual_crop_id"                "stand_year"                    "num_harvests"                 
-#>  [7] "rotation_phase"                "uid_1"                         "uid_2"                        
-#> [10] "uid_3"                         "expected_crop_id_1"            "expected_crop_id_2"           
-#> [13] "expected_crop_id_3"            "measured_fraction_1"           "measured_fraction_2"          
-#> [16] "measured_fraction_3"           "removed_from_field_tf_1"       "removed_from_field_tf_2"      
-#> [19] "removed_from_field_tf_3"       "dry_yield_kg_ha_1"             "dry_yield_kg_ha_2"            
-#> [22] "dry_yield_kg_ha_3"             "yield_kg_ha_1"                 "yield_kg_ha_2"                
-#> [25] "yield_kg_ha_3"                 "yield_percent_moisture_1"      "yield_percent_moisture_2"     
-#> [28] "yield_percent_moisture_3"      "moisture_type_1"               "moisture_type_2"              
-#> [31] "moisture_type_3"               "percent_moisture_at_harvest_1" "percent_moisture_at_harvest_2"
-#> [34] "percent_moisture_at_harvest_3" "data_processing_note_1"        "data_processing_note_2"       
-#> [37] "data_processing_note_3"        "cover_crop_1"                  "cover_crop_2"                 
-#> [40] "cover_crop_3"                  "treatmentID1"                  "treatmentID2"                 
-#> [43] "rotation_id"                   "entryPhase"                    "cover crop"                   
-#> [46] "fertilizer amendment class"    "irrigation"                    "N fertility"                  
-#> [49] "organic management"            "pest management"               "residue management"           
-#> [52] "tillage"                       "cropping system"               "nutrient management system"   
-#> [55] "N rate"                        "soil amendment"                "production system"            
-#> [58] "grassland management"          "grassland N addition"
 dim(hyt)
-#> [1] 47021    59
 
 hyt <- harmonize_yields_treatments(db, crop_fractions_as_columns = FALSE)  
-#> Joining with `by = join_by(treatment_id)`
-#> Joining with `by = join_by(treatment_id)`
 names(hyt) 
-#>  [1] "uid"                         "site_id"                     "unit_id"                    
-#>  [4] "harvest_year"                "rotation_phase"              "stand_year"                 
-#>  [7] "num_harvests"                "expected_crop_id"            "actual_crop_id"             
-#> [10] "measured_fraction"           "removed_from_field_tf"       "dry_yield_kg_ha"            
-#> [13] "yield_kg_ha"                 "yield_percent_moisture"      "moisture_type"              
-#> [16] "percent_moisture_at_harvest" "data_processing_note"        "cover_crop"                 
-#> [19] "treatmentID1"                "treatmentID2"                "rotation_id"                
-#> [22] "entryPhase"                  "cover crop"                  "fertilizer amendment class" 
-#> [25] "irrigation"                  "N fertility"                 "organic management"         
-#> [28] "pest management"             "residue management"          "tillage"                    
-#> [31] "cropping system"             "nutrient management system"  "N rate"                     
-#> [34] "soil amendment"              "production system"           "grassland management"       
-#> [37] "grassland N addition"
 dim(hyt)
-#> [1] 65839    37
+
 ```
 
 The *harmonize_yields_planting_harvest* function combines the harmonization steps for yields, planting info, and harvest dates. The only argument is the input list of data tables, which are fetched from Directus if NULL. Details on component crops and multiple planting dates from planting_info are excluded. Multiple harvest dates are included as separate columns, as in *harmonize_harvest_dates*. Multiple fractions per crop are included as separate columns with suffixes _f1, _f2, etc. 
 
-
-``` r
+```{r harmonize_yields_planting_harvest, eval=TRUE}
 names(db) # full list including yield, planting, and harvest data. 
-#>  [1] "crop_info"                    "crop_variety_info"            "crop_yields"                 
-#>  [4] "experimental_unit_info"       "experimental_unit_treatments" "harvest_dates"               
-#>  [7] "planting_info"                "rotation_id_info"             "rotation_phases"             
-#> [10] "site_info"                    "site_treatment_level_info"    "site_treatment_type_info"    
-#> [13] "treatment_id_components"      "treatment_id_info"            "weather_daily"               
-#> [16] "weather_station_info"
 yph <- harmonize_yields_planting_harvest(db)
 dim(yph)
-#> [1] 47021    55
 names(yph)
-#>  [1] "site_id"                        "unit_id"                        "harvest_year"                  
-#>  [4] "expected_crop_id"               "actual_crop_id"                 "stand_year"                    
-#>  [7] "num_harvests"                   "rotation_phase"                 "cover_crop"                    
-#> [10] "crop_yields_uid_f1"             "crop_yields_uid_f2"             "crop_yields_uid_f3"            
-#> [13] "measured_fraction_f1"           "measured_fraction_f2"           "measured_fraction_f3"          
-#> [16] "removed_from_field_tf_f1"       "removed_from_field_tf_f2"       "removed_from_field_tf_f3"      
-#> [19] "dry_yield_kg_ha_f1"             "dry_yield_kg_ha_f2"             "dry_yield_kg_ha_f3"            
-#> [22] "yield_kg_ha_f1"                 "yield_kg_ha_f2"                 "yield_kg_ha_f3"                
-#> [25] "yield_percent_moisture_f1"      "yield_percent_moisture_f2"      "yield_percent_moisture_f3"     
-#> [28] "moisture_type_f1"               "moisture_type_f2"               "moisture_type_f3"              
-#> [31] "percent_moisture_at_harvest_f1" "percent_moisture_at_harvest_f2" "data_processing_note_f1"       
-#> [34] "data_processing_note_f2"        "data_processing_note_f3"        "phase_year_harvest_f1"         
-#> [37] "phase_year_harvest_f2"          "harvest_notes_f1"               "harvest_notes_f2"              
-#> [40] "harvest_date_1_f1"              "harvest_date_1_f2"              "harvest_dates_uid_1_f1"        
-#> [43] "harvest_dates_uid_1_f2"         "planting_info_uid"              "phase_year_planting"           
-#> [46] "planting_year"                  "planting_date"                  "variety_id"                    
-#> [49] "planting_rate"                  "planting_units"                 "material_planted"              
-#> [52] "planting_notes"                 "date_index"                     "replantedTF"                   
-#> [55] "num_components"
 ```
 
 
 The *harmonize_yields_planting_harvest_treatments* function combines the harmonization steps for yields, planting info, harvest dates, and experimental treatments to create one giant data table. The only argument is the input list of data tables, which are fetched from Directus if NULL. If don't mind losing some details, you can skip all the previous data download and harmonization steps (excluding weather data) and just use this function. The code below fetches the tables from the database and puts them all together. You can provide a list of previously downloaded database tables as an input.
 
-
-``` r
+```{r harmonize_yields_planting_harvest_treatments, eval=TRUE}
 monsterdf <- harmonize_yields_planting_harvest_treatments(db)
-#> Joining with `by = join_by(treatment_id)`
-#> Joining with `by = join_by(treatment_id)`
 dim(monsterdf)
-#> [1] 47021    74
 names(monsterdf)
-#>  [1] "site_id"                        "unit_id"                        "year"                          
-#>  [4] "treatmentID1"                   "treatmentID2"                   "rotation_id"                   
-#>  [7] "entryPhase"                     "cover crop"                     "fertilizer amendment class"    
-#> [10] "irrigation"                     "N fertility"                    "organic management"            
-#> [13] "pest management"                "residue management"             "tillage"                       
-#> [16] "cropping system"                "nutrient management system"     "N rate"                        
-#> [19] "soil amendment"                 "production system"              "grassland management"          
-#> [22] "grassland N addition"           "expected_crop_id"               "actual_crop_id"                
-#> [25] "stand_year"                     "num_harvests"                   "rotation_phase"                
-#> [28] "cover_crop"                     "crop_yields_uid_f1"             "crop_yields_uid_f2"            
-#> [31] "crop_yields_uid_f3"             "measured_fraction_f1"           "measured_fraction_f2"          
-#> [34] "measured_fraction_f3"           "removed_from_field_tf_f1"       "removed_from_field_tf_f2"      
-#> [37] "removed_from_field_tf_f3"       "dry_yield_kg_ha_f1"             "dry_yield_kg_ha_f2"            
-#> [40] "dry_yield_kg_ha_f3"             "yield_kg_ha_f1"                 "yield_kg_ha_f2"                
-#> [43] "yield_kg_ha_f3"                 "yield_percent_moisture_f1"      "yield_percent_moisture_f2"     
-#> [46] "yield_percent_moisture_f3"      "moisture_type_f1"               "moisture_type_f2"              
-#> [49] "moisture_type_f3"               "percent_moisture_at_harvest_f1" "percent_moisture_at_harvest_f2"
-#> [52] "data_processing_note_f1"        "data_processing_note_f2"        "data_processing_note_f3"       
-#> [55] "phase_year_harvest_f1"          "phase_year_harvest_f2"          "harvest_notes_f1"              
-#> [58] "harvest_notes_f2"               "harvest_date_1_f1"              "harvest_date_1_f2"             
-#> [61] "harvest_dates_uid_1_f1"         "harvest_dates_uid_1_f2"         "planting_info_uid"             
-#> [64] "phase_year_planting"            "planting_year"                  "planting_date"                 
-#> [67] "variety_id"                     "planting_rate"                  "planting_units"                
-#> [70] "material_planted"               "planting_notes"                 "date_index"                    
-#> [73] "replantedTF"                    "num_components"
 ```
 
 
