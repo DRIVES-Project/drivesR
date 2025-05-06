@@ -341,8 +341,7 @@ harmonize_treatments_units <- function(db = NULL){
                 names_from = "treatment_id_type",
                 values_from = "treatment_id" )
   # merge yearly treatment components with yearly_unit_trt.
-  yearly_unit_trt2 <- left_join(yearly_unit_trt, subset(tcw, select = -c(treatmentID1)),
-                                by = c("site_id", "treatmentID2", "year"))
+  yearly_unit_trt2 <- left_join(yearly_unit_trt, tcw, by = c("site_id", "treatmentID1","treatmentID2", "year"))
   return(yearly_unit_trt2) 
 }
 
