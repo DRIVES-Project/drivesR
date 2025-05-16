@@ -3,7 +3,7 @@ pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
   drivesR-data-use: drivesR-data-use.html
-last_built: 2025-05-06T20:42Z
+last_built: 2025-05-16T19:40Z
 urls:
   reference: https://drives-project.github.io/drivesR/reference
   article: https://drives-project.github.io/drivesR/articles
