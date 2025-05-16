@@ -4,11 +4,16 @@
 \alias{list_treatments_by_management_practice}
 \title{List treatment components by management practice.}
 \usage{
-list_treatments_by_management_practice(site_treatment_type_info = NULL)
+list_treatments_by_management_practice(db = NULL, match_trt = TRUE)
 }
 \arguments{
-\item{site_treatment_type_info}{A data frame with the site_treatment_type_info table. If left as
-NULL, this table is imported from directus.}
+\item{db}{A named list of data frames containing the site_treatment_type_info
+and treatment_id_components table. If left as
+NULL, these tables are imported from directus.}
+
+\item{match_trt}{Specifies whether to remove treatment types that are not 
+referenced in the treatment_id_components table. Defaults to TRUE,
+with a warning mentioning which are removed.}
 }
 \value{
 A named list of treatment types corresponding to a set of core management practices described for

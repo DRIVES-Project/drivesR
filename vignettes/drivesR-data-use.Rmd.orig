@@ -235,7 +235,7 @@ The full dataframe with all treatment components may be a little daunting. We ma
 
 ```{r list_treatments_by_management_practice, eval = TRUE}
 trt <- harmonize_treatments(db)
-trtlist <- list_treatments_by_management_practice(db$site_treatment_type_info)
+trtlist <- list_treatments_by_management_practice(db)
 # lets say I wanted to extract information on N fertility treatments
 trtcolz <- trtlist$`N fertility`
 trtsubset <- trt[c("site_id","year", trtcolz)]
