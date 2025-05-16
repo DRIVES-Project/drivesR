@@ -5,8 +5,8 @@
 \title{Make relations json schema objects from data dictionary tables}
 \usage{
 make_relations_json(
-  columndf = test_column_dict[which(test_column_dict$table_name ==
-    "test_favorite_toy"), ],
+  columndf = test_column_dict[which(test_column_dict$table_name == "test_favorite_toy"),
+    ],
   tablerow = test_table_dict[2, ],
   update_action = "CASCADE",
   delete_action = "NO ACTION"

@@ -108,3 +108,48 @@ test_api_token <- function(mytoken = getOption("drivesR.default.directustoken"),
   }
   return(validCode)
 }
+
+
+#' Create Directus Personal Access Token
+#' 
+#' This function generates a personal access token (PAT) for a user 
+#' who has been registered on data.drives-network.org. The PAT is is
+#' an alternative to an API key, meant to be used for single sessions
+#' with the API. The PAT expires after about 10 minutes and can be 
+#' regenerated as many times as needed by the user.
+#' 
+#' If using this in a script, the user email and password should be read
+#' from an external file.
+#'
+#' @param useremail
+#' Email address registered with data.drives-network.org.
+#' @param userpassword 
+#' Account password.
+#' @param myurl 
+#' Default url (data.drives-network.org)
+#' @returns
+#' Returns a text object "Bearer {newPAT}" that can be used as 
+#' the input for set_default_token(). 
+#' @export
+#' @import httr
+#'
+#' @examples
+#' # not run: source("directus_creds.R") ## script that reads email and password,
+#' #not run: mypat <- generate_directus_pat(# objects created in "directus_creds.R"
+#' #                                          useremail = directus_email, 
+#' #                                          userpassword = directus_password)
+#' # not run: set_default_token(mypat)
+#' # not run: test_api_token(mypat) # to check if it works. 
+ 
+generate_directus_pat <- function(useremail = NULL,
+                                userpassword = NULL,
+                                myurl = getOption("drivesR.default.url")){
+  userlist <- list(email = useremail, password = userpassword)
+  userjson <- jsonlite::toJSON(userlist, auto_unbox = TRUE, pretty = TRUE)
+  myreq <- POST(glue::glue("{myurl}/auth/login"),
+                body = userjson, content_type_json())
+  output <- jsonlite::fromJSON(content(myreq,type = "text"))[["data"]]
+  token <- output$access_token
+  outtoken <- paste0("Bearer ",token)
+  return(outtoken)
+}
