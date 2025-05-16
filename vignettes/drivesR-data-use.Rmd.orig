@@ -15,11 +15,11 @@ knitr::opts_chunk$set(
 
 ```
 
-This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [data.drives-network.org](https://data.drives-network.org). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVE project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
+This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [data.drives-network.org](https://data.drives-network.org). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVES project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
 
 This package has two main purposes for users interested in analyzing DRIVES data. First, it provides easy-to-use functions to download data tables from the Directus API. Second, it provides harmonization functions to combine and reshape tables for analysis. 
 
-As of May 2025, access to DRIVES database tables requires an API key. Project members and collaborators can request an API key from the DRIVES data manager, which will provide full read access. Other users must complete our [data use survey](https://www.drives-network.org/data-request) and agree to our data use terms to receive an API key. The latter will be assigned a role called "approved public access." This role has read access to a subset of the data excluding sites and site years embargoed from public access. 
+As of May 2025, access to DRIVES database tables requires an API key. Project members and collaborators can request an API key, which will proide full read access, from the DRIVES data manager. Other users must complete our [data use survey](https://www.drives-network.org/data-request) and agree to our data use terms to receive an API key. The latter will be assigned a role called "approved public access." This role has read access to a subset of the data excluding sites and site years embargoed from public access. 
 
 
 # Installation
@@ -50,6 +50,9 @@ Once you have an empty script file, you can add something like this, replacing M
 ```{r creds2, eval = FALSE}
 directus_token = "Bearer MYAPIKEY"
 ```
+
+### Personal Access Token
+If there is a problem with the API key, users with a valid email and password can generate a personal access token that will provide access to the API for short periods (a single session). See ?generate_directus_pat for details. 
 
 ## Setup steps
 If you format your setup script as described above, you should include these lines of code at the beginning of every any script that downloads DRIVES tables:
@@ -101,7 +104,7 @@ db <- import_db_tables(tablevec =  c("crop_yields","site_info","experimental_uni
 ```
 For the remaining examples, we'll assume the default "tablevec" option. 
 
-The argument "fetch_option" controls whether tables are imported as a list to the global R environment ("download.only"), saved to a specified directory ("save.only"), or both ("download.only"). It also has the option to read tables from a local directory after they have been downloaded ("upload"). The latter option allows you to rerun the same code without having to repeat the time-consuming step of downloading the tables. For example, you could run the following code to download tables into a list in your global R environment and saved as an RData file on your local directory:  
+The argument "fetch_option" controls whether tables are imported as a list to the global R environment ("download.only"), saved to a specified directory ("save.only"), or both ("download.save"). It also has the option to read tables from a local directory after they have been downloaded ("upload"). The latter option allows you to rerun the same code without having to repeat the time-consuming step of downloading the tables. For example, you could run the following code to download tables into a list in your global R environment and saved as an RData file on your local directory:  
 
 ```{r import_db_tables2, eval=FALSE}
 db <- import_db_tables(fetch_option = "download.save",
@@ -243,7 +246,7 @@ head(trtsubset)
 ## 3) Management data
 Currently, the DRIVES database has two tables with time-series management details. 
 
-- *planting_info* provides planting dates, variety identifiers, and seeding rates for every unit/year/crop where available. It includes separate rows for components of crop mixtures and for replanting, if earlier plantings failied. This level of detail makes the data a little difficult to work with.
+- *planting_info* provides planting dates, variety identifiers, and seeding rates for every unit/year/crop where available. It includes separate rows for components of crop mixtures and for replanting, if earlier plantings failed. This level of detail makes the data a little difficult to work with.
 
 The harmonize_planting_info function offers several options to simplify the planting_info table into one row per unit/year/crop/date. 
 Multiple planting dates can be retained in separate rows or columns, or trimmed to include only the latest planting date. Component crops within mixtures can be retained as separate columns or excluded. See ?harmonize_planting_info for details on options and output. 
@@ -270,7 +273,7 @@ names(p3) # names include suffixes d and c for planting dates and component crop
 
 The harmonize_harvest_dates function reshapes the harvest_dates table so multiple harvests are in separate columns (one row per unit/year/crop). It has an option to put crop fractions with different harvest dates in separate columns (rarely an issue).
 
-Like other harmonization functions, it can accept the planting_info table as an input or fetch it from the database
+Like other harmonization functions, it can accept the harvest_dates table as an input or fetch it from the database
 ```{r harmonize_harvest_dates, eval=TRUE}
 #harvest_dates <- get_db_table("harvest_dates")# can be a separate table or part of a list.
 h1 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = FALSE)

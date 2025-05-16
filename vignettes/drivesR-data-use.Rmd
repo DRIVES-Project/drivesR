@@ -9,11 +9,11 @@ vignette: >
 
 
 
-This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [data.drives-network.org](https://data.drives-network.org). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVE project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
+This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [data.drives-network.org](https://data.drives-network.org). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVES project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
 
 This package has two main purposes for users interested in analyzing DRIVES data. First, it provides easy-to-use functions to download data tables from the Directus API. Second, it provides harmonization functions to combine and reshape tables for analysis. 
 
-As of May 2025, access to DRIVES database tables requires an API key. Project members and collaborators can request an API key from the DRIVES data manager, which will provide full read access. Other users must complete our [data use survey](https://www.drives-network.org/data-request) and agree to our data use terms to receive an API key. The latter will be assigned a role called "approved public access." This role has read access to a subset of the data excluding sites and site years embargoed from public access. 
+As of May 2025, access to DRIVES database tables requires an API key. Project members and collaborators can request an API key, which will proide full read access, from the DRIVES data manager. Other users must complete our [data use survey](https://www.drives-network.org/data-request) and agree to our data use terms to receive an API key. The latter will be assigned a role called "approved public access." This role has read access to a subset of the data excluding sites and site years embargoed from public access. 
 
 
 # Installation
@@ -47,6 +47,9 @@ Once you have an empty script file, you can add something like this, replacing M
 ``` r
 directus_token = "Bearer MYAPIKEY"
 ```
+
+### Personal Access Token
+If there is a problem with the API key, users with a valid email and password can generate a personal access token that will provide access to the API for short periods (a single session). See ?generate_directus_pat for details. 
 
 ## Setup steps
 If you format your setup script as described above, you should include these lines of code at the beginning of every any script that downloads DRIVES tables:
@@ -119,7 +122,7 @@ db <- import_db_tables(tablevec =  c("crop_yields","site_info","experimental_uni
 ```
 For the remaining examples, we'll assume the default "tablevec" option. 
 
-The argument "fetch_option" controls whether tables are imported as a list to the global R environment ("download.only"), saved to a specified directory ("save.only"), or both ("download.only"). It also has the option to read tables from a local directory after they have been downloaded ("upload"). The latter option allows you to rerun the same code without having to repeat the time-consuming step of downloading the tables. For example, you could run the following code to download tables into a list in your global R environment and saved as an RData file on your local directory:  
+The argument "fetch_option" controls whether tables are imported as a list to the global R environment ("download.only"), saved to a specified directory ("save.only"), or both ("download.save"). It also has the option to read tables from a local directory after they have been downloaded ("upload"). The latter option allows you to rerun the same code without having to repeat the time-consuming step of downloading the tables. For example, you could run the following code to download tables into a list in your global R environment and saved as an RData file on your local directory:  
 
 
 ``` r
@@ -351,7 +354,7 @@ head(trtsubset)
 ## 3) Management data
 Currently, the DRIVES database has two tables with time-series management details. 
 
-- *planting_info* provides planting dates, variety identifiers, and seeding rates for every unit/year/crop where available. It includes separate rows for components of crop mixtures and for replanting, if earlier plantings failied. This level of detail makes the data a little difficult to work with.
+- *planting_info* provides planting dates, variety identifiers, and seeding rates for every unit/year/crop where available. It includes separate rows for components of crop mixtures and for replanting, if earlier plantings failed. This level of detail makes the data a little difficult to work with.
 
 The harmonize_planting_info function offers several options to simplify the planting_info table into one row per unit/year/crop/date. 
 Multiple planting dates can be retained in separate rows or columns, or trimmed to include only the latest planting date. Component crops within mixtures can be retained as separate columns or excluded. See ?harmonize_planting_info for details on options and output. 
@@ -384,36 +387,44 @@ p2 <- harmonize_planting_info(db$planting_info, replant_dates = "rows",include_c
 dim(p2)
 #> [1] 45019    18
 names(p2) # All planting dates are included and organized under a date_index column. Since include_component_crops is FALSE, there is an added column num_components providing the number of component crops within each actual_crop_id.
-#>  [1] "uid"                 "site_id"             "unit_id"             "expected_crop_id"    "actual_crop_id"     
-#>  [6] "stand_year"          "rotation_phase"      "phase_year_planting" "harvest_year"        "planting_year"      
-#> [11] "planting_date"       "variety_id"          "planting_rate"       "planting_units"      "material_planted"   
-#> [16] "planting_notes"      "date_index"          "num_components"
+#>  [1] "uid"                 "site_id"             "unit_id"             "expected_crop_id"   
+#>  [5] "actual_crop_id"      "stand_year"          "rotation_phase"      "phase_year_planting"
+#>  [9] "harvest_year"        "planting_year"       "planting_date"       "variety_id"         
+#> [13] "planting_rate"       "planting_units"      "material_planted"    "planting_notes"     
+#> [17] "date_index"          "num_components"
 
 p3 <- harmonize_planting_info(db$planting_info, replant_dates = "columns",include_component_crops = TRUE)
 dim(p3)
 #> [1] 44537    85
 names(p3) # names include suffixes d and c for planting dates and component crops, respectively.
-#>  [1] "site_id"                  "unit_id"                  "expected_crop_id"         "actual_crop_id"          
-#>  [5] "stand_year"               "rotation_phase"           "harvest_year"             "component_crop_id_d1_c2" 
-#>  [9] "component_crop_id_d1_c1"  "component_crop_id_d2_c1"  "component_crop_id_d1_c3"  "component_crop_id_d3_c1" 
-#> [13] "component_crop_id_d1_c5"  "component_crop_id_d1_c4"  "component_crop_id_d1_c6"  "component_crop_id_d1_c10"
-#> [17] "component_crop_id_d1_c9"  "component_crop_id_d1_c7"  "component_crop_id_d1_c8"  "component_crop_id_d3_c2" 
-#> [21] "component_crop_id_d2_c2"  "component_crop_id_d4_c1"  "planting_date_d1_c2"      "planting_date_d1_c1"     
-#> [25] "planting_date_d2_c1"      "planting_date_d1_c3"      "planting_date_d3_c1"      "planting_date_d1_c5"     
-#> [29] "planting_date_d1_c4"      "planting_date_d1_c6"      "planting_date_d1_c10"     "planting_date_d1_c9"     
-#> [33] "planting_date_d1_c7"      "planting_date_d1_c8"      "planting_date_d3_c2"      "planting_date_d2_c2"     
-#> [37] "planting_date_d4_c1"      "variety_id_d1_c2"         "variety_id_d1_c1"         "variety_id_d2_c1"        
-#> [41] "variety_id_d1_c3"         "variety_id_d3_c1"         "variety_id_d1_c5"         "variety_id_d1_c4"        
-#> [45] "variety_id_d1_c6"         "variety_id_d1_c10"        "variety_id_d1_c9"         "variety_id_d1_c7"        
-#> [49] "variety_id_d1_c8"         "variety_id_d3_c2"         "variety_id_d2_c2"         "variety_id_d4_c1"        
-#> [53] "planting_rate_d1_c2"      "planting_rate_d1_c1"      "planting_rate_d2_c1"      "planting_rate_d1_c3"     
-#> [57] "planting_rate_d3_c1"      "planting_rate_d1_c5"      "planting_rate_d1_c4"      "planting_rate_d1_c6"     
-#> [61] "planting_rate_d1_c10"     "planting_rate_d1_c9"      "planting_rate_d1_c7"      "planting_rate_d1_c8"     
-#> [65] "planting_rate_d3_c2"      "planting_rate_d2_c2"      "planting_rate_d4_c1"      "uid_d1_c2"               
-#> [69] "uid_d1_c1"                "uid_d2_c1"                "uid_d1_c3"                "uid_d3_c1"               
-#> [73] "uid_d1_c5"                "uid_d1_c4"                "uid_d1_c6"                "uid_d1_c10"              
-#> [77] "uid_d1_c9"                "uid_d1_c7"                "uid_d1_c8"                "uid_d3_c2"               
-#> [81] "uid_d2_c2"                "uid_d4_c1"                "planting_notes"           "planting_units"          
+#>  [1] "site_id"                  "unit_id"                  "expected_crop_id"        
+#>  [4] "actual_crop_id"           "stand_year"               "rotation_phase"          
+#>  [7] "harvest_year"             "component_crop_id_d1_c2"  "component_crop_id_d1_c1" 
+#> [10] "component_crop_id_d2_c1"  "component_crop_id_d1_c3"  "component_crop_id_d3_c1" 
+#> [13] "component_crop_id_d1_c5"  "component_crop_id_d1_c4"  "component_crop_id_d1_c6" 
+#> [16] "component_crop_id_d1_c10" "component_crop_id_d1_c9"  "component_crop_id_d1_c7" 
+#> [19] "component_crop_id_d1_c8"  "component_crop_id_d3_c2"  "component_crop_id_d2_c2" 
+#> [22] "component_crop_id_d4_c1"  "planting_date_d1_c2"      "planting_date_d1_c1"     
+#> [25] "planting_date_d2_c1"      "planting_date_d1_c3"      "planting_date_d3_c1"     
+#> [28] "planting_date_d1_c5"      "planting_date_d1_c4"      "planting_date_d1_c6"     
+#> [31] "planting_date_d1_c10"     "planting_date_d1_c9"      "planting_date_d1_c7"     
+#> [34] "planting_date_d1_c8"      "planting_date_d3_c2"      "planting_date_d2_c2"     
+#> [37] "planting_date_d4_c1"      "variety_id_d1_c2"         "variety_id_d1_c1"        
+#> [40] "variety_id_d2_c1"         "variety_id_d1_c3"         "variety_id_d3_c1"        
+#> [43] "variety_id_d1_c5"         "variety_id_d1_c4"         "variety_id_d1_c6"        
+#> [46] "variety_id_d1_c10"        "variety_id_d1_c9"         "variety_id_d1_c7"        
+#> [49] "variety_id_d1_c8"         "variety_id_d3_c2"         "variety_id_d2_c2"        
+#> [52] "variety_id_d4_c1"         "planting_rate_d1_c2"      "planting_rate_d1_c1"     
+#> [55] "planting_rate_d2_c1"      "planting_rate_d1_c3"      "planting_rate_d3_c1"     
+#> [58] "planting_rate_d1_c5"      "planting_rate_d1_c4"      "planting_rate_d1_c6"     
+#> [61] "planting_rate_d1_c10"     "planting_rate_d1_c9"      "planting_rate_d1_c7"     
+#> [64] "planting_rate_d1_c8"      "planting_rate_d3_c2"      "planting_rate_d2_c2"     
+#> [67] "planting_rate_d4_c1"      "uid_d1_c2"                "uid_d1_c1"               
+#> [70] "uid_d2_c1"                "uid_d1_c3"                "uid_d3_c1"               
+#> [73] "uid_d1_c5"                "uid_d1_c4"                "uid_d1_c6"               
+#> [76] "uid_d1_c10"               "uid_d1_c9"                "uid_d1_c7"               
+#> [79] "uid_d1_c8"                "uid_d3_c2"                "uid_d2_c2"               
+#> [82] "uid_d4_c1"                "planting_notes"           "planting_units"          
 #> [85] "material_planted"
 ```
 
@@ -421,7 +432,7 @@ names(p3) # names include suffixes d and c for planting dates and component crop
 
 The harmonize_harvest_dates function reshapes the harvest_dates table so multiple harvests are in separate columns (one row per unit/year/crop). It has an option to put crop fractions with different harvest dates in separate columns (rarely an issue).
 
-Like other harmonization functions, it can accept the planting_info table as an input or fetch it from the database
+Like other harmonization functions, it can accept the harvest_dates table as an input or fetch it from the database
 
 ``` r
 #harvest_dates <- get_db_table("harvest_dates")# can be a separate table or part of a list.
@@ -429,12 +440,13 @@ h1 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = FALS
 dim(h1)
 #> [1] 45299    26
 names(h1)
-#>  [1] "site_id"            "unit_id"            "expected_crop_id"   "actual_crop_id"     "stand_year"        
-#>  [6] "rotation_phase"     "phase_year_harvest" "harvest_year"       "harvested_fraction" "harvest_notes"     
-#> [11] "termination_date"   "termination_notes"  "harvest_date_1"     "harvest_date_2"     "harvest_date_3"    
-#> [16] "harvest_date_4"     "harvest_date_5"     "harvest_date_6"     "harvest_date_7"     "uid_1"             
-#> [21] "uid_2"              "uid_3"              "uid_4"              "uid_5"              "uid_6"             
-#> [26] "uid_7"
+#>  [1] "site_id"            "unit_id"            "expected_crop_id"   "actual_crop_id"    
+#>  [5] "stand_year"         "rotation_phase"     "phase_year_harvest" "harvest_year"      
+#>  [9] "harvested_fraction" "harvest_notes"      "termination_date"   "termination_notes" 
+#> [13] "harvest_date_1"     "harvest_date_2"     "harvest_date_3"     "harvest_date_4"    
+#> [17] "harvest_date_5"     "harvest_date_6"     "harvest_date_7"     "uid_1"             
+#> [21] "uid_2"              "uid_3"              "uid_4"              "uid_5"             
+#> [25] "uid_6"              "uid_7"
 
 h2 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = TRUE)
 dim(h2) # only slightly different.
