@@ -630,7 +630,7 @@ check_table_contents <- function(table_name = NULL,
       cnames <- paste(cnames,colname, sep=mysep)
     }
     # test the data:
-    colvec <- inputdf[,colname]
+    colvec <- inputdf[[colname]]
     
     if(dtype == "integer"){
       # test for integer
