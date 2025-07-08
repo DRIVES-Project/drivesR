@@ -920,7 +920,7 @@ order_rows_by_internal_fk <- function(inputdf = NULL,
   rowqueue <- c()
   while(length(waitingrows) > 0){
     qTF <- c()
-    for(i in seq_along(waitingrows)){
+    for(i in waitingrows){
       # if internal fk value is empty, add to queue 
       addToQ <- FALSE
       if(is.na(inputdf[i,fkcol])){
