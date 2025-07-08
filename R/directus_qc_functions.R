@@ -535,8 +535,8 @@ check_table_contents <- function(table_name = NULL,
       if(!colname %in% names(inputdf)){
         next
       }
-      failrows <- which(nchar(inputdf[,colname]) > maxLengthDf$schema.max_length[i])
-      if(length(failrows) > 0){
+      failrows <- nchar(inputdf[,colname]) > maxLengthDf$schema.max_length[i]
+      if(sum(failrows, na.rm=TRUE) > 0){
         listitem <- list(failrows)
         names(listitem) <- colname
         outlist <- append(outlist, listitem)
