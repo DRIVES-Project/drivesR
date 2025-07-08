@@ -537,7 +537,7 @@ check_table_contents <- function(table_name = NULL,
       }
       failrows <- nchar(inputdf[,colname]) > maxLengthDf$schema.max_length[i]
       if(sum(failrows, na.rm=TRUE) > 0){
-        listitem <- list(failrows)
+        listitem <- list(which(failrows==TRUE))
         names(listitem) <- colname
         outlist <- append(outlist, listitem)
         mysep <- ifelse(cnames == "", "",";")
