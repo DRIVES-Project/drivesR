@@ -30,5 +30,5 @@ internal foreign key constraints within a table.
 \examples{
 #not run: roworder <- order_rows_by_internal_fk(
 #inputdf = crop_info,idcol = "crop_id",fkcol = "parent_crop_id")
-# not run: walk(roworder,~post_rows("crop_info",inputdf[.x,] ))
+# not run: walk(roworder,~post_rows("crop_info",inputdf[[.x]] ))
 }
