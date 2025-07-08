@@ -804,6 +804,9 @@ check_fk_values <- function(table_name = NULL,
   names(fklist) <- fk_schema$field # named by field name in input table.
   for(i in 1:nrow(fk_schema)){
     fktable = fk_schema$schema.foreign_key_table[i]
+    # skip internal foreign keys
+    if(fktable == table_name) next()
+    
     fkfield = fk_schema$schema.foreign_key_column[i]
     fkq <- jsonlite::toJSON(list("fields" = fkfield),auto_unbox = FALSE)
     
@@ -821,6 +824,9 @@ check_fk_values <- function(table_name = NULL,
   names(outlist) <- fk_schema$field
   for(i in 1:nrow(fk_schema)){
     fkfield <- fk_schema$field[i]
+    
+    ## skip if it's an internal fk
+    if(is.null(fklist[[fkfield]])) next()
     fkTF <- inputdf[,fkfield] %in% fklist[[fkfield]]
     ## if the field is nullable, set NAs to true. 
     if(fk_schema$schema.is_nullable[i] == TRUE &
