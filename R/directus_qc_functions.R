@@ -535,7 +535,7 @@ check_table_contents <- function(table_name = NULL,
       if(!colname %in% names(inputdf)){
         next
       }
-      failrows <- nchar(inputdf[,colname]) > maxLengthDf$schema.max_length[i]
+      failrows <- nchar(inputdf[[colname]]) > maxLengthDf$schema.max_length[i]
       if(sum(failrows, na.rm=TRUE) > 0){
         listitem <- list(which(failrows==TRUE))
         names(listitem) <- colname
@@ -576,9 +576,9 @@ check_table_contents <- function(table_name = NULL,
       if(!colname %in% names(inputdf)){
         next
       }
-      if(anyDuplicated(inputdf[,colname])){
-        dupvals <- inputdf[,colname][which(duplicated(inputdf[,colname]))]  
-        failrows <- which(inputdf[,colname] %in% dupvals)
+      if(anyDuplicated(inputdf[[colname]])){
+        dupvals <- inputdf[[colname]][which(duplicated(inputdf[[colname]]))]  
+        failrows <- which(inputdf[[colname]] %in% dupvals)
         listitem <- list(failrows)
         names(listitem) <- colname
         outlist <- append(outlist, listitem)
@@ -827,11 +827,11 @@ check_fk_values <- function(table_name = NULL,
     
     ## skip if it's an internal fk
     if(is.null(fklist[[fkfield]])) next()
-    fkTF <- inputdf[,fkfield] %in% fklist[[fkfield]]
+    fkTF <- inputdf[[fkfield]] %in% fklist[[fkfield]]
     ## if the field is nullable, set NAs to true. 
     if(fk_schema$schema.is_nullable[i] == TRUE &
-       any(is.na(inputdf[,fkfield]))){
-      fkTF[which(is.na(inputdf[,fkfield]))] <- TRUE
+       any(is.na(inputdf[[fkfield]]))){
+      fkTF[which(is.na(inputdf[[fkfield]]))] <- TRUE
     }
     if(all(fkTF == TRUE)){
       message(glue::glue("No foreign key violations in column {fkfield}."))
@@ -918,7 +918,7 @@ order_tables_by_fk <- function(column_dictionary = NULL){
 #' @examples
 #' #not run: roworder <- order_rows_by_internal_fk(
 #' #inputdf = crop_info,idcol = "crop_id",fkcol = "parent_crop_id")
-#' # not run: walk(roworder,~post_rows("crop_info",inputdf[.x,] ))
+#' # not run: walk(roworder,~post_rows("crop_info",inputdf[[.x]] ))
 order_rows_by_internal_fk <- function(inputdf = NULL,
                                       idcol = NULL,
                                       fkcol = NULL){
