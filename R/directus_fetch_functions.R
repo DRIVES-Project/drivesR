@@ -116,65 +116,6 @@ get_db_table <- function(table_name = "site_info",
     return(table_df)
 }
 
-#' Get Canadian data from the Borealis Repository
-#' This function is called by get_db_table if the 
-#' public option is set to TRUE.
-#'
-#' @param table_name
-#' Name of the drives database table, as shown in table_dictionary. 
-#' @param dataverse_url 
-#' Server URL for the Borealis repository, part of Dataverse.
-#' By default is set to "https://borealisdata.ca"
-#' @param dataverse_doi
-#' Persistent identifier for the collection in Borealis. This is set 
-#' to a default. 
-#' @param dataverse_api 
-#' API key for the Borealis repository. This option is included for troubleshooting
-#' before the repository data tables are published. Once they are published, this option
-#' can remain as NULL.
-#' @param borealis_repo_info 
-#' A dataframe containing Borealis file identifiers for each table_name. 
-#' If NULL, this information is imported from Directus. Set with set_default_token().
-#' @param directus_url
-#' URL for the Directus database (can be set with global options).
-#' @returns
-#' A dataframe with rows for the two Canadian sites for the specified table_name. 
-#' This can be combined with the public Direcctus table using bind_rows.
-#' @export
-#' @import httr
-#' @import jsonlite
-#'
-#' @examples
-get_canadian_data <- function(table_name = NULL,
-                                  dataverse_url = "https://borealisdata.ca",
-                                  dataverse_doi = "doi:10.5683/SP3/QGLCKO",
-                                  dataverse_api = getOption("drivesR.default.dataversetoken"),
-                                  borealis_repo_info = NULL,
-                                  directus_url =getOption("drivesR.default.url") ){
-  ## import borealis_repo_info if NULL
-  if(is.null(borealis_repo_info)){
-    ## doesn't require a token.
-    brireq <- GET(url = glue::glue("{directus_url}/items/borealis_repo_info?limit=-1"))
-    borealis_repo_info <- get_table_from_req(brireq)
-      
-  }
-  #fetch File id from borealis_repo_info-----------
-  myFileId <- borealis_repo_info$repo_file_id[which(borealis_repo_info$table_name==table_name)]
-  
-  #fetch table from Borealis  -----------
-  ## for now, use my API key. This won't require a key
-  # once it's published.
-  breq <- GET(url =glue::glue("{dataverse_url}/api/access/datafile/{myFileId}"),
-              add_headers(
-                `X-Dataverse-key` = dataverse_api  
-              )
-    )
-  if(breq$status_code != 200){
-    stop("Request failed with status code ", breq$status_code)
-  }
-  bdf <- utils::read.table(text = content(breq,as = "text"),sep = "\t",header =TRUE, na.strings = "")
-  return(bdf)
-}
 
 #' Fetch schema information from directus
 #'
