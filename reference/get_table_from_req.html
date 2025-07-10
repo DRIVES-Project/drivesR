@@ -57,6 +57,21 @@
     <p>A data-frame with contents from the API request.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># not run:</span></span></span>
+<span class="r-in"><span><span class="co"># this example demonstrates how a query filter might be set up </span></span></span>
+<span class="r-in"><span><span class="co"># in an api request.</span></span></span>
+<span class="r-in"><span><span class="co"># querylist &lt;- </span></span></span>
+<span class="r-in"><span><span class="co">#   list("query"= list("filter" = </span></span></span>
+<span class="r-in"><span><span class="co">#   list("table_name" =</span></span></span>
+<span class="r-in"><span><span class="co">#   list("_eq" = "site_info")),</span></span></span>
+<span class="r-in"><span><span class="co">#   "limit" = -1))</span></span></span>
+<span class="r-in"><span><span class="co"># queryjson &lt;- toJSON(querylist, auto_unbox = TRUE)</span></span></span>
+<span class="r-in"><span><span class="co"># myreq &lt;- api_request("SEARCH","items/column_dictionary", queryjson)</span></span></span>
+<span class="r-in"><span><span class="co"># outdf &lt;- get_table_from_req(myreq)</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
@@ -66,7 +81,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

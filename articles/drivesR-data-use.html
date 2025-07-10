@@ -102,37 +102,33 @@ the devtools package.</p>
 ask that anyone interesting in using DRIVES data complete the <a href="https://www.drives-network.org/data-request" class="external-link">data request
 form</a>. Direct collaborators and project members can request access
 directly from the DRIVES data manager. Either way, you will receive an
-email with a username, password, and API key.</p>
+email with a username and password.</p>
 <p>You can use the username and password to log in to the <a href="https://data.drives-network.org/admin/login" class="external-link">Directus Data Studio
-Application</a>, where you can change your password and view tables
-through the graphical interface. While you can download tables from this
-application, we recommend doing so through the drivesR package. The API
-key is all you need to access the data through the drivesR package.</p>
-<p>After you complete the request process, you will receive a Directus
-API key set to your user permissions. This is a string of random letters
-and numbers. For use with this package, the Directus API key must be
-formatted, “Bearer APIKEY”.</p>
-<p>It’s best practice never to hard-code an API key into a script. We
-recommend making a setup script that is sourced by other scripts (be
-sure to add this to your .gitignore if you’re using github).
-Alternatively, you can use this script to read the API key from a
+Application</a>, where you can view tables through the graphical
+interface. You can change your password through the log-in page.</p>
+<p>After you complete the request process, you can use your user email
+and password to create a personal access token (PAT) for the API. The
+PAT expires after 7 days and can be regenerated using a ‘refresh’ token.
+The drivesR package has an easy-to-use function for generating and
+refreshing tokens (see below). Approved users can request a long-term
+API key from the data manager. The PAT and the API key are
+interchangeable in the examples below. See ?generate_directus_pat for
+details on how to generate a PAT.</p>
+<p>The PAT or API key is a string of random letters and numbers. For use
+with this package, the Directus API key must be formatted, “Bearer
+APIKEY”. It is best practice never to hard-code a PAT or API key into a
+script. We recommend making a setup script that is sourced by other
+scripts (be sure to add this to your .gitignore if you’re using github).
+Alternatively, you can use this script to read credentials from a
 non-indexed location.</p>
 <p>The code below generates an empty script file in your working
 directory that opens in R studio.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">edit_file</span><span class="op">(</span><span class="st">"directus_creds.R"</span><span class="op">)</span></span></code></pre></div>
 <p>Once you have an empty script file, you can add something like this,
-replacing MYAPI key with the API key you received.</p>
+replacing MYAPI key with the API key or PAT.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">directus_token</span> <span class="op">=</span> <span class="st">"Bearer MYAPIKEY"</span></span></code></pre></div>
-<div class="section level4">
-<h4 id="personal-access-token">Personal Access Token<a class="anchor" aria-label="anchor" href="#personal-access-token"></a>
-</h4>
-<p>If there is a problem with the API key, users with a valid email and
-password can generate a personal access token that will provide access
-to the API for short periods (a single session). See
-?generate_directus_pat for details.</p>
-</div>
 </div>
 <div class="section level3">
 <h3 id="setup-steps">Setup steps<a class="anchor" aria-label="anchor" href="#setup-steps"></a>
@@ -147,13 +143,6 @@ downloads DRIVES tables:</p>
 <p>The last line sets the global option for the Directus token that is
 used by functions in the drivesR package. You can view this option with
 getOption(“drivesR.default.directus.token”).</p>
-<p>DRIVES collaborators and project members with full read-access will
-need to add one extra line:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_public_access.html">set_public_access</a></span><span class="op">(</span>public <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p>By default, the drivesR package reads from data tables with approved
-public access privileges, which excludes certain sites and site-years.
-This function allows approved users to access the full database.</p>
 </div>
 <div class="section level3">
 <h3 id="downloading-drives-tables-">Downloading DRIVES tables.<a class="anchor" aria-label="anchor" href="#downloading-drives-tables-"></a>
@@ -165,33 +154,25 @@ tables</p>
 <em>Download individual tables.</em> The <em>get_db_table</em>
 function uses table names as inputs.</li>
 </ol>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">crop_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_db_table.html">get_db_table</a></span><span class="op">(</span><span class="st">"crop_info"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in get_db_table("crop_info"): Invalid Directus API token.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">crop_info</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 'data.frame':    91 obs. of  11 variables:</span></span>
-<span><span class="co">#&gt;  $ crop_id            : chr  "alfalfa" "alfalfa mix" "alfalfa plus" "annual grass-forb mix" ...</span></span>
-<span><span class="co">#&gt;  $ parent_crop_id     : chr  "alfalfa plus" "alfalfa plus" NA "annual mix" ...</span></span>
-<span><span class="co">#&gt;  $ species_name       : chr  "Medicago sativa L." NA NA NA ...</span></span>
-<span><span class="co">#&gt;  $ is_a_mix           : logi  FALSE TRUE TRUE TRUE TRUE TRUE ...</span></span>
-<span><span class="co">#&gt;  $ family             : chr  "Fabaceae" NA NA NA ...</span></span>
-<span><span class="co">#&gt;  $ perenniality       : chr  "perennial" "perennial" "perennial" "annual" ...</span></span>
-<span><span class="co">#&gt;  $ photosynthetic_mode: chr  "C3" NA NA NA ...</span></span>
-<span><span class="co">#&gt;  $ seasonality        : chr  "warm season" NA NA NA ...</span></span>
-<span><span class="co">#&gt;  $ base_temp_c        : int  5 NA NA NA NA NA NA NA NA NA ...</span></span>
-<span><span class="co">#&gt;  $ max_temp_c         : num  43.3 NA NA NA NA NA NA NA NA NA ...</span></span>
-<span><span class="co">#&gt;  $ gdd_references     : chr  "Parsons et al 2006" NA NA NA ...</span></span></code></pre></div>
+<span><span class="co">#&gt; Error: object 'crop_info' not found</span></span></code></pre></div>
 <p>You can see the names of tables available for public access by
 running this code after the package is loaded (this excludes dictionary
 tables that are available without an API key).</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">"drivesR.default.tablevec"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $drivesR.default.tablevec</span></span>
-<span><span class="co">#&gt;  [1] "crop_info"                    "crop_variety_info"            "crop_yields"                 </span></span>
-<span><span class="co">#&gt;  [4] "experimental_unit_info"       "experimental_unit_treatments" "harvest_dates"               </span></span>
-<span><span class="co">#&gt;  [7] "planting_info"                "rotation_id_info"             "rotation_phases"             </span></span>
-<span><span class="co">#&gt; [10] "site_info"                    "site_treatment_level_info"    "site_treatment_type_info"    </span></span>
-<span><span class="co">#&gt; [13] "treatment_id_components"      "treatment_id_info"            "weather_daily"               </span></span>
-<span><span class="co">#&gt; [16] "weather_station_info"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "crop_info"                    "crop_variety_info"           </span></span>
+<span><span class="co">#&gt;  [3] "crop_yields"                  "experimental_unit_info"      </span></span>
+<span><span class="co">#&gt;  [5] "experimental_unit_treatments" "harvest_dates"               </span></span>
+<span><span class="co">#&gt;  [7] "planting_info"                "rotation_id_info"            </span></span>
+<span><span class="co">#&gt;  [9] "rotation_phases"              "site_info"                   </span></span>
+<span><span class="co">#&gt; [11] "site_treatment_level_info"    "site_treatment_type_info"    </span></span>
+<span><span class="co">#&gt; [13] "treatment_id_components"      "treatment_id_info"           </span></span>
+<span><span class="co">#&gt; [15] "weather_daily"                "weather_station_info"</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>
 <em>Download multiple tables at once.</em> The
@@ -204,7 +185,7 @@ downloaded. By default, the function downloads all tables in
 <em>getOption(“drivesR.default.tablevec”)</em>. If set to NULL, the
 function will download all tables available to your user role. You can
 also provide a vector of table names.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_db_tables.html">import_db_tables</a></span><span class="op">(</span>tablevec <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"crop_yields"</span>,<span class="st">"site_info"</span>,<span class="st">"experimental_unit_treatments"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>For the remaining examples, we’ll assume the default “tablevec”
 option.</p>
@@ -217,14 +198,14 @@ code without having to repeat the time-consuming step of downloading the
 tables. For example, you could run the following code to download tables
 into a list in your global R environment and saved as an RData file on
 your local directory:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_db_tables.html">import_db_tables</a></span><span class="op">(</span>fetch_option <span class="op">=</span> <span class="st">"download.save"</span>,</span>
 <span>                       <span class="co">#fetch_option = "upload",</span></span>
 <span>                       savedir <span class="op">=</span> <span class="st">"data"</span>,</span>
 <span>                       savename <span class="op">=</span> <span class="st">"sampledblist"</span><span class="op">)</span></span></code></pre></div>
 <p>Then, you can move the comment and rerun the same code to load the
 tables from the local directory:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_db_tables.html">import_db_tables</a></span><span class="op">(</span><span class="co">#fetch_option = "download.save",</span></span>
 <span>                       fetch_option <span class="op">=</span> <span class="st">"upload"</span>,</span>
 <span>                       savedir <span class="op">=</span> <span class="st">"data"</span>,</span>
@@ -259,7 +240,7 @@ may work better to save tables as separate files and load individual
 tables as needed.</p>
 <p>Users who plan to work with the data tables outside of R may want to
 save the tables into separate CSV files locally:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_db_tables.html">import_db_tables</a></span><span class="op">(</span>fetch_option <span class="op">=</span> <span class="st">"save.only"</span>,</span>
 <span>                       save_option <span class="op">=</span> <span class="st">"csv"</span>,</span>
 <span>                       savedir <span class="op">=</span> <span class="st">"myChosenFolder"</span>,</span>
@@ -277,7 +258,7 @@ relationships.</p>
 <p>Dictionary tables can be downloaded individually, using the
 <em>get_db_table</em> function, or all at once as a list with
 <em>import_dictionary_tables</em>.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## separate:</span></span>
 <span><span class="va">table_dictionary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_db_table.html">get_db_table</a></span><span class="op">(</span><span class="st">"table_dictionary"</span><span class="op">)</span></span>
 <span><span class="va">column_dictionary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_db_table.html">get_db_table</a></span><span class="op">(</span><span class="st">"column_dictionary"</span><span class="op">)</span></span>
@@ -291,43 +272,12 @@ table dictionary. The output can be formatted as a json or a dataframe.
 The json option is a clearer representation of how information is
 structured in Directus. See <a href="https://directus.io/docs/api" class="external-link">https://directus.io/docs/api</a>.
 For more information on the Directus API.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">table_dict_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_db_info.html">get_db_info</a></span><span class="op">(</span>mytarget <span class="op">=</span> <span class="st">"collections/table_dictionary"</span>,</span>
 <span>                             output_format <span class="op">=</span> <span class="st">"json"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in get_db_info(mytarget = "collections/table_dictionary", output_format = "json"): Invalid Directus API token.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">table_dict_info</span><span class="op">)</span></span>
-<span><span class="co">#&gt; {</span></span>
-<span><span class="co">#&gt;     "data": {</span></span>
-<span><span class="co">#&gt;         "collection": "table_dictionary",</span></span>
-<span><span class="co">#&gt;         "meta": {</span></span>
-<span><span class="co">#&gt;             "collection": "table_dictionary",</span></span>
-<span><span class="co">#&gt;             "icon": null,</span></span>
-<span><span class="co">#&gt;             "note": "Describes tables within the DRIVES database (you're reading it now!). \n One row per table. ",</span></span>
-<span><span class="co">#&gt;             "display_template": null,</span></span>
-<span><span class="co">#&gt;             "hidden": false,</span></span>
-<span><span class="co">#&gt;             "singleton": false,</span></span>
-<span><span class="co">#&gt;             "translations": null,</span></span>
-<span><span class="co">#&gt;             "archive_field": null,</span></span>
-<span><span class="co">#&gt;             "archive_app_filter": true,</span></span>
-<span><span class="co">#&gt;             "archive_value": null,</span></span>
-<span><span class="co">#&gt;             "unarchive_value": null,</span></span>
-<span><span class="co">#&gt;             "sort_field": null,</span></span>
-<span><span class="co">#&gt;             "accountability": "all",</span></span>
-<span><span class="co">#&gt;             "color": null,</span></span>
-<span><span class="co">#&gt;             "item_duplication_fields": null,</span></span>
-<span><span class="co">#&gt;             "sort": null,</span></span>
-<span><span class="co">#&gt;             "group": null,</span></span>
-<span><span class="co">#&gt;             "collapse": "open",</span></span>
-<span><span class="co">#&gt;             "preview_url": null,</span></span>
-<span><span class="co">#&gt;             "versioning": false</span></span>
-<span><span class="co">#&gt;         },</span></span>
-<span><span class="co">#&gt;         "schema": {</span></span>
-<span><span class="co">#&gt;             "schema": "public",</span></span>
-<span><span class="co">#&gt;             "name": "table_dictionary",</span></span>
-<span><span class="co">#&gt;             "comment": null</span></span>
-<span><span class="co">#&gt;         }</span></span>
-<span><span class="co">#&gt;     }</span></span>
-<span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; </span></span></code></pre></div>
+<span><span class="co">#&gt; Error: object 'table_dict_info' not found</span></span></code></pre></div>
 <p>One detail to note is that non-dictionary tables with approved public
 viewer access have a prefix “public_”. This only comes up when viewing
 tables in the <a href="https://data.drives-network.org/admin/login" class="external-link">Directus Studio
@@ -353,7 +303,7 @@ level functions that combine tables with some loss of information.</p>
 the crop_yields table. If the table is already downloaded, it can be
 used as an argument. Otherwise, the function downloads the table using
 the Directus API.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## without pre-downloaded tables:</span></span>
 <span><span class="va">yields</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields.html">harmonize_yields</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">## with pre-downloaded tables:</span></span>
@@ -366,7 +316,7 @@ calculating dry yields and adding a TRUE or FALSE column for cover
 crops. It also provides the option to keep crop fractions from the same
 crop/unit/year (e.g. grain and straw) in separate rows, to rearrange
 them into columns.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## crop fractions in rows</span></span>
 <span><span class="co">#crop_yields &lt;- get_db_table("crop_yields")</span></span>
 <span><span class="va">yields</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields.html">harmonize_yields</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">crop_yields</span><span class="op">)</span> <span class="co"># could be a separate dataframe or part of a list</span></span>
@@ -375,32 +325,41 @@ them into columns.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">longyields</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 65839    18</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">longyields</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "uid"                         "site_id"                     "unit_id"                    </span></span>
-<span><span class="co">#&gt;  [4] "harvest_year"                "rotation_phase"              "stand_year"                 </span></span>
-<span><span class="co">#&gt;  [7] "num_harvests"                "expected_crop_id"            "actual_crop_id"             </span></span>
-<span><span class="co">#&gt; [10] "measured_fraction"           "removed_from_field_tf"       "dry_yield_kg_ha"            </span></span>
-<span><span class="co">#&gt; [13] "yield_kg_ha"                 "yield_percent_moisture"      "moisture_type"              </span></span>
-<span><span class="co">#&gt; [16] "percent_moisture_at_harvest" "data_processing_note"        "cover_crop"</span></span>
+<span><span class="co">#&gt;  [1] "uid"                         "site_id"                    </span></span>
+<span><span class="co">#&gt;  [3] "unit_id"                     "harvest_year"               </span></span>
+<span><span class="co">#&gt;  [5] "rotation_phase"              "stand_year"                 </span></span>
+<span><span class="co">#&gt;  [7] "num_harvests"                "expected_crop_id"           </span></span>
+<span><span class="co">#&gt;  [9] "actual_crop_id"              "measured_fraction"          </span></span>
+<span><span class="co">#&gt; [11] "removed_from_field_tf"       "dry_yield_kg_ha"            </span></span>
+<span><span class="co">#&gt; [13] "yield_kg_ha"                 "yield_percent_moisture"     </span></span>
+<span><span class="co">#&gt; [15] "moisture_type"               "percent_moisture_at_harvest"</span></span>
+<span><span class="co">#&gt; [17] "data_processing_note"        "cover_crop"</span></span>
 <span><span class="co">## crop fractions in columns</span></span>
 <span><span class="va">wideyields</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields.html">harmonize_yields</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">crop_yields</span>,</span>
 <span>                               crop_fractions_as_columns <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">wideyields</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 47021    40</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">wideyields</span><span class="op">)</span> <span class="co"># columns include suffix _1 for the primary fraction and _2, _3, etc. for other fractions.</span></span>
-<span><span class="co">#&gt;  [1] "site_id"                       "unit_id"                       "harvest_year"                 </span></span>
-<span><span class="co">#&gt;  [4] "actual_crop_id"                "stand_year"                    "num_harvests"                 </span></span>
-<span><span class="co">#&gt;  [7] "rotation_phase"                "uid_1"                         "uid_2"                        </span></span>
-<span><span class="co">#&gt; [10] "uid_3"                         "expected_crop_id_1"            "expected_crop_id_2"           </span></span>
-<span><span class="co">#&gt; [13] "expected_crop_id_3"            "measured_fraction_1"           "measured_fraction_2"          </span></span>
-<span><span class="co">#&gt; [16] "measured_fraction_3"           "removed_from_field_tf_1"       "removed_from_field_tf_2"      </span></span>
-<span><span class="co">#&gt; [19] "removed_from_field_tf_3"       "dry_yield_kg_ha_1"             "dry_yield_kg_ha_2"            </span></span>
-<span><span class="co">#&gt; [22] "dry_yield_kg_ha_3"             "yield_kg_ha_1"                 "yield_kg_ha_2"                </span></span>
-<span><span class="co">#&gt; [25] "yield_kg_ha_3"                 "yield_percent_moisture_1"      "yield_percent_moisture_2"     </span></span>
-<span><span class="co">#&gt; [28] "yield_percent_moisture_3"      "moisture_type_1"               "moisture_type_2"              </span></span>
-<span><span class="co">#&gt; [31] "moisture_type_3"               "percent_moisture_at_harvest_1" "percent_moisture_at_harvest_2"</span></span>
-<span><span class="co">#&gt; [34] "percent_moisture_at_harvest_3" "data_processing_note_1"        "data_processing_note_2"       </span></span>
-<span><span class="co">#&gt; [37] "data_processing_note_3"        "cover_crop_1"                  "cover_crop_2"                 </span></span>
-<span><span class="co">#&gt; [40] "cover_crop_3"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "site_id"                       "unit_id"                      </span></span>
+<span><span class="co">#&gt;  [3] "harvest_year"                  "actual_crop_id"               </span></span>
+<span><span class="co">#&gt;  [5] "stand_year"                    "num_harvests"                 </span></span>
+<span><span class="co">#&gt;  [7] "rotation_phase"                "uid_1"                        </span></span>
+<span><span class="co">#&gt;  [9] "uid_2"                         "uid_3"                        </span></span>
+<span><span class="co">#&gt; [11] "expected_crop_id_1"            "expected_crop_id_2"           </span></span>
+<span><span class="co">#&gt; [13] "expected_crop_id_3"            "measured_fraction_1"          </span></span>
+<span><span class="co">#&gt; [15] "measured_fraction_2"           "measured_fraction_3"          </span></span>
+<span><span class="co">#&gt; [17] "removed_from_field_tf_1"       "removed_from_field_tf_2"      </span></span>
+<span><span class="co">#&gt; [19] "removed_from_field_tf_3"       "dry_yield_kg_ha_1"            </span></span>
+<span><span class="co">#&gt; [21] "dry_yield_kg_ha_2"             "dry_yield_kg_ha_3"            </span></span>
+<span><span class="co">#&gt; [23] "yield_kg_ha_1"                 "yield_kg_ha_2"                </span></span>
+<span><span class="co">#&gt; [25] "yield_kg_ha_3"                 "yield_percent_moisture_1"     </span></span>
+<span><span class="co">#&gt; [27] "yield_percent_moisture_2"      "yield_percent_moisture_3"     </span></span>
+<span><span class="co">#&gt; [29] "moisture_type_1"               "moisture_type_2"              </span></span>
+<span><span class="co">#&gt; [31] "moisture_type_3"               "percent_moisture_at_harvest_1"</span></span>
+<span><span class="co">#&gt; [33] "percent_moisture_at_harvest_2" "percent_moisture_at_harvest_3"</span></span>
+<span><span class="co">#&gt; [35] "data_processing_note_1"        "data_processing_note_2"       </span></span>
+<span><span class="co">#&gt; [37] "data_processing_note_3"        "cover_crop_1"                 </span></span>
+<span><span class="co">#&gt; [39] "cover_crop_2"                  "cover_crop_3"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="experimental-treatments-and-design">2) Experimental treatments and design:<a class="anchor" aria-label="anchor" href="#experimental-treatments-and-design"></a>
@@ -463,7 +422,7 @@ function accepts a list of database tables named
 <em>treatment_id_info</em> and <em>treatment_id_components</em>. If
 those are not provided, it fetches those tables from the Directus
 database.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## tables provided</span></span>
 <span><span class="va">trt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_treatments.html">harmonize_treatments</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="co"># db is a named list with 'treatment_id_info' and 'treatment_id_components'</span></span>
 <span></span>
@@ -474,7 +433,7 @@ row per unit_id and year, and separate columns for each treatment id and
 component. This structure allows it to be merged with yield data.
 Similar to other harmonization functions, it accepts a named list or
 fetches tables from the database.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## tables provided</span></span>
 <span><span class="va">trtunit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_treatments_units.html">harmonize_treatments_units</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="co"># db is a named list with 'treatment_id_info', 'treatment_id_components', and 'experimental_unit_treatments'</span></span>
 <span></span>
@@ -486,7 +445,7 @@ to help subset column names corresponding to particular management
 practices. This uses information in the site_treatment_type_info table.
 The function accepts this table as an argument, or fetches it from the
 database.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_treatments.html">harmonize_treatments</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
 <span><span class="va">trtlist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/list_treatments_by_management_practice.html">list_treatments_by_management_practice</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
@@ -494,13 +453,20 @@ database.</p>
 <span><span class="va">trtcolz</span> <span class="op">&lt;-</span> <span class="va">trtlist</span><span class="op">$</span><span class="va">`N fertility`</span></span>
 <span><span class="va">trtsubset</span> <span class="op">&lt;-</span> <span class="va">trt</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site_id"</span>,<span class="st">"year"</span>, <span class="va">trtcolz</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">trtsubset</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   site_id year         N fertility nutrient management system N rate soil amendment grassland N addition</span></span>
-<span><span class="co">#&gt; 1   CATCE 2013 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2   CATCE 2014 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 3   CATCE 2015 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 4   CATCE 2016 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 5   CATCE 2017 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 6   CATCE 2018 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;                 &lt;NA&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt;   site_id year         N fertility nutrient management system N rate</span></span>
+<span><span class="co">#&gt; 1   CATCE 2013 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2   CATCE 2014 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3   CATCE 2015 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4   CATCE 2016 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5   CATCE 2017 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6   CATCE 2018 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;   soil amendment grassland N addition</span></span>
+<span><span class="co">#&gt; 1           &lt;NA&gt;                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2           &lt;NA&gt;                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3           &lt;NA&gt;                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4           &lt;NA&gt;                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5           &lt;NA&gt;                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6           &lt;NA&gt;                 &lt;NA&gt;</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="management-data">3) Management data<a class="anchor" aria-label="anchor" href="#management-data"></a>
@@ -523,70 +489,89 @@ mixtures can be retained as separate columns or excluded. See
 ?harmonize_planting_info for details on options and output.</p>
 <p>Like other harmonization functions, it can accept the planting_info
 table as an input or fetch it from the database.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#planting_info &lt;- get_db_table("planting_info") # can be a separate table or part of a list.</span></span>
 <span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_planting_info.html">harmonize_planting_info</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">planting_info</span>, replant_dates <span class="op">=</span> <span class="st">"latest"</span>,include_component_crops <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">p1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 44537    53</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">p1</span><span class="op">)</span><span class="co"># names have a numbered suffix for component crops in mixtures.</span></span>
-<span><span class="co">#&gt;  [1] "site_id"              "unit_id"              "harvest_year"         "expected_crop_id"    </span></span>
-<span><span class="co">#&gt;  [5] "actual_crop_id"       "stand_year"           "rotation_phase"       "planting_date"       </span></span>
-<span><span class="co">#&gt;  [9] "date_index"           "replantedTF"          "component_crop_id_2"  "component_crop_id_1" </span></span>
-<span><span class="co">#&gt; [13] "component_crop_id_3"  "component_crop_id_5"  "component_crop_id_4"  "component_crop_id_6" </span></span>
-<span><span class="co">#&gt; [17] "component_crop_id_10" "component_crop_id_9"  "component_crop_id_7"  "component_crop_id_8" </span></span>
-<span><span class="co">#&gt; [21] "variety_id_2"         "variety_id_1"         "variety_id_3"         "variety_id_5"        </span></span>
-<span><span class="co">#&gt; [25] "variety_id_4"         "variety_id_6"         "variety_id_10"        "variety_id_9"        </span></span>
-<span><span class="co">#&gt; [29] "variety_id_7"         "variety_id_8"         "planting_rate_2"      "planting_rate_1"     </span></span>
-<span><span class="co">#&gt; [33] "planting_rate_3"      "planting_rate_5"      "planting_rate_4"      "planting_rate_6"     </span></span>
-<span><span class="co">#&gt; [37] "planting_rate_10"     "planting_rate_9"      "planting_rate_7"      "planting_rate_8"     </span></span>
-<span><span class="co">#&gt; [41] "uid_2"                "uid_1"                "uid_3"                "uid_5"               </span></span>
-<span><span class="co">#&gt; [45] "uid_4"                "uid_6"                "uid_10"               "uid_9"               </span></span>
-<span><span class="co">#&gt; [49] "uid_7"                "uid_8"                "planting_units"       "material_planted"    </span></span>
-<span><span class="co">#&gt; [53] "planting_notes"</span></span>
+<span><span class="co">#&gt;  [1] "site_id"              "unit_id"              "harvest_year"        </span></span>
+<span><span class="co">#&gt;  [4] "expected_crop_id"     "actual_crop_id"       "stand_year"          </span></span>
+<span><span class="co">#&gt;  [7] "rotation_phase"       "planting_date"        "date_index"          </span></span>
+<span><span class="co">#&gt; [10] "replantedTF"          "component_crop_id_2"  "component_crop_id_1" </span></span>
+<span><span class="co">#&gt; [13] "component_crop_id_3"  "component_crop_id_5"  "component_crop_id_4" </span></span>
+<span><span class="co">#&gt; [16] "component_crop_id_6"  "component_crop_id_10" "component_crop_id_9" </span></span>
+<span><span class="co">#&gt; [19] "component_crop_id_7"  "component_crop_id_8"  "variety_id_2"        </span></span>
+<span><span class="co">#&gt; [22] "variety_id_1"         "variety_id_3"         "variety_id_5"        </span></span>
+<span><span class="co">#&gt; [25] "variety_id_4"         "variety_id_6"         "variety_id_10"       </span></span>
+<span><span class="co">#&gt; [28] "variety_id_9"         "variety_id_7"         "variety_id_8"        </span></span>
+<span><span class="co">#&gt; [31] "planting_rate_2"      "planting_rate_1"      "planting_rate_3"     </span></span>
+<span><span class="co">#&gt; [34] "planting_rate_5"      "planting_rate_4"      "planting_rate_6"     </span></span>
+<span><span class="co">#&gt; [37] "planting_rate_10"     "planting_rate_9"      "planting_rate_7"     </span></span>
+<span><span class="co">#&gt; [40] "planting_rate_8"      "uid_2"                "uid_1"               </span></span>
+<span><span class="co">#&gt; [43] "uid_3"                "uid_5"                "uid_4"               </span></span>
+<span><span class="co">#&gt; [46] "uid_6"                "uid_10"               "uid_9"               </span></span>
+<span><span class="co">#&gt; [49] "uid_7"                "uid_8"                "planting_units"      </span></span>
+<span><span class="co">#&gt; [52] "material_planted"     "planting_notes"</span></span>
 <span><span class="co"># And since replant_dates = 'latest', there is an added column replantedTF indicating whether a unit was replanted.</span></span>
 <span></span>
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_planting_info.html">harmonize_planting_info</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">planting_info</span>, replant_dates <span class="op">=</span> <span class="st">"rows"</span>,include_component_crops <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">p2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 45019    18</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">p2</span><span class="op">)</span> <span class="co"># All planting dates are included and organized under a date_index column. Since include_component_crops is FALSE, there is an added column num_components providing the number of component crops within each actual_crop_id.</span></span>
-<span><span class="co">#&gt;  [1] "uid"                 "site_id"             "unit_id"             "expected_crop_id"   </span></span>
-<span><span class="co">#&gt;  [5] "actual_crop_id"      "stand_year"          "rotation_phase"      "phase_year_planting"</span></span>
-<span><span class="co">#&gt;  [9] "harvest_year"        "planting_year"       "planting_date"       "variety_id"         </span></span>
-<span><span class="co">#&gt; [13] "planting_rate"       "planting_units"      "material_planted"    "planting_notes"     </span></span>
-<span><span class="co">#&gt; [17] "date_index"          "num_components"</span></span>
+<span><span class="co">#&gt;  [1] "uid"                 "site_id"             "unit_id"            </span></span>
+<span><span class="co">#&gt;  [4] "expected_crop_id"    "actual_crop_id"      "stand_year"         </span></span>
+<span><span class="co">#&gt;  [7] "rotation_phase"      "phase_year_planting" "harvest_year"       </span></span>
+<span><span class="co">#&gt; [10] "planting_year"       "planting_date"       "variety_id"         </span></span>
+<span><span class="co">#&gt; [13] "planting_rate"       "planting_units"      "material_planted"   </span></span>
+<span><span class="co">#&gt; [16] "planting_notes"      "date_index"          "num_components"</span></span>
 <span></span>
 <span><span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_planting_info.html">harmonize_planting_info</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">planting_info</span>, replant_dates <span class="op">=</span> <span class="st">"columns"</span>,include_component_crops <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">p3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 44537    85</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">p3</span><span class="op">)</span> <span class="co"># names include suffixes d and c for planting dates and component crops, respectively.</span></span>
-<span><span class="co">#&gt;  [1] "site_id"                  "unit_id"                  "expected_crop_id"        </span></span>
-<span><span class="co">#&gt;  [4] "actual_crop_id"           "stand_year"               "rotation_phase"          </span></span>
-<span><span class="co">#&gt;  [7] "harvest_year"             "component_crop_id_d1_c2"  "component_crop_id_d1_c1" </span></span>
-<span><span class="co">#&gt; [10] "component_crop_id_d2_c1"  "component_crop_id_d1_c3"  "component_crop_id_d3_c1" </span></span>
-<span><span class="co">#&gt; [13] "component_crop_id_d1_c5"  "component_crop_id_d1_c4"  "component_crop_id_d1_c6" </span></span>
-<span><span class="co">#&gt; [16] "component_crop_id_d1_c10" "component_crop_id_d1_c9"  "component_crop_id_d1_c7" </span></span>
-<span><span class="co">#&gt; [19] "component_crop_id_d1_c8"  "component_crop_id_d3_c2"  "component_crop_id_d2_c2" </span></span>
-<span><span class="co">#&gt; [22] "component_crop_id_d4_c1"  "planting_date_d1_c2"      "planting_date_d1_c1"     </span></span>
-<span><span class="co">#&gt; [25] "planting_date_d2_c1"      "planting_date_d1_c3"      "planting_date_d3_c1"     </span></span>
-<span><span class="co">#&gt; [28] "planting_date_d1_c5"      "planting_date_d1_c4"      "planting_date_d1_c6"     </span></span>
-<span><span class="co">#&gt; [31] "planting_date_d1_c10"     "planting_date_d1_c9"      "planting_date_d1_c7"     </span></span>
-<span><span class="co">#&gt; [34] "planting_date_d1_c8"      "planting_date_d3_c2"      "planting_date_d2_c2"     </span></span>
-<span><span class="co">#&gt; [37] "planting_date_d4_c1"      "variety_id_d1_c2"         "variety_id_d1_c1"        </span></span>
-<span><span class="co">#&gt; [40] "variety_id_d2_c1"         "variety_id_d1_c3"         "variety_id_d3_c1"        </span></span>
-<span><span class="co">#&gt; [43] "variety_id_d1_c5"         "variety_id_d1_c4"         "variety_id_d1_c6"        </span></span>
-<span><span class="co">#&gt; [46] "variety_id_d1_c10"        "variety_id_d1_c9"         "variety_id_d1_c7"        </span></span>
-<span><span class="co">#&gt; [49] "variety_id_d1_c8"         "variety_id_d3_c2"         "variety_id_d2_c2"        </span></span>
-<span><span class="co">#&gt; [52] "variety_id_d4_c1"         "planting_rate_d1_c2"      "planting_rate_d1_c1"     </span></span>
-<span><span class="co">#&gt; [55] "planting_rate_d2_c1"      "planting_rate_d1_c3"      "planting_rate_d3_c1"     </span></span>
-<span><span class="co">#&gt; [58] "planting_rate_d1_c5"      "planting_rate_d1_c4"      "planting_rate_d1_c6"     </span></span>
-<span><span class="co">#&gt; [61] "planting_rate_d1_c10"     "planting_rate_d1_c9"      "planting_rate_d1_c7"     </span></span>
-<span><span class="co">#&gt; [64] "planting_rate_d1_c8"      "planting_rate_d3_c2"      "planting_rate_d2_c2"     </span></span>
-<span><span class="co">#&gt; [67] "planting_rate_d4_c1"      "uid_d1_c2"                "uid_d1_c1"               </span></span>
-<span><span class="co">#&gt; [70] "uid_d2_c1"                "uid_d1_c3"                "uid_d3_c1"               </span></span>
-<span><span class="co">#&gt; [73] "uid_d1_c5"                "uid_d1_c4"                "uid_d1_c6"               </span></span>
-<span><span class="co">#&gt; [76] "uid_d1_c10"               "uid_d1_c9"                "uid_d1_c7"               </span></span>
-<span><span class="co">#&gt; [79] "uid_d1_c8"                "uid_d3_c2"                "uid_d2_c2"               </span></span>
-<span><span class="co">#&gt; [82] "uid_d4_c1"                "planting_notes"           "planting_units"          </span></span>
+<span><span class="co">#&gt;  [1] "site_id"                  "unit_id"                 </span></span>
+<span><span class="co">#&gt;  [3] "expected_crop_id"         "actual_crop_id"          </span></span>
+<span><span class="co">#&gt;  [5] "stand_year"               "rotation_phase"          </span></span>
+<span><span class="co">#&gt;  [7] "harvest_year"             "component_crop_id_d1_c2" </span></span>
+<span><span class="co">#&gt;  [9] "component_crop_id_d1_c1"  "component_crop_id_d2_c1" </span></span>
+<span><span class="co">#&gt; [11] "component_crop_id_d1_c3"  "component_crop_id_d3_c1" </span></span>
+<span><span class="co">#&gt; [13] "component_crop_id_d1_c5"  "component_crop_id_d1_c4" </span></span>
+<span><span class="co">#&gt; [15] "component_crop_id_d1_c6"  "component_crop_id_d1_c10"</span></span>
+<span><span class="co">#&gt; [17] "component_crop_id_d1_c9"  "component_crop_id_d1_c7" </span></span>
+<span><span class="co">#&gt; [19] "component_crop_id_d1_c8"  "component_crop_id_d3_c2" </span></span>
+<span><span class="co">#&gt; [21] "component_crop_id_d2_c2"  "component_crop_id_d4_c1" </span></span>
+<span><span class="co">#&gt; [23] "planting_date_d1_c2"      "planting_date_d1_c1"     </span></span>
+<span><span class="co">#&gt; [25] "planting_date_d2_c1"      "planting_date_d1_c3"     </span></span>
+<span><span class="co">#&gt; [27] "planting_date_d3_c1"      "planting_date_d1_c5"     </span></span>
+<span><span class="co">#&gt; [29] "planting_date_d1_c4"      "planting_date_d1_c6"     </span></span>
+<span><span class="co">#&gt; [31] "planting_date_d1_c10"     "planting_date_d1_c9"     </span></span>
+<span><span class="co">#&gt; [33] "planting_date_d1_c7"      "planting_date_d1_c8"     </span></span>
+<span><span class="co">#&gt; [35] "planting_date_d3_c2"      "planting_date_d2_c2"     </span></span>
+<span><span class="co">#&gt; [37] "planting_date_d4_c1"      "variety_id_d1_c2"        </span></span>
+<span><span class="co">#&gt; [39] "variety_id_d1_c1"         "variety_id_d2_c1"        </span></span>
+<span><span class="co">#&gt; [41] "variety_id_d1_c3"         "variety_id_d3_c1"        </span></span>
+<span><span class="co">#&gt; [43] "variety_id_d1_c5"         "variety_id_d1_c4"        </span></span>
+<span><span class="co">#&gt; [45] "variety_id_d1_c6"         "variety_id_d1_c10"       </span></span>
+<span><span class="co">#&gt; [47] "variety_id_d1_c9"         "variety_id_d1_c7"        </span></span>
+<span><span class="co">#&gt; [49] "variety_id_d1_c8"         "variety_id_d3_c2"        </span></span>
+<span><span class="co">#&gt; [51] "variety_id_d2_c2"         "variety_id_d4_c1"        </span></span>
+<span><span class="co">#&gt; [53] "planting_rate_d1_c2"      "planting_rate_d1_c1"     </span></span>
+<span><span class="co">#&gt; [55] "planting_rate_d2_c1"      "planting_rate_d1_c3"     </span></span>
+<span><span class="co">#&gt; [57] "planting_rate_d3_c1"      "planting_rate_d1_c5"     </span></span>
+<span><span class="co">#&gt; [59] "planting_rate_d1_c4"      "planting_rate_d1_c6"     </span></span>
+<span><span class="co">#&gt; [61] "planting_rate_d1_c10"     "planting_rate_d1_c9"     </span></span>
+<span><span class="co">#&gt; [63] "planting_rate_d1_c7"      "planting_rate_d1_c8"     </span></span>
+<span><span class="co">#&gt; [65] "planting_rate_d3_c2"      "planting_rate_d2_c2"     </span></span>
+<span><span class="co">#&gt; [67] "planting_rate_d4_c1"      "uid_d1_c2"               </span></span>
+<span><span class="co">#&gt; [69] "uid_d1_c1"                "uid_d2_c1"               </span></span>
+<span><span class="co">#&gt; [71] "uid_d1_c3"                "uid_d3_c1"               </span></span>
+<span><span class="co">#&gt; [73] "uid_d1_c5"                "uid_d1_c4"               </span></span>
+<span><span class="co">#&gt; [75] "uid_d1_c6"                "uid_d1_c10"              </span></span>
+<span><span class="co">#&gt; [77] "uid_d1_c9"                "uid_d1_c7"               </span></span>
+<span><span class="co">#&gt; [79] "uid_d1_c8"                "uid_d3_c2"               </span></span>
+<span><span class="co">#&gt; [81] "uid_d2_c2"                "uid_d4_c1"               </span></span>
+<span><span class="co">#&gt; [83] "planting_notes"           "planting_units"          </span></span>
 <span><span class="co">#&gt; [85] "material_planted"</span></span></code></pre></div>
 <p><em>harvest_dates</em> provides harvest dates for every
 unit/year/crop where available. It includes separate rows for multiple
@@ -598,32 +583,37 @@ unit/year/crop). It has an option to put crop fractions with different
 harvest dates in separate columns (rarely an issue).</p>
 <p>Like other harmonization functions, it can accept the harvest_dates
 table as an input or fetch it from the database</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#harvest_dates &lt;- get_db_table("harvest_dates")# can be a separate table or part of a list.</span></span>
 <span><span class="va">h1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_harvest_dates.html">harmonize_harvest_dates</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">harvest_dates</span>, crop_fractions_as_columns <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">h1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 45299    26</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">h1</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "site_id"            "unit_id"            "expected_crop_id"   "actual_crop_id"    </span></span>
-<span><span class="co">#&gt;  [5] "stand_year"         "rotation_phase"     "phase_year_harvest" "harvest_year"      </span></span>
-<span><span class="co">#&gt;  [9] "harvested_fraction" "harvest_notes"      "termination_date"   "termination_notes" </span></span>
-<span><span class="co">#&gt; [13] "harvest_date_1"     "harvest_date_2"     "harvest_date_3"     "harvest_date_4"    </span></span>
-<span><span class="co">#&gt; [17] "harvest_date_5"     "harvest_date_6"     "harvest_date_7"     "uid_1"             </span></span>
-<span><span class="co">#&gt; [21] "uid_2"              "uid_3"              "uid_4"              "uid_5"             </span></span>
+<span><span class="co">#&gt;  [1] "site_id"            "unit_id"            "expected_crop_id"  </span></span>
+<span><span class="co">#&gt;  [4] "actual_crop_id"     "stand_year"         "rotation_phase"    </span></span>
+<span><span class="co">#&gt;  [7] "phase_year_harvest" "harvest_year"       "harvested_fraction"</span></span>
+<span><span class="co">#&gt; [10] "harvest_notes"      "termination_date"   "termination_notes" </span></span>
+<span><span class="co">#&gt; [13] "harvest_date_1"     "harvest_date_2"     "harvest_date_3"    </span></span>
+<span><span class="co">#&gt; [16] "harvest_date_4"     "harvest_date_5"     "harvest_date_6"    </span></span>
+<span><span class="co">#&gt; [19] "harvest_date_7"     "uid_1"              "uid_2"             </span></span>
+<span><span class="co">#&gt; [22] "uid_3"              "uid_4"              "uid_5"             </span></span>
 <span><span class="co">#&gt; [25] "uid_6"              "uid_7"</span></span>
 <span></span>
 <span><span class="va">h2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_harvest_dates.html">harmonize_harvest_dates</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">harvest_dates</span>, crop_fractions_as_columns <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">h2</span><span class="op">)</span> <span class="co"># only slightly different.</span></span>
 <span><span class="co">#&gt; [1] 45267    32</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">h2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "site_id"              "unit_id"              "expected_crop_id"     "actual_crop_id"      </span></span>
-<span><span class="co">#&gt;  [5] "stand_year"           "rotation_phase"       "phase_year_harvest"   "harvest_year"        </span></span>
-<span><span class="co">#&gt;  [9] "harvest_notes"        "termination_date"     "termination_notes"    "harvest_date_1"      </span></span>
-<span><span class="co">#&gt; [13] "harvest_date_2"       "harvest_date_3"       "harvest_date_4"       "harvest_date_5"      </span></span>
-<span><span class="co">#&gt; [17] "harvest_date_6"       "harvest_date_7"       "harvested_fraction_1" "harvested_fraction_2"</span></span>
-<span><span class="co">#&gt; [21] "harvested_fraction_3" "harvested_fraction_4" "harvested_fraction_5" "harvested_fraction_6"</span></span>
-<span><span class="co">#&gt; [25] "harvested_fraction_7" "uid_1"                "uid_2"                "uid_3"               </span></span>
-<span><span class="co">#&gt; [29] "uid_4"                "uid_5"                "uid_6"                "uid_7"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "site_id"              "unit_id"              "expected_crop_id"    </span></span>
+<span><span class="co">#&gt;  [4] "actual_crop_id"       "stand_year"           "rotation_phase"      </span></span>
+<span><span class="co">#&gt;  [7] "phase_year_harvest"   "harvest_year"         "harvest_notes"       </span></span>
+<span><span class="co">#&gt; [10] "termination_date"     "termination_notes"    "harvest_date_1"      </span></span>
+<span><span class="co">#&gt; [13] "harvest_date_2"       "harvest_date_3"       "harvest_date_4"      </span></span>
+<span><span class="co">#&gt; [16] "harvest_date_5"       "harvest_date_6"       "harvest_date_7"      </span></span>
+<span><span class="co">#&gt; [19] "harvested_fraction_1" "harvested_fraction_2" "harvested_fraction_3"</span></span>
+<span><span class="co">#&gt; [22] "harvested_fraction_4" "harvested_fraction_5" "harvested_fraction_6"</span></span>
+<span><span class="co">#&gt; [25] "harvested_fraction_7" "uid_1"                "uid_2"               </span></span>
+<span><span class="co">#&gt; [28] "uid_3"                "uid_4"                "uid_5"               </span></span>
+<span><span class="co">#&gt; [31] "uid_6"                "uid_7"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="weather">6) Weather<a class="anchor" aria-label="anchor" href="#weather"></a>
@@ -636,32 +626,10 @@ long format, with weather variables in separate rows.
 <strong>weather_station_info</strong> provides information on weather
 station identifiers used in the weather_daily data. This includes their
 lat-lon coordinates and urls for data access (if applicable).</p>
-<p>The <em>harmonize_weather</em> function converts the daily weather
-table from long to wide and removes columns that are not useful in a
-wide format.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#weather_daily &lt;- get_db_table("weather_daily")# can be a separate table or part of a list.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">weather_daily</span><span class="op">)</span> <span class="co"># long version</span></span>
-<span><span class="co">#&gt; 'data.frame':    732322 obs. of  9 variables:</span></span>
-<span><span class="co">#&gt;  $ uid               : int  95329 95330 95331 95332 95333 95334 95335 95336 95337 95338 ...</span></span>
-<span><span class="co">#&gt;  $ site_id           : chr  "CATCE" "CATCE" "CATCE" "CATCE" ...</span></span>
-<span><span class="co">#&gt;  $ weather_station_id: chr  "CATCE_ST2" "CATCE_ST2" "CATCE_ST2" "CATCE_ST2" ...</span></span>
-<span><span class="co">#&gt;  $ year              : int  1978 1978 1978 1978 1978 1978 1978 1978 1978 1978 ...</span></span>
-<span><span class="co">#&gt;  $ date              : chr  "1978-01-01" "1978-01-01" "1978-01-01" "1978-01-02" ...</span></span>
-<span><span class="co">#&gt;  $ day_of_year       : int  1 1 1 2 2 2 3 3 3 4 ...</span></span>
-<span><span class="co">#&gt;  $ variable          : chr  "air_temp_min_c" "air_temp_max_c" "precip_mm" "air_temp_min_c" ...</span></span>
-<span><span class="co">#&gt;  $ value             : num  4.4 13.9 0 7.8 15 1.3 7.8 13.9 4.6 8.3 ...</span></span>
-<span><span class="co">#&gt;  $ flag              : chr  NA NA NA NA ...</span></span>
-<span><span class="va">weatherdf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_weather.html">harmonize_weather</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">weather_daily</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">weatherdf</span><span class="op">)</span> <span class="co"># wide simplified version</span></span>
-<span><span class="co">#&gt; tibble [244,108 × 7] (S3: tbl_df/tbl/data.frame)</span></span>
-<span><span class="co">#&gt;  $ site_id       : chr [1:244108] "CATCE" "CATCE" "CATCE" "CATCE" ...</span></span>
-<span><span class="co">#&gt;  $ year          : int [1:244108] 1978 1978 1978 1978 1978 1978 1978 1978 1978 1978 ...</span></span>
-<span><span class="co">#&gt;  $ date          : chr [1:244108] "1978-01-01" "1978-01-02" "1978-01-03" "1978-01-04" ...</span></span>
-<span><span class="co">#&gt;  $ day_of_year   : int [1:244108] 1 2 3 4 5 6 7 8 9 10 ...</span></span>
-<span><span class="co">#&gt;  $ air_temp_min_c: num [1:244108] 4.4 7.8 7.8 8.3 10 9.4 5.6 10 11.7 10 ...</span></span>
-<span><span class="co">#&gt;  $ air_temp_max_c: num [1:244108] 13.9 15 13.9 11.7 12.8 13.3 15 13.9 14.4 16.1 ...</span></span>
-<span><span class="co">#&gt;  $ precip_mm     : num [1:244108] 0 1.3 4.6 4.3 29.7 23.1 0.3 1.3 24.9 4.3 ...</span></span></code></pre></div>
+<p>The weather table is in wide format and ready for analysis. Weather
+variables can be merged with other datasets based on site_id and year.
+It is up to the user to coalesce between daily and yearly time
+scales.</p>
 </div>
 <div class="section level3">
 <h3 id="putting-it-all-together">5) Putting it all together<a class="anchor" aria-label="anchor" href="#putting-it-all-together"></a>
@@ -671,32 +639,42 @@ harmonization steps for treatments, units, and yields and merges them
 together. It includes the option to keep crop fractions in separate rows
 or reorganize them into columns. It can operate on a list of
 pre-downloaded tables, or fetch the tables from Directus.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># db &lt;- import_db_tables(c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields"),fetch_option = "download.only")</span></span>
 <span><span class="va">hyt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields_treatments.html">harmonize_yields_treatments</a></span><span class="op">(</span><span class="va">db</span>, crop_fractions_as_columns <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">hyt</span><span class="op">)</span> <span class="co">#names will have numbered suffixes for crop fractions.</span></span>
-<span><span class="co">#&gt;  [1] "site_id"                       "unit_id"                       "harvest_year"                 </span></span>
-<span><span class="co">#&gt;  [4] "actual_crop_id"                "stand_year"                    "num_harvests"                 </span></span>
-<span><span class="co">#&gt;  [7] "rotation_phase"                "uid_1"                         "uid_2"                        </span></span>
-<span><span class="co">#&gt; [10] "uid_3"                         "expected_crop_id_1"            "expected_crop_id_2"           </span></span>
-<span><span class="co">#&gt; [13] "expected_crop_id_3"            "measured_fraction_1"           "measured_fraction_2"          </span></span>
-<span><span class="co">#&gt; [16] "measured_fraction_3"           "removed_from_field_tf_1"       "removed_from_field_tf_2"      </span></span>
-<span><span class="co">#&gt; [19] "removed_from_field_tf_3"       "dry_yield_kg_ha_1"             "dry_yield_kg_ha_2"            </span></span>
-<span><span class="co">#&gt; [22] "dry_yield_kg_ha_3"             "yield_kg_ha_1"                 "yield_kg_ha_2"                </span></span>
-<span><span class="co">#&gt; [25] "yield_kg_ha_3"                 "yield_percent_moisture_1"      "yield_percent_moisture_2"     </span></span>
-<span><span class="co">#&gt; [28] "yield_percent_moisture_3"      "moisture_type_1"               "moisture_type_2"              </span></span>
-<span><span class="co">#&gt; [31] "moisture_type_3"               "percent_moisture_at_harvest_1" "percent_moisture_at_harvest_2"</span></span>
-<span><span class="co">#&gt; [34] "percent_moisture_at_harvest_3" "data_processing_note_1"        "data_processing_note_2"       </span></span>
-<span><span class="co">#&gt; [37] "data_processing_note_3"        "cover_crop_1"                  "cover_crop_2"                 </span></span>
-<span><span class="co">#&gt; [40] "cover_crop_3"                  "treatmentID1"                  "treatmentID2"                 </span></span>
-<span><span class="co">#&gt; [43] "rotation_id"                   "entryPhase"                    "cover crop"                   </span></span>
-<span><span class="co">#&gt; [46] "fertilizer amendment class"    "irrigation"                    "N fertility"                  </span></span>
-<span><span class="co">#&gt; [49] "organic management"            "pest management"               "residue management"           </span></span>
-<span><span class="co">#&gt; [52] "tillage"                       "cropping system"               "nutrient management system"   </span></span>
-<span><span class="co">#&gt; [55] "N rate"                        "soil amendment"                "production system"            </span></span>
-<span><span class="co">#&gt; [58] "grassland management"          "grassland N addition"</span></span>
+<span><span class="co">#&gt;  [1] "site_id"                       "unit_id"                      </span></span>
+<span><span class="co">#&gt;  [3] "harvest_year"                  "actual_crop_id"               </span></span>
+<span><span class="co">#&gt;  [5] "stand_year"                    "num_harvests"                 </span></span>
+<span><span class="co">#&gt;  [7] "rotation_phase"                "uid_1"                        </span></span>
+<span><span class="co">#&gt;  [9] "uid_2"                         "uid_3"                        </span></span>
+<span><span class="co">#&gt; [11] "expected_crop_id_1"            "expected_crop_id_2"           </span></span>
+<span><span class="co">#&gt; [13] "expected_crop_id_3"            "measured_fraction_1"          </span></span>
+<span><span class="co">#&gt; [15] "measured_fraction_2"           "measured_fraction_3"          </span></span>
+<span><span class="co">#&gt; [17] "removed_from_field_tf_1"       "removed_from_field_tf_2"      </span></span>
+<span><span class="co">#&gt; [19] "removed_from_field_tf_3"       "dry_yield_kg_ha_1"            </span></span>
+<span><span class="co">#&gt; [21] "dry_yield_kg_ha_2"             "dry_yield_kg_ha_3"            </span></span>
+<span><span class="co">#&gt; [23] "yield_kg_ha_1"                 "yield_kg_ha_2"                </span></span>
+<span><span class="co">#&gt; [25] "yield_kg_ha_3"                 "yield_percent_moisture_1"     </span></span>
+<span><span class="co">#&gt; [27] "yield_percent_moisture_2"      "yield_percent_moisture_3"     </span></span>
+<span><span class="co">#&gt; [29] "moisture_type_1"               "moisture_type_2"              </span></span>
+<span><span class="co">#&gt; [31] "moisture_type_3"               "percent_moisture_at_harvest_1"</span></span>
+<span><span class="co">#&gt; [33] "percent_moisture_at_harvest_2" "percent_moisture_at_harvest_3"</span></span>
+<span><span class="co">#&gt; [35] "data_processing_note_1"        "data_processing_note_2"       </span></span>
+<span><span class="co">#&gt; [37] "data_processing_note_3"        "cover_crop_1"                 </span></span>
+<span><span class="co">#&gt; [39] "cover_crop_2"                  "cover_crop_3"                 </span></span>
+<span><span class="co">#&gt; [41] "treatmentID1"                  "treatmentID2"                 </span></span>
+<span><span class="co">#&gt; [43] "rotation_id"                   "entryPhase"                   </span></span>
+<span><span class="co">#&gt; [45] "cover crop"                    "fertilizer amendment class"   </span></span>
+<span><span class="co">#&gt; [47] "irrigation"                    "N fertility"                  </span></span>
+<span><span class="co">#&gt; [49] "organic management"            "pest management"              </span></span>
+<span><span class="co">#&gt; [51] "residue management"            "tillage"                      </span></span>
+<span><span class="co">#&gt; [53] "cropping system"               "nutrient management system"   </span></span>
+<span><span class="co">#&gt; [55] "N rate"                        "soil amendment"               </span></span>
+<span><span class="co">#&gt; [57] "production system"             "grassland management"         </span></span>
+<span><span class="co">#&gt; [59] "grassland N addition"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">hyt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 47021    59</span></span>
 <span></span>
@@ -704,18 +682,24 @@ pre-downloaded tables, or fetch the tables from Directus.</p>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">hyt</span><span class="op">)</span> </span>
-<span><span class="co">#&gt;  [1] "uid"                         "site_id"                     "unit_id"                    </span></span>
-<span><span class="co">#&gt;  [4] "harvest_year"                "rotation_phase"              "stand_year"                 </span></span>
-<span><span class="co">#&gt;  [7] "num_harvests"                "expected_crop_id"            "actual_crop_id"             </span></span>
-<span><span class="co">#&gt; [10] "measured_fraction"           "removed_from_field_tf"       "dry_yield_kg_ha"            </span></span>
-<span><span class="co">#&gt; [13] "yield_kg_ha"                 "yield_percent_moisture"      "moisture_type"              </span></span>
-<span><span class="co">#&gt; [16] "percent_moisture_at_harvest" "data_processing_note"        "cover_crop"                 </span></span>
-<span><span class="co">#&gt; [19] "treatmentID1"                "treatmentID2"                "rotation_id"                </span></span>
-<span><span class="co">#&gt; [22] "entryPhase"                  "cover crop"                  "fertilizer amendment class" </span></span>
-<span><span class="co">#&gt; [25] "irrigation"                  "N fertility"                 "organic management"         </span></span>
-<span><span class="co">#&gt; [28] "pest management"             "residue management"          "tillage"                    </span></span>
-<span><span class="co">#&gt; [31] "cropping system"             "nutrient management system"  "N rate"                     </span></span>
-<span><span class="co">#&gt; [34] "soil amendment"              "production system"           "grassland management"       </span></span>
+<span><span class="co">#&gt;  [1] "uid"                         "site_id"                    </span></span>
+<span><span class="co">#&gt;  [3] "unit_id"                     "harvest_year"               </span></span>
+<span><span class="co">#&gt;  [5] "rotation_phase"              "stand_year"                 </span></span>
+<span><span class="co">#&gt;  [7] "num_harvests"                "expected_crop_id"           </span></span>
+<span><span class="co">#&gt;  [9] "actual_crop_id"              "measured_fraction"          </span></span>
+<span><span class="co">#&gt; [11] "removed_from_field_tf"       "dry_yield_kg_ha"            </span></span>
+<span><span class="co">#&gt; [13] "yield_kg_ha"                 "yield_percent_moisture"     </span></span>
+<span><span class="co">#&gt; [15] "moisture_type"               "percent_moisture_at_harvest"</span></span>
+<span><span class="co">#&gt; [17] "data_processing_note"        "cover_crop"                 </span></span>
+<span><span class="co">#&gt; [19] "treatmentID1"                "treatmentID2"               </span></span>
+<span><span class="co">#&gt; [21] "rotation_id"                 "entryPhase"                 </span></span>
+<span><span class="co">#&gt; [23] "cover crop"                  "fertilizer amendment class" </span></span>
+<span><span class="co">#&gt; [25] "irrigation"                  "N fertility"                </span></span>
+<span><span class="co">#&gt; [27] "organic management"          "pest management"            </span></span>
+<span><span class="co">#&gt; [29] "residue management"          "tillage"                    </span></span>
+<span><span class="co">#&gt; [31] "cropping system"             "nutrient management system" </span></span>
+<span><span class="co">#&gt; [33] "N rate"                      "soil amendment"             </span></span>
+<span><span class="co">#&gt; [35] "production system"           "grassland management"       </span></span>
 <span><span class="co">#&gt; [37] "grassland N addition"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">hyt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 65839    37</span></span></code></pre></div>
@@ -727,36 +711,47 @@ from planting_info are excluded. Multiple harvest dates are included as
 separate columns, as in <em>harmonize_harvest_dates</em>. Multiple
 fractions per crop are included as separate columns with suffixes _f1,
 _f2, etc.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="co"># full list including yield, planting, and harvest data. </span></span>
-<span><span class="co">#&gt;  [1] "crop_info"                    "crop_variety_info"            "crop_yields"                 </span></span>
-<span><span class="co">#&gt;  [4] "experimental_unit_info"       "experimental_unit_treatments" "harvest_dates"               </span></span>
-<span><span class="co">#&gt;  [7] "planting_info"                "rotation_id_info"             "rotation_phases"             </span></span>
-<span><span class="co">#&gt; [10] "site_info"                    "site_treatment_level_info"    "site_treatment_type_info"    </span></span>
-<span><span class="co">#&gt; [13] "treatment_id_components"      "treatment_id_info"            "weather_daily"               </span></span>
-<span><span class="co">#&gt; [16] "weather_station_info"</span></span>
+<span><span class="co">#&gt;  [1] "crop_info"                    "crop_variety_info"           </span></span>
+<span><span class="co">#&gt;  [3] "crop_yields"                  "experimental_unit_info"      </span></span>
+<span><span class="co">#&gt;  [5] "experimental_unit_treatments" "harvest_dates"               </span></span>
+<span><span class="co">#&gt;  [7] "planting_info"                "rotation_id_info"            </span></span>
+<span><span class="co">#&gt;  [9] "rotation_phases"              "site_info"                   </span></span>
+<span><span class="co">#&gt; [11] "site_treatment_level_info"    "site_treatment_type_info"    </span></span>
+<span><span class="co">#&gt; [13] "treatment_id_components"      "treatment_id_info"           </span></span>
+<span><span class="co">#&gt; [15] "weather_daily"                "weather_station_info"</span></span>
 <span><span class="va">yph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields_planting_harvest.html">harmonize_yields_planting_harvest</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">yph</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 47021    55</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">yph</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "site_id"                        "unit_id"                        "harvest_year"                  </span></span>
-<span><span class="co">#&gt;  [4] "expected_crop_id"               "actual_crop_id"                 "stand_year"                    </span></span>
-<span><span class="co">#&gt;  [7] "num_harvests"                   "rotation_phase"                 "cover_crop"                    </span></span>
-<span><span class="co">#&gt; [10] "crop_yields_uid_f1"             "crop_yields_uid_f2"             "crop_yields_uid_f3"            </span></span>
-<span><span class="co">#&gt; [13] "measured_fraction_f1"           "measured_fraction_f2"           "measured_fraction_f3"          </span></span>
-<span><span class="co">#&gt; [16] "removed_from_field_tf_f1"       "removed_from_field_tf_f2"       "removed_from_field_tf_f3"      </span></span>
-<span><span class="co">#&gt; [19] "dry_yield_kg_ha_f1"             "dry_yield_kg_ha_f2"             "dry_yield_kg_ha_f3"            </span></span>
-<span><span class="co">#&gt; [22] "yield_kg_ha_f1"                 "yield_kg_ha_f2"                 "yield_kg_ha_f3"                </span></span>
-<span><span class="co">#&gt; [25] "yield_percent_moisture_f1"      "yield_percent_moisture_f2"      "yield_percent_moisture_f3"     </span></span>
-<span><span class="co">#&gt; [28] "moisture_type_f1"               "moisture_type_f2"               "moisture_type_f3"              </span></span>
-<span><span class="co">#&gt; [31] "percent_moisture_at_harvest_f1" "percent_moisture_at_harvest_f2" "data_processing_note_f1"       </span></span>
-<span><span class="co">#&gt; [34] "data_processing_note_f2"        "data_processing_note_f3"        "phase_year_harvest_f1"         </span></span>
-<span><span class="co">#&gt; [37] "phase_year_harvest_f2"          "harvest_notes_f1"               "harvest_notes_f2"              </span></span>
-<span><span class="co">#&gt; [40] "harvest_date_1_f1"              "harvest_date_1_f2"              "harvest_dates_uid_1_f1"        </span></span>
-<span><span class="co">#&gt; [43] "harvest_dates_uid_1_f2"         "planting_info_uid"              "phase_year_planting"           </span></span>
-<span><span class="co">#&gt; [46] "planting_year"                  "planting_date"                  "variety_id"                    </span></span>
-<span><span class="co">#&gt; [49] "planting_rate"                  "planting_units"                 "material_planted"              </span></span>
-<span><span class="co">#&gt; [52] "planting_notes"                 "date_index"                     "replantedTF"                   </span></span>
+<span><span class="co">#&gt;  [1] "site_id"                        "unit_id"                       </span></span>
+<span><span class="co">#&gt;  [3] "harvest_year"                   "expected_crop_id"              </span></span>
+<span><span class="co">#&gt;  [5] "actual_crop_id"                 "stand_year"                    </span></span>
+<span><span class="co">#&gt;  [7] "num_harvests"                   "rotation_phase"                </span></span>
+<span><span class="co">#&gt;  [9] "cover_crop"                     "crop_yields_uid_f1"            </span></span>
+<span><span class="co">#&gt; [11] "crop_yields_uid_f2"             "crop_yields_uid_f3"            </span></span>
+<span><span class="co">#&gt; [13] "measured_fraction_f1"           "measured_fraction_f2"          </span></span>
+<span><span class="co">#&gt; [15] "measured_fraction_f3"           "removed_from_field_tf_f1"      </span></span>
+<span><span class="co">#&gt; [17] "removed_from_field_tf_f2"       "removed_from_field_tf_f3"      </span></span>
+<span><span class="co">#&gt; [19] "dry_yield_kg_ha_f1"             "dry_yield_kg_ha_f2"            </span></span>
+<span><span class="co">#&gt; [21] "dry_yield_kg_ha_f3"             "yield_kg_ha_f1"                </span></span>
+<span><span class="co">#&gt; [23] "yield_kg_ha_f2"                 "yield_kg_ha_f3"                </span></span>
+<span><span class="co">#&gt; [25] "yield_percent_moisture_f1"      "yield_percent_moisture_f2"     </span></span>
+<span><span class="co">#&gt; [27] "yield_percent_moisture_f3"      "moisture_type_f1"              </span></span>
+<span><span class="co">#&gt; [29] "moisture_type_f2"               "moisture_type_f3"              </span></span>
+<span><span class="co">#&gt; [31] "percent_moisture_at_harvest_f1" "percent_moisture_at_harvest_f2"</span></span>
+<span><span class="co">#&gt; [33] "data_processing_note_f1"        "data_processing_note_f2"       </span></span>
+<span><span class="co">#&gt; [35] "data_processing_note_f3"        "phase_year_harvest_f1"         </span></span>
+<span><span class="co">#&gt; [37] "phase_year_harvest_f2"          "harvest_notes_f1"              </span></span>
+<span><span class="co">#&gt; [39] "harvest_notes_f2"               "harvest_date_1_f1"             </span></span>
+<span><span class="co">#&gt; [41] "harvest_date_1_f2"              "harvest_dates_uid_1_f1"        </span></span>
+<span><span class="co">#&gt; [43] "harvest_dates_uid_1_f2"         "planting_info_uid"             </span></span>
+<span><span class="co">#&gt; [45] "phase_year_planting"            "planting_year"                 </span></span>
+<span><span class="co">#&gt; [47] "planting_date"                  "variety_id"                    </span></span>
+<span><span class="co">#&gt; [49] "planting_rate"                  "planting_units"                </span></span>
+<span><span class="co">#&gt; [51] "material_planted"               "planting_notes"                </span></span>
+<span><span class="co">#&gt; [53] "date_index"                     "replantedTF"                   </span></span>
 <span><span class="co">#&gt; [55] "num_components"</span></span></code></pre></div>
 <p>The <em>harmonize_yields_planting_harvest_treatments</em> function
 combines the harmonization steps for yields, planting info, harvest
@@ -767,37 +762,49 @@ the previous data download and harmonization steps (excluding weather
 data) and just use this function. The code below fetches the tables from
 the database and puts them all together. You can provide a list of
 previously downloaded database tables as an input.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">monsterdf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields_planting_harvest_treatments.html">harmonize_yields_planting_harvest_treatments</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">monsterdf</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 47021    74</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">monsterdf</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "site_id"                        "unit_id"                        "year"                          </span></span>
-<span><span class="co">#&gt;  [4] "treatmentID1"                   "treatmentID2"                   "rotation_id"                   </span></span>
-<span><span class="co">#&gt;  [7] "entryPhase"                     "cover crop"                     "fertilizer amendment class"    </span></span>
-<span><span class="co">#&gt; [10] "irrigation"                     "N fertility"                    "organic management"            </span></span>
-<span><span class="co">#&gt; [13] "pest management"                "residue management"             "tillage"                       </span></span>
-<span><span class="co">#&gt; [16] "cropping system"                "nutrient management system"     "N rate"                        </span></span>
-<span><span class="co">#&gt; [19] "soil amendment"                 "production system"              "grassland management"          </span></span>
-<span><span class="co">#&gt; [22] "grassland N addition"           "expected_crop_id"               "actual_crop_id"                </span></span>
-<span><span class="co">#&gt; [25] "stand_year"                     "num_harvests"                   "rotation_phase"                </span></span>
-<span><span class="co">#&gt; [28] "cover_crop"                     "crop_yields_uid_f1"             "crop_yields_uid_f2"            </span></span>
-<span><span class="co">#&gt; [31] "crop_yields_uid_f3"             "measured_fraction_f1"           "measured_fraction_f2"          </span></span>
-<span><span class="co">#&gt; [34] "measured_fraction_f3"           "removed_from_field_tf_f1"       "removed_from_field_tf_f2"      </span></span>
-<span><span class="co">#&gt; [37] "removed_from_field_tf_f3"       "dry_yield_kg_ha_f1"             "dry_yield_kg_ha_f2"            </span></span>
-<span><span class="co">#&gt; [40] "dry_yield_kg_ha_f3"             "yield_kg_ha_f1"                 "yield_kg_ha_f2"                </span></span>
-<span><span class="co">#&gt; [43] "yield_kg_ha_f3"                 "yield_percent_moisture_f1"      "yield_percent_moisture_f2"     </span></span>
-<span><span class="co">#&gt; [46] "yield_percent_moisture_f3"      "moisture_type_f1"               "moisture_type_f2"              </span></span>
-<span><span class="co">#&gt; [49] "moisture_type_f3"               "percent_moisture_at_harvest_f1" "percent_moisture_at_harvest_f2"</span></span>
-<span><span class="co">#&gt; [52] "data_processing_note_f1"        "data_processing_note_f2"        "data_processing_note_f3"       </span></span>
-<span><span class="co">#&gt; [55] "phase_year_harvest_f1"          "phase_year_harvest_f2"          "harvest_notes_f1"              </span></span>
-<span><span class="co">#&gt; [58] "harvest_notes_f2"               "harvest_date_1_f1"              "harvest_date_1_f2"             </span></span>
-<span><span class="co">#&gt; [61] "harvest_dates_uid_1_f1"         "harvest_dates_uid_1_f2"         "planting_info_uid"             </span></span>
-<span><span class="co">#&gt; [64] "phase_year_planting"            "planting_year"                  "planting_date"                 </span></span>
-<span><span class="co">#&gt; [67] "variety_id"                     "planting_rate"                  "planting_units"                </span></span>
-<span><span class="co">#&gt; [70] "material_planted"               "planting_notes"                 "date_index"                    </span></span>
+<span><span class="co">#&gt;  [1] "site_id"                        "unit_id"                       </span></span>
+<span><span class="co">#&gt;  [3] "year"                           "treatmentID1"                  </span></span>
+<span><span class="co">#&gt;  [5] "treatmentID2"                   "rotation_id"                   </span></span>
+<span><span class="co">#&gt;  [7] "entryPhase"                     "cover crop"                    </span></span>
+<span><span class="co">#&gt;  [9] "fertilizer amendment class"     "irrigation"                    </span></span>
+<span><span class="co">#&gt; [11] "N fertility"                    "organic management"            </span></span>
+<span><span class="co">#&gt; [13] "pest management"                "residue management"            </span></span>
+<span><span class="co">#&gt; [15] "tillage"                        "cropping system"               </span></span>
+<span><span class="co">#&gt; [17] "nutrient management system"     "N rate"                        </span></span>
+<span><span class="co">#&gt; [19] "soil amendment"                 "production system"             </span></span>
+<span><span class="co">#&gt; [21] "grassland management"           "grassland N addition"          </span></span>
+<span><span class="co">#&gt; [23] "expected_crop_id"               "actual_crop_id"                </span></span>
+<span><span class="co">#&gt; [25] "stand_year"                     "num_harvests"                  </span></span>
+<span><span class="co">#&gt; [27] "rotation_phase"                 "cover_crop"                    </span></span>
+<span><span class="co">#&gt; [29] "crop_yields_uid_f1"             "crop_yields_uid_f2"            </span></span>
+<span><span class="co">#&gt; [31] "crop_yields_uid_f3"             "measured_fraction_f1"          </span></span>
+<span><span class="co">#&gt; [33] "measured_fraction_f2"           "measured_fraction_f3"          </span></span>
+<span><span class="co">#&gt; [35] "removed_from_field_tf_f1"       "removed_from_field_tf_f2"      </span></span>
+<span><span class="co">#&gt; [37] "removed_from_field_tf_f3"       "dry_yield_kg_ha_f1"            </span></span>
+<span><span class="co">#&gt; [39] "dry_yield_kg_ha_f2"             "dry_yield_kg_ha_f3"            </span></span>
+<span><span class="co">#&gt; [41] "yield_kg_ha_f1"                 "yield_kg_ha_f2"                </span></span>
+<span><span class="co">#&gt; [43] "yield_kg_ha_f3"                 "yield_percent_moisture_f1"     </span></span>
+<span><span class="co">#&gt; [45] "yield_percent_moisture_f2"      "yield_percent_moisture_f3"     </span></span>
+<span><span class="co">#&gt; [47] "moisture_type_f1"               "moisture_type_f2"              </span></span>
+<span><span class="co">#&gt; [49] "moisture_type_f3"               "percent_moisture_at_harvest_f1"</span></span>
+<span><span class="co">#&gt; [51] "percent_moisture_at_harvest_f2" "data_processing_note_f1"       </span></span>
+<span><span class="co">#&gt; [53] "data_processing_note_f2"        "data_processing_note_f3"       </span></span>
+<span><span class="co">#&gt; [55] "phase_year_harvest_f1"          "phase_year_harvest_f2"         </span></span>
+<span><span class="co">#&gt; [57] "harvest_notes_f1"               "harvest_notes_f2"              </span></span>
+<span><span class="co">#&gt; [59] "harvest_date_1_f1"              "harvest_date_1_f2"             </span></span>
+<span><span class="co">#&gt; [61] "harvest_dates_uid_1_f1"         "harvest_dates_uid_1_f2"        </span></span>
+<span><span class="co">#&gt; [63] "planting_info_uid"              "phase_year_planting"           </span></span>
+<span><span class="co">#&gt; [65] "planting_year"                  "planting_date"                 </span></span>
+<span><span class="co">#&gt; [67] "variety_id"                     "planting_rate"                 </span></span>
+<span><span class="co">#&gt; [69] "planting_units"                 "material_planted"              </span></span>
+<span><span class="co">#&gt; [71] "planting_notes"                 "date_index"                    </span></span>
 <span><span class="co">#&gt; [73] "replantedTF"                    "num_components"</span></span></code></pre></div>
 </div>
 </div>
@@ -812,7 +819,7 @@ previously downloaded database tables as an input.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

@@ -43,11 +43,8 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_db_table</span><span class="op">(</span></span>
 <span>  table_name <span class="op">=</span> <span class="st">"site_info"</span>,</span>
-<span>  public <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"drivesR.default.public"</span><span class="op">)</span>,</span>
 <span>  myurl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"drivesR.default.url"</span><span class="op">)</span>,</span>
-<span>  mytoken <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"drivesR.default.directustoken"</span><span class="op">)</span>,</span>
-<span>  public_tables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"drivesR.default.tablevec"</span><span class="op">)</span>,</span>
-<span>  borealis_repo_info <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  mytoken <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"drivesR.default.directustoken"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -59,11 +56,6 @@
 <dd><p>The table identifier within Directus</p></dd>
 
 
-<dt id="arg-public">public<a class="anchor" aria-label="anchor" href="#arg-public"></a></dt>
-<dd><p>TRUE or FALSE indicating whether the table should be read from the
-public or internal portions of the DRIVES database. This can be set as a global option.</p></dd>
-
-
 <dt id="arg-myurl">myurl<a class="anchor" aria-label="anchor" href="#arg-myurl"></a></dt>
 <dd><p>The database url. By default, "https://data.drives-network.org"</p></dd>
 
@@ -71,15 +63,6 @@ public or internal portions of the DRIVES database. This can be set as a global 
 <dt id="arg-mytoken">mytoken<a class="anchor" aria-label="anchor" href="#arg-mytoken"></a></dt>
 <dd><p>The user-specific API token, in the format "Bearer insertAPItoken", without curly brackets.
 This can be set with set_default_token.</p></dd>
-
-
-<dt id="arg-public-tables">public_tables<a class="anchor" aria-label="anchor" href="#arg-public-tables"></a></dt>
-<dd><p>Vector of table names that receive the prefix 'public_' when public = TRUE.</p></dd>
-
-
-<dt id="arg-borealis-repo-info">borealis_repo_info<a class="anchor" aria-label="anchor" href="#arg-borealis-repo-info"></a></dt>
-<dd><p>A dataframe containing Borealis file identifiers for each table_name.
-If NULL, this information is imported from Directus.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -92,8 +75,7 @@ Canadian-hosted repository (Borealis).</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#not run: testdf &lt;- get_db_table("site_info") # at once</span></span></span>
-<span class="r-in"><span><span class="co">#not run: testdf2 &lt;- get_db_table("site_info", in_batches = TRUE, batchsize = 4)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#not run: testdf &lt;- get_db_table("site_info") </span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -106,7 +88,7 @@ Canadian-hosted repository (Borealis).</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

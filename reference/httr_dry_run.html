@@ -52,11 +52,15 @@
 <dd><p>An API request through the httr package. More convenient with piping.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A "request" object, containing a list of fields pertaining to the HTTP request.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">testreq</span> <span class="op">&lt;-</span> <span class="fu">httr_dry_run</span><span class="op">(</span><span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/GET.html" class="external-link">GET</a></span><span class="op">(</span>url <span class="op">=</span> <span class="st">"https://data.drives-network.org/collections"</span>,</span></span>
-<span class="r-in"><span>              <span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/add_headers.html" class="external-link">add_headers</a></span><span class="op">(</span><span class="st">"Authorization"</span> <span class="op">=</span> <span class="st">"Bearer {myAPItoken}"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># testreq &lt;- httr_dry_run(httr::GET(url = "https://data.drives-network.org/collections",</span></span></span>
+<span class="r-in"><span><span class="co">#               httr::add_headers("Authorization" = "Bearer myAPItoken")))</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
@@ -70,7 +74,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

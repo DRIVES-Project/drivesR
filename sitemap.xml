@@ -23,7 +23,6 @@
 <url><loc>https://drives-project.github.io/drivesR/reference/expand_years.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/ft_to_m.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/generate_directus_pat.html</loc></url>
-<url><loc>https://drives-project.github.io/drivesR/reference/get_canadian_data.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/get_column_dict_for_table.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/get_db_info.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/get_db_table.html</loc></url>
@@ -32,7 +31,6 @@
 <url><loc>https://drives-project.github.io/drivesR/reference/harmonize_planting_info.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/harmonize_treatments.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/harmonize_treatments_units.html</loc></url>
-<url><loc>https://drives-project.github.io/drivesR/reference/harmonize_weather.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/harmonize_yields.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/harmonize_yields_planting_harvest.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/harmonize_yields_planting_harvest_treatments.html</loc></url>
@@ -51,6 +49,7 @@
 <url><loc>https://drives-project.github.io/drivesR/reference/make_field_json.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/make_relations_json.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/make_row_insert_json.html</loc></url>
+<url><loc>https://drives-project.github.io/drivesR/reference/make_template_df.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/modify_rows.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/order_rows_by_internal_fk.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/order_tables_by_fk.html</loc></url>
@@ -60,7 +59,6 @@
 <url><loc>https://drives-project.github.io/drivesR/reference/print_stringvec_as_commasep.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/query_table_by_pk.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/set_default_token.html</loc></url>
-<url><loc>https://drives-project.github.io/drivesR/reference/set_public_access.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/test_api_token.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/test_category_dict.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/test_column_dict.html</loc></url>
