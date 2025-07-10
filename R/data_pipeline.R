@@ -528,32 +528,6 @@ harmonize_yields_treatments <- function(
 }
 
 
-#' Harmonize daily weather data
-#'
-#' @param weather_daily
-#' A dataframe corresponding to the weather_daily table
-#' in the DRIVES database. If NULL, this table is downloaded from Directus.
-#'  
-#' @returns
-#' A data frame of mildly processed weather data with weather variables in separate columns
-#' (instead of in separate rows as in the database). The processed table also excludes
-#' weather_station_id, flag, and uid columns from the original database table. 
-#' @export
-#' @import tidyr
-#' @examples
-harmonize_weather <- function(weather_daily=NULL){
-  if(is.null(weather_daily)){
-    ## import from directus
-    weather_daily <- get_db_table("weather_daily")
-    
-  }
-  wide_weather <- tidyr::pivot_wider(weather_daily, 
-                                     id_cols = c("site_id","year","date","day_of_year"),
-                                     names_from = variable,
-                                     values_from = value)
-  return(wide_weather)
-}
-
 #' Harmonize harvest dates
 #' 
 #' Does some light processing of the harvest_dates table.
