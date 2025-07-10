@@ -68,6 +68,10 @@ source("directus_creds.R")
 set_default_token(directus_token)
 ```
 
+```{r setup2, eval = TRUE, include = FALSE}
+options("drivesR.default.url" = directus_url)
+```
+
 The last line sets the global option for the Directus token that is used by functions in the drivesR package. You can view this option with getOption("drivesR.default.directus.token").
 
 
