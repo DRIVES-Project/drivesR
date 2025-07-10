@@ -5,12 +5,12 @@
 #' @param r 
 #' An API request through the httr package. More convenient with piping.
 #' @returns
-#' 
+#' A "request" object, containing a list of fields pertaining to the HTTP request. 
 #' @export
 #' @import httr
 #' @examples
-#' testreq <- httr_dry_run(httr::GET(url = "https://data.drives-network.org/collections",
-#'               httr::add_headers("Authorization" = "Bearer {myAPItoken}")))
+#' # testreq <- httr_dry_run(httr::GET(url = "https://data.drives-network.org/collections",
+#' #               httr::add_headers("Authorization" = "Bearer myAPItoken")))
 #' 
 #'
 httr_dry_run <- function(r) {
@@ -56,26 +56,6 @@ set_default_token <- function(usertoken, api = c("Directus","Dataverse")[1]){
   }
 }
 
-#' Set default public access settings
-#' This can be used to change the default public access settings
-#' from what is set up during package loading. 
-#' For the publicly-released package, the default will be
-#' public access.
-#' 
-#' @param public 
-#' TRUE for public access, FALSE for private access.
-#' @returns
-#' Changes the option for "drivesR.default.directustoken"
-#' that is used by various functions.  
-#' @export
-#'
-#' @examples
-set_public_access<- function(public = TRUE){
-  if(!public %in% c(TRUE,FALSE) | length(public) != 1){
-    stop("function argument 'public' must be TRUE or FALSE")
-  }
-  options("drivesR.default.public" = public)
-}
 
 #' Verify Directus API token
 #' Used within other functions to check for errors.

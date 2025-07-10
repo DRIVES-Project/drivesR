@@ -858,7 +858,15 @@ check_fk_values <- function(table_name = NULL,
 #' @import dplyr
 #'
 #' @examples
+#' # not run:
+#' # dict <- import_dictionary_tables()
+#' # fkorderdf <- order_tables_by_fk(dict$column_dictionary)
+#' 
 order_tables_by_fk <- function(column_dictionary = NULL){
+  if(is.null(column_dictionary)){
+    stop("column dictionary must be supplied")  
+  }
+  
   fkdict <- column_dictionary %>% group_by(table_name) %>%
     summarize(num_fk_tables = length(unique(foreign_key_table[!is.na(foreign_key_table)])),
               has_internal_fk = sum(table_name == foreign_key_table,na.rm=TRUE)>0,

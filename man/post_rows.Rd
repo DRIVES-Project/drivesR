@@ -19,3 +19,7 @@ The status code of that request is returned as a message.
 This adds all rows in an input dataframe in a single API request. To add
 more than 100 rows, use post_rows_in_batches. For use in an interactive R session.
 }
+\examples{
+# not run: post_rows("my_table", tabledf)
+
+}

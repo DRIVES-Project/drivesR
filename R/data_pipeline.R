@@ -973,6 +973,8 @@ harmonize_yields_planting_harvest <- function(db = NULL, primary_crop_fractions 
 #' @export
 #' @import dplyr
 #' @examples
+#' # not run: monsterdf <- harmonize_yields_planting_harvest_treatments()
+#' 
 harmonize_yields_planting_harvest_treatments <- function(db = NULL){
   # test input
   dbtables <- c("crop_yields","harvest_dates","planting_info","treatment_id_info","treatment_id_components","experimental_unit_treatments")

@@ -25,3 +25,9 @@ foreign key constraints. This is to help determine
 the order of items to post to avoid foreign key violations.
 Tables with internal foreign keys should use order_rows_by_internal_fk
 }
+\examples{
+# not run:
+# dict <- import_dictionary_tables()
+# fkorderdf <- order_tables_by_fk(dict$column_dictionary)
+
+}

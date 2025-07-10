@@ -15,7 +15,14 @@ get_column_dict_for_table(
 
 \item{myurl}{Base url for the Directus database.}
 }
+\value{
+A dataframe consisting of the subsetted column dictionary for the corresponding table.
+}
 \description{
 Get column dictionary for a specified table
 As an alternative to subsetting.
+}
+\examples{
+#not run: cdict <- get_column_dict_for_table("site_info")
+
 }

@@ -24,3 +24,7 @@ Silent.
 \description{
 To get around issues of posting limits.
 }
+\examples{
+# not run: post_rows_in_batches("my_table", bigdf, 1000)
+
+}

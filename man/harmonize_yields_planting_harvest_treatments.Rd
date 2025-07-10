@@ -15,3 +15,7 @@ A single data frame with combined output from all these tables.
 \description{
 This performs the steps in harmonize_treatment_units and harmonize_yields_planting_harvest and combines the output.
 }
+\examples{
+# not run: monsterdf <- harmonize_yields_planting_harvest_treatments()
+
+}

@@ -5,10 +5,14 @@
 #' @param myurl Base url for the Directus database.
 #'
 #' @returns
+#' A dataframe consisting of the subsetted column dictionary for the corresponding table.
+#' 
 #' @export
 #' @import httr
 #' @import jsonlite
 #' @examples
+#' #not run: cdict <- get_column_dict_for_table("site_info")
+#' 
 get_column_dict_for_table <- function(table_name = "site_info",
                                 myurl = getOption("drivesR.default.url") ){
   reqlist <- list("query"= list("filter" = 
@@ -32,19 +36,11 @@ get_column_dict_for_table <- function(table_name = "site_info",
 #'
 #' @param table_name 
 #' The table identifier within Directus
-#' @param public
-#' TRUE or FALSE indicating whether the table should be read from the 
-#' public or internal portions of the DRIVES database. This can be set as a global option.
 #' @param myurl 
 #' The database url. By default, "https://data.drives-network.org"
 #' @param mytoken 
 #' The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets.
 #' This can be set with set_default_token.
-#' @param public_tables
-#' Vector of table names that receive the prefix 'public_' when public = TRUE.
-#' @param borealis_repo_info 
-#' A dataframe containing Borealis file identifiers for each table_name. 
-#' If NULL, this information is imported from Directus. 
 #' @returns
 #' A data frame containing all rows and columns of the specified table. 
 #' If public is set to TRUE, the data will exclude sites and years not approved 
@@ -57,8 +53,7 @@ get_column_dict_for_table <- function(table_name = "site_info",
 #' @import jsonlite
 #' @import dplyr
 #' @examples
-#' #not run: testdf <- get_db_table("site_info") # at once
-#' #not run: testdf2 <- get_db_table("site_info", in_batches = TRUE, batchsize = 4)
+#' #not run: testdf <- get_db_table("site_info") 
 #' 
 get_db_table <- function(table_name = "site_info",
                          myurl = getOption("drivesR.default.url"),
@@ -178,6 +173,17 @@ get_db_info <- function(mytarget = "collections",
 #' @import jsonlite
 #' @import httr
 #' @examples
+#' # not run:
+#' # this example demonstrates how a query filter might be set up 
+#' # in an api request.
+#' # querylist <- 
+#' #   list("query"= list("filter" = 
+#' #   list("table_name" =
+#' #   list("_eq" = "site_info")),
+#' #   "limit" = -1))
+#' # queryjson <- toJSON(querylist, auto_unbox = TRUE)
+#' # myreq <- api_request("SEARCH","items/column_dictionary", queryjson)
+#' # outdf <- get_table_from_req(myreq)
 get_table_from_req <- function(apirequest = NULL){
   resp <- httr::content(apirequest, as= "text")
   output <- jsonlite::fromJSON(resp)[["data"]]
@@ -204,10 +210,13 @@ get_table_from_req <- function(apirequest = NULL){
 #' Vector of tables that receive the public_ prefix if public==TRUE.
 #' Set as a global default. 
 #' @returns
+#' A dataframe of the specified tables subsetted for rows matching the 
+#' primary key vector.
 #' @export
 #'
 #' @examples
 #' #not run: qtable <- query_table_by_pk("harvest_dates",pkvec = 1:100, pkfield = "uid)
+#' 
 query_table_by_pk <- function(
     table_name = NULL,
     pkvec = NULL,
