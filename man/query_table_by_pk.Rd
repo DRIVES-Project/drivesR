@@ -30,6 +30,10 @@ Since this function is mostly for internal use, the default is FALSE.}
 \item{public_tables}{Vector of tables that receive the public_ prefix if public==TRUE.
 Set as a global default.}
 }
+\value{
+A dataframe of the specified tables subsetted for rows matching the 
+primary key vector.
+}
 \description{
 Fetch table contents by primary keys
 Function to query contents of a database table with a vector of primary key values.
@@ -38,4 +42,5 @@ It could be useful for querying information across tables.
 }
 \examples{
 #not run: qtable <- query_table_by_pk("harvest_dates",pkvec = 1:100, pkfield = "uid)
+
 }

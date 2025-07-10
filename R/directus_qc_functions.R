@@ -535,9 +535,9 @@ check_table_contents <- function(table_name = NULL,
       if(!colname %in% names(inputdf)){
         next
       }
-      failrows <- which(nchar(inputdf[,colname]) > maxLengthDf$schema.max_length[i])
-      if(length(failrows) > 0){
-        listitem <- list(failrows)
+      failrows <- nchar(inputdf[[colname]]) > maxLengthDf$schema.max_length[i]
+      if(sum(failrows, na.rm=TRUE) > 0){
+        listitem <- list(which(failrows==TRUE))
         names(listitem) <- colname
         outlist <- append(outlist, listitem)
         mysep <- ifelse(cnames == "", "",";")
@@ -576,9 +576,9 @@ check_table_contents <- function(table_name = NULL,
       if(!colname %in% names(inputdf)){
         next
       }
-      if(anyDuplicated(inputdf[,colname])){
-        dupvals <- inputdf[,colname][which(duplicated(inputdf[,colname]))]  
-        failrows <- which(inputdf[,colname] %in% dupvals)
+      if(anyDuplicated(inputdf[[colname]])){
+        dupvals <- inputdf[[colname]][which(duplicated(inputdf[[colname]]))]  
+        failrows <- which(inputdf[[colname]] %in% dupvals)
         listitem <- list(failrows)
         names(listitem) <- colname
         outlist <- append(outlist, listitem)
@@ -630,7 +630,7 @@ check_table_contents <- function(table_name = NULL,
       cnames <- paste(cnames,colname, sep=mysep)
     }
     # test the data:
-    colvec <- inputdf[,colname]
+    colvec <- inputdf[[colname]]
     
     if(dtype == "integer"){
       # test for integer
@@ -804,6 +804,9 @@ check_fk_values <- function(table_name = NULL,
   names(fklist) <- fk_schema$field # named by field name in input table.
   for(i in 1:nrow(fk_schema)){
     fktable = fk_schema$schema.foreign_key_table[i]
+    # skip internal foreign keys
+    if(fktable == table_name) next()
+    
     fkfield = fk_schema$schema.foreign_key_column[i]
     fkq <- jsonlite::toJSON(list("fields" = fkfield),auto_unbox = FALSE)
     
@@ -821,11 +824,14 @@ check_fk_values <- function(table_name = NULL,
   names(outlist) <- fk_schema$field
   for(i in 1:nrow(fk_schema)){
     fkfield <- fk_schema$field[i]
-    fkTF <- inputdf[,fkfield] %in% fklist[[fkfield]]
+    
+    ## skip if it's an internal fk
+    if(is.null(fklist[[fkfield]])) next()
+    fkTF <- inputdf[[fkfield]] %in% fklist[[fkfield]]
     ## if the field is nullable, set NAs to true. 
     if(fk_schema$schema.is_nullable[i] == TRUE &
-       any(is.na(inputdf[,fkfield]))){
-      fkTF[which(is.na(inputdf[,fkfield]))] <- TRUE
+       any(is.na(inputdf[[fkfield]]))){
+      fkTF[which(is.na(inputdf[[fkfield]]))] <- TRUE
     }
     if(all(fkTF == TRUE)){
       message(glue::glue("No foreign key violations in column {fkfield}."))
@@ -852,7 +858,15 @@ check_fk_values <- function(table_name = NULL,
 #' @import dplyr
 #'
 #' @examples
+#' # not run:
+#' # dict <- import_dictionary_tables()
+#' # fkorderdf <- order_tables_by_fk(dict$column_dictionary)
+#' 
 order_tables_by_fk <- function(column_dictionary = NULL){
+  if(is.null(column_dictionary)){
+    stop("column dictionary must be supplied")  
+  }
+  
   fkdict <- column_dictionary %>% group_by(table_name) %>%
     summarize(num_fk_tables = length(unique(foreign_key_table[!is.na(foreign_key_table)])),
               has_internal_fk = sum(table_name == foreign_key_table,na.rm=TRUE)>0,
@@ -912,7 +926,7 @@ order_tables_by_fk <- function(column_dictionary = NULL){
 #' @examples
 #' #not run: roworder <- order_rows_by_internal_fk(
 #' #inputdf = crop_info,idcol = "crop_id",fkcol = "parent_crop_id")
-#' # not run: walk(roworder,~post_rows("crop_info",inputdf[.x,] ))
+#' # not run: walk(roworder,~post_rows("crop_info",inputdf[[.x]] ))
 order_rows_by_internal_fk <- function(inputdf = NULL,
                                       idcol = NULL,
                                       fkcol = NULL){
@@ -920,7 +934,7 @@ order_rows_by_internal_fk <- function(inputdf = NULL,
   rowqueue <- c()
   while(length(waitingrows) > 0){
     qTF <- c()
-    for(i in seq_along(waitingrows)){
+    for(i in waitingrows){
       # if internal fk value is empty, add to queue 
       addToQ <- FALSE
       if(is.na(inputdf[i,fkcol])){

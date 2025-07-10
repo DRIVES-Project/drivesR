@@ -6,28 +6,17 @@
 \usage{
 get_db_table(
   table_name = "site_info",
-  public = getOption("drivesR.default.public"),
   myurl = getOption("drivesR.default.url"),
-  mytoken = getOption("drivesR.default.directustoken"),
-  public_tables = getOption("drivesR.default.tablevec"),
-  borealis_repo_info = NULL
+  mytoken = getOption("drivesR.default.directustoken")
 )
 }
 \arguments{
 \item{table_name}{The table identifier within Directus}
 
-\item{public}{TRUE or FALSE indicating whether the table should be read from the 
-public or internal portions of the DRIVES database. This can be set as a global option.}
-
 \item{myurl}{The database url. By default, "https://data.drives-network.org"}
 
 \item{mytoken}{The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets.
 This can be set with set_default_token.}
-
-\item{public_tables}{Vector of table names that receive the prefix 'public_' when public = TRUE.}
-
-\item{borealis_repo_info}{A dataframe containing Borealis file identifiers for each table_name. 
-If NULL, this information is imported from Directus.}
 }
 \value{
 A data frame containing all rows and columns of the specified table. 
@@ -39,7 +28,6 @@ Canadian-hosted repository (Borealis).
 Fetch an entire table from Directus
 }
 \examples{
-#not run: testdf <- get_db_table("site_info") # at once
-#not run: testdf2 <- get_db_table("site_info", in_batches = TRUE, batchsize = 4)
+#not run: testdf <- get_db_table("site_info") 
 
 }

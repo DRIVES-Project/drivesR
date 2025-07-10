@@ -5,10 +5,14 @@
 #' @param myurl Base url for the Directus database.
 #'
 #' @returns
+#' A dataframe consisting of the subsetted column dictionary for the corresponding table.
+#' 
 #' @export
 #' @import httr
 #' @import jsonlite
 #' @examples
+#' #not run: cdict <- get_column_dict_for_table("site_info")
+#' 
 get_column_dict_for_table <- function(table_name = "site_info",
                                 myurl = getOption("drivesR.default.url") ){
   reqlist <- list("query"= list("filter" = 
@@ -32,19 +36,11 @@ get_column_dict_for_table <- function(table_name = "site_info",
 #'
 #' @param table_name 
 #' The table identifier within Directus
-#' @param public
-#' TRUE or FALSE indicating whether the table should be read from the 
-#' public or internal portions of the DRIVES database. This can be set as a global option.
 #' @param myurl 
 #' The database url. By default, "https://data.drives-network.org"
 #' @param mytoken 
 #' The user-specific API token, in the format "Bearer {insertAPItoken}", without curly brackets.
 #' This can be set with set_default_token.
-#' @param public_tables
-#' Vector of table names that receive the prefix 'public_' when public = TRUE.
-#' @param borealis_repo_info 
-#' A dataframe containing Borealis file identifiers for each table_name. 
-#' If NULL, this information is imported from Directus. 
 #' @returns
 #' A data frame containing all rows and columns of the specified table. 
 #' If public is set to TRUE, the data will exclude sites and years not approved 
@@ -57,15 +53,11 @@ get_column_dict_for_table <- function(table_name = "site_info",
 #' @import jsonlite
 #' @import dplyr
 #' @examples
-#' #not run: testdf <- get_db_table("site_info") # at once
-#' #not run: testdf2 <- get_db_table("site_info", in_batches = TRUE, batchsize = 4)
+#' #not run: testdf <- get_db_table("site_info") 
 #' 
 get_db_table <- function(table_name = "site_info",
-                         public = getOption("drivesR.default.public"),
                          myurl = getOption("drivesR.default.url"),
-                         mytoken = getOption("drivesR.default.directustoken"),
-                         public_tables = getOption("drivesR.default.tablevec"),
-                         borealis_repo_info = NULL
+                         mytoken = getOption("drivesR.default.directustoken")
                          ){
   ## Check arguments-----
   ## conditions to stop execution with incompatible arguments
@@ -77,16 +69,14 @@ get_db_table <- function(table_name = "site_info",
   if(is.null(mytoken)){
     message("Directus API token set to NULL. Will only work for certain tables.")
   }
-  ## add public prefix if applicable 
-  table_id <- ifelse(public == TRUE & table_name %in% public_tables,
-                             paste0("public_", table_name), table_name)
   
   ## get column order from column dictionary.
   column_order <- get_column_dict_for_table(table_name)[,c("column_name","column_order")]
   
   ## Bulk import------- 
+  ## batch import didn't work for more than 10K rows.
     table_req <- GET(
-      glue::glue("{myurl}/items/{table_id}?limit=-1"),
+      glue::glue("{myurl}/items/{table_name}?limit=-1"),
       add_headers(
         "Authorization" = mytoken
       )
@@ -100,81 +90,12 @@ get_db_table <- function(table_name = "site_info",
     table_resp <- content(table_req, as="text")
     table_df <- jsonlite::fromJSON(table_resp)[["data"]]
     
-    # import canadian table if: public is TRUE, table is in the list of public_tables,
-    # table is not crop_info.
-    if(public == TRUE & 
-       table_name %in% public_tables &
-       table_name != "crop_info"){
-      candf <- get_canadian_data(table_name = table_name,
-                                    borealis_repo_info = borealis_repo_info )
-      table_df <- dplyr::bind_rows(table_df, candf)
-      
-    }
     # put columns in the correct order
     table_df <- table_df[,column_order$column_name]
     # last step
     return(table_df)
 }
 
-#' Get Canadian data from the Borealis Repository
-#' This function is called by get_db_table if the 
-#' public option is set to TRUE.
-#'
-#' @param table_name
-#' Name of the drives database table, as shown in table_dictionary. 
-#' @param dataverse_url 
-#' Server URL for the Borealis repository, part of Dataverse.
-#' By default is set to "https://borealisdata.ca"
-#' @param dataverse_doi
-#' Persistent identifier for the collection in Borealis. This is set 
-#' to a default. 
-#' @param dataverse_api 
-#' API key for the Borealis repository. This option is included for troubleshooting
-#' before the repository data tables are published. Once they are published, this option
-#' can remain as NULL.
-#' @param borealis_repo_info 
-#' A dataframe containing Borealis file identifiers for each table_name. 
-#' If NULL, this information is imported from Directus. Set with set_default_token().
-#' @param directus_url
-#' URL for the Directus database (can be set with global options).
-#' @returns
-#' A dataframe with rows for the two Canadian sites for the specified table_name. 
-#' This can be combined with the public Direcctus table using bind_rows.
-#' @export
-#' @import httr
-#' @import jsonlite
-#'
-#' @examples
-get_canadian_data <- function(table_name = NULL,
-                                  dataverse_url = "https://borealisdata.ca",
-                                  dataverse_doi = "doi:10.5683/SP3/QGLCKO",
-                                  dataverse_api = getOption("drivesR.default.dataversetoken"),
-                                  borealis_repo_info = NULL,
-                                  directus_url =getOption("drivesR.default.url") ){
-  ## import borealis_repo_info if NULL
-  if(is.null(borealis_repo_info)){
-    ## doesn't require a token.
-    brireq <- GET(url = glue::glue("{directus_url}/items/borealis_repo_info?limit=-1"))
-    borealis_repo_info <- get_table_from_req(brireq)
-      
-  }
-  #fetch File id from borealis_repo_info-----------
-  myFileId <- borealis_repo_info$repo_file_id[which(borealis_repo_info$table_name==table_name)]
-  
-  #fetch table from Borealis  -----------
-  ## for now, use my API key. This won't require a key
-  # once it's published.
-  breq <- GET(url =glue::glue("{dataverse_url}/api/access/datafile/{myFileId}"),
-              add_headers(
-                `X-Dataverse-key` = dataverse_api  
-              )
-    )
-  if(breq$status_code != 200){
-    stop("Request failed with status code ", breq$status_code)
-  }
-  bdf <- utils::read.table(text = content(breq,as = "text"),sep = "\t",header =TRUE, na.strings = "")
-  return(bdf)
-}
 
 #' Fetch schema information from directus
 #'
@@ -252,6 +173,17 @@ get_db_info <- function(mytarget = "collections",
 #' @import jsonlite
 #' @import httr
 #' @examples
+#' # not run:
+#' # this example demonstrates how a query filter might be set up 
+#' # in an api request.
+#' # querylist <- 
+#' #   list("query"= list("filter" = 
+#' #   list("table_name" =
+#' #   list("_eq" = "site_info")),
+#' #   "limit" = -1))
+#' # queryjson <- toJSON(querylist, auto_unbox = TRUE)
+#' # myreq <- api_request("SEARCH","items/column_dictionary", queryjson)
+#' # outdf <- get_table_from_req(myreq)
 get_table_from_req <- function(apirequest = NULL){
   resp <- httr::content(apirequest, as= "text")
   output <- jsonlite::fromJSON(resp)[["data"]]
@@ -278,10 +210,13 @@ get_table_from_req <- function(apirequest = NULL){
 #' Vector of tables that receive the public_ prefix if public==TRUE.
 #' Set as a global default. 
 #' @returns
+#' A dataframe of the specified tables subsetted for rows matching the 
+#' primary key vector.
 #' @export
 #'
 #' @examples
 #' #not run: qtable <- query_table_by_pk("harvest_dates",pkvec = 1:100, pkfield = "uid)
+#' 
 query_table_by_pk <- function(
     table_name = NULL,
     pkvec = NULL,

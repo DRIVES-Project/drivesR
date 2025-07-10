@@ -32,27 +32,28 @@ library(drivesR)
 
 # Accessing the DRIVES database
 ## Requesting access
- The DRIVES database is hosted at [data.drives-network.org/](https://data.drives-network.org/). We ask that anyone interesting in using DRIVES data complete the [data request form](https://www.drives-network.org/data-request). Direct collaborators and project members can request access directly from the DRIVES data manager. Either way, you will receive an email with a username, password, and API key. 
+ The DRIVES database is hosted at [data.drives-network.org/](https://data.drives-network.org/). We ask that anyone interesting in using DRIVES data complete the [data request form](https://www.drives-network.org/data-request). Direct collaborators and project members can request access directly from the DRIVES data manager. Either way, you will receive an email with a username and password.  
 
- You can use the username and password to log in to the [Directus Data Studio Application](https://data.drives-network.org/admin/login), where you can change your password and view tables through the graphical interface. While you can download tables from this application, we recommend doing so through the drivesR package. The API key is all you need to access the data through the drivesR package. 
- 
+ You can use the username and password to log in to the [Directus Data Studio Application](https://data.drives-network.org/admin/login), where you can view tables through the graphical interface. You can change your password through the log-in page. 
 
-After you complete the request process, you will receive a Directus API key set to your user permissions. This is a string of random letters and numbers. For use with this package, the Directus API key must be formatted, "Bearer APIKEY". 
+After you complete the request process, you can use your user email and password to create a personal access token (PAT) for the API. The PAT expires after 7 days and can be regenerated using a 'refresh' token. The drivesR package has an easy-to-use function for generating and refreshing tokens (see below). Approved users can request a long-term API key from the data manager. The PAT and the API key are interchangeable in the examples below. See ?generate_directus_pat for details on how to generate a PAT.
 
-It's best practice never to hard-code an API key into a script. We recommend making a setup script that is sourced by other scripts (be sure to add this to your .gitignore if you're using github). Alternatively, you can use this script to read the API key from a non-indexed location.
+The PAT or API key is a string of random letters and numbers. For use with this package, the Directus API key must be formatted, "Bearer APIKEY". It is best practice never to hard-code a PAT or API key into a script. We recommend making a setup script that is sourced by other scripts (be sure to add this to your .gitignore if you're using github). Alternatively, you can use this script to read credentials from a non-indexed location.
+
 
 The code below generates an empty script file in your working directory that opens in R studio.
 ```{r creds1, eval = FALSE}
 usethis::edit_file("directus_creds.R")
 ```
 
-Once you have an empty script file, you can add something like this, replacing MYAPI key with the API key you received.
+
+Once you have an empty script file, you can add something like this, replacing MYAPI key with the API key or PAT.
+
 ```{r creds2, eval = FALSE}
 directus_token = "Bearer MYAPIKEY"
 ```
 
-### Personal Access Token
-If there is a problem with the API key, users with a valid email and password can generate a personal access token that will provide access to the API for short periods (a single session). See ?generate_directus_pat for details. 
+
 
 ## Setup steps
 If you format your setup script as described above, you should include these lines of code at the beginning of every any script that downloads DRIVES tables:
@@ -67,13 +68,11 @@ source("directus_creds.R")
 set_default_token(directus_token)
 ```
 
-The last line sets the global option for the Directus token that is used by functions in the drivesR package. You can view this option with getOption("drivesR.default.directus.token").
-
-DRIVES collaborators and project members with full read-access will need to add one extra line:
-```{r setup2, eval= FALSE}
-set_public_access(public = FALSE)
+```{r setup2, eval = TRUE, include = FALSE}
+options("drivesR.default.url" = directus_url)
 ```
-By default, the drivesR package reads from data tables with approved public access privileges, which excludes certain sites and site-years. This function allows approved users to access the full database. 
+
+The last line sets the global option for the Directus token that is used by functions in the drivesR package. You can view this option with getOption("drivesR.default.directus.token").
 
 
 ## Downloading DRIVES tables. 
@@ -290,15 +289,7 @@ The DRIVES database contains two tables pertaining to weather:
  **weather_daily** contains daily weather station data for min and max precipitation and cumulative precipitation. Missing observations are supplied from gridded data from [Daymet](https://daymet.ornl.gov/). The table is organized in a long format, with weather variables in separate rows.
  **weather_station_info** provides information on weather station identifiers used in the weather_daily data. This includes their lat-lon coordinates and urls for data access (if applicable). 
 
-The *harmonize_weather* function converts the daily weather table from long to wide and removes columns that are not useful in a wide format.
-```{r harmonize_weather, eval=TRUE}
-#weather_daily <- get_db_table("weather_daily")# can be a separate table or part of a list.
-str(db$weather_daily) # long version
-weatherdf <- harmonize_weather(db$weather_daily)
-str(weatherdf) # wide simplified version
-
-```
-
+The weather table is in wide format and ready for analysis. Weather variables can be merged with other datasets based on site_id and year. It is up to the user to coalesce between daily and yearly time scales. 
 
 ## 5) Putting it all together
 The *harmonize_yields_treatments* function combines the harmonization steps for treatments, units, and yields and merges them together. It includes the option to keep crop fractions in separate rows or reorganize them into columns. It can operate on a list of pre-downloaded tables, or fetch the tables from Directus. 

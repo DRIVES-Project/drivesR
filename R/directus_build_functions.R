@@ -289,6 +289,8 @@ make_field_json <- function(column_dictionary_row = NULL){
 #' @export
 #'
 #' @examples
+#' # not run: post_rows("my_table", tabledf)
+#' 
 post_rows <- function(table_name = NULL,
                       inputdf = NULL){
   insert_json <- make_row_insert_json(inputdf)
@@ -315,6 +317,8 @@ post_rows <- function(table_name = NULL,
 #' @export
 #'
 #' @examples
+#' # not run: post_rows_in_batches("my_table", bigdf, 1000)
+#' 
 post_rows_in_batches <- function(table_name = "crop_yields", inputdf = NULL,batchsize = 1000){
   nitems = nrow(inputdf)
   nbatches = ceiling(nitems/batchsize)
