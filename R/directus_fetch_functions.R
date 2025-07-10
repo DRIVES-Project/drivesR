@@ -61,11 +61,8 @@ get_column_dict_for_table <- function(table_name = "site_info",
 #' #not run: testdf2 <- get_db_table("site_info", in_batches = TRUE, batchsize = 4)
 #' 
 get_db_table <- function(table_name = "site_info",
-                         public = getOption("drivesR.default.public"),
                          myurl = getOption("drivesR.default.url"),
-                         mytoken = getOption("drivesR.default.directustoken"),
-                         public_tables = getOption("drivesR.default.tablevec"),
-                         borealis_repo_info = NULL
+                         mytoken = getOption("drivesR.default.directustoken")
                          ){
   ## Check arguments-----
   ## conditions to stop execution with incompatible arguments
@@ -77,16 +74,14 @@ get_db_table <- function(table_name = "site_info",
   if(is.null(mytoken)){
     message("Directus API token set to NULL. Will only work for certain tables.")
   }
-  ## add public prefix if applicable 
-  table_id <- ifelse(public == TRUE & table_name %in% public_tables,
-                             paste0("public_", table_name), table_name)
   
   ## get column order from column dictionary.
   column_order <- get_column_dict_for_table(table_name)[,c("column_name","column_order")]
   
   ## Bulk import------- 
+  ## batch import didn't work for more than 10K rows.
     table_req <- GET(
-      glue::glue("{myurl}/items/{table_id}?limit=-1"),
+      glue::glue("{myurl}/items/{table_name}?limit=-1"),
       add_headers(
         "Authorization" = mytoken
       )
@@ -100,16 +95,6 @@ get_db_table <- function(table_name = "site_info",
     table_resp <- content(table_req, as="text")
     table_df <- jsonlite::fromJSON(table_resp)[["data"]]
     
-    # import canadian table if: public is TRUE, table is in the list of public_tables,
-    # table is not crop_info.
-    if(public == TRUE & 
-       table_name %in% public_tables &
-       table_name != "crop_info"){
-      candf <- get_canadian_data(table_name = table_name,
-                                    borealis_repo_info = borealis_repo_info )
-      table_df <- dplyr::bind_rows(table_df, candf)
-      
-    }
     # put columns in the correct order
     table_df <- table_df[,column_order$column_name]
     # last step
