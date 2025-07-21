@@ -231,3 +231,55 @@ generate_directus_pat <- function(useremail = NULL,
   }
 
 }
+
+
+#' Import Directus PAT
+#' This imports a Directus Personal Access Token from a file created by generate_directus_token.
+#' It also tests whether the token is valid. 
+#'
+#' @param filepath 
+#' A path to the file created by generate_directus_token(). 
+#'
+#' @returns
+#' returns a character string that can be used in the function set_default_token().
+#' @export
+#'
+#' @examples
+#' # not run:
+#' # ## run in command line or read password from a non-indexed location:
+#' # generate_directus_token(savedir = "afolder", savename = "directus.PAT.txt")
+#' # mytoken <- read_directus_pat(file.path("afolder","directus.PAT.txt"))
+#' # set_default_token(mytoken)
+#' 
+read_directus_pat <- function(filepath = "directus_PAT.txt"){
+  # check inputs.
+  if(!file.exists(filepath)){
+    stop("File path ", filepath, " not found.")
+  }
+  outputdf <- try(read.table(file = filepath, header=TRUE,sep = "\t"),silent = TRUE)
+  if(class(outputdf)=="try-error"){
+      stop("File not readable by read.table.")
+  }
+    if(class(outputdf) != "data.frame"){
+      stop("Contents of ", file.path(savedir,savename), "are formatted incorrectly.
+           Run generate_directus_pat with fetch_option = 'regenerate' and save = TRUE to create a new PAT file.")
+    }
+    if(!all(names(outputdf) %in% c("expires","refresh_token","access_token"))){
+      stop("Contents of ", file.path(savedir,savename), "are formatted incorrectly.
+           Run generate_directus_pat with fetch_option = 'regenerate' and save = TRUE to create a new PAT file.")
+    }
+  # checks for valid PAT file content
+  
+  # test if token is valid. throw warning message if not
+  outtoken <- paste0("Bearer ",outputdf$access_token)
+  validToken <- test_api_token(outtoken)
+  
+  if(validToken == FALSE){
+    warning("Invalid token.")
+  }
+  if(validToken == TRUE){
+    message("Token is good to go.")
+  }
+    return(outtoken)
+}
+
