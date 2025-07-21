@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 
 ```
 
-This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [data.drives-network.org](https://data.drives-network.org). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVES project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
+This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [drivesmachine.cals.ncsu.edu](https://drivesmachine.cals.ncsu.edu). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVES project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
 
 This package has two main purposes for users interested in analyzing DRIVES data. First, it provides easy-to-use functions to download data tables from the Directus API. Second, it provides harmonization functions to combine and reshape tables for analysis. 
 
@@ -32,44 +32,54 @@ library(drivesR)
 
 # Accessing the DRIVES database
 ## Requesting access
- The DRIVES database is hosted at [data.drives-network.org/](https://data.drives-network.org/). We ask that anyone interesting in using DRIVES data complete the [data request form](https://www.drives-network.org/data-request). Direct collaborators and project members can request access directly from the DRIVES data manager. Either way, you will receive an email with a username and password.  
+ The DRIVES database is hosted at [drivesmachine.cals.ncsu.edu/](https://drivesmachine.cals.ncsu.edu/). We ask that anyone interesting in using DRIVES data complete the [data request form](https://www.drives-network.org/data-request). Direct collaborators and project members can request access directly from the DRIVES data manager. Either way, you will receive an email with a username and password.  
 
- You can use the username and password to log in to the [Directus Data Studio Application](https://data.drives-network.org/admin/login), where you can view tables through the graphical interface. You can change your password through the log-in page. 
+ You can use the username and password to log in to the [Directus Data Studio Application](https://drivesmachine.cals.ncsu.edu/admin/login), where you can view tables through the graphical interface. You can change your password through the log-in page. 
 
-After you complete the request process, you can use your user email and password to create a personal access token (PAT) for the API. The PAT expires after 7 days and can be regenerated using a 'refresh' token. The drivesR package has an easy-to-use function for generating and refreshing tokens (see below). Approved users can request a long-term API key from the data manager. The PAT and the API key are interchangeable in the examples below. See ?generate_directus_pat for details on how to generate a PAT.
+After you complete the request process, you can use your user email and password to create a personal access token (PAT) for the API. The PAT expires after 7 days and can be regenerated using a 'refresh' token. The drivesR package has an easy-to-use function for generating and refreshing tokens (see below). Approved users can request a long-term API key from the data manager. The PAT and the API key are interchangeable in the examples below. See below details on how to generate a PAT.
 
 The PAT or API key is a string of random letters and numbers. For use with this package, the Directus API key must be formatted, "Bearer APIKEY". It is best practice never to hard-code a PAT or API key into a script. We recommend making a setup script that is sourced by other scripts (be sure to add this to your .gitignore if you're using github). Alternatively, you can use this script to read credentials from a non-indexed location.
 
 
-The code below generates an empty script file in your working directory that opens in R studio.
+The function generate_directus_pat() uses your user email and password to generate a PAT, then saves it in a specified location. For security, run this in the console or import your password from a non-indexed location.
 ```{r creds1, eval = FALSE}
-usethis::edit_file("directus_creds.R")
+generate_directus_pat(useremail = "myemail@fake.com", 
+                      userpassword = "mysupersecurepassword",
+                      savedir = ".", # default is the working directory.  
+                      savename = "directus_PAT.txt")
 ```
 
-
-Once you have an empty script file, you can add something like this, replacing MYAPI key with the API key or PAT.
+The Directus PAT should last 7 days. You can always regenerate it.
+You can use this code to read and check the validity of your PAT:
 
 ```{r creds2, eval = FALSE}
-directus_token = "Bearer MYAPIKEY"
-```
+directus_token <- read_directus_pat("directus_PAT.txt"))
 
+```
+ If you have an API key, you can read it in from a non-indexed location. For example, you can source an R script with the following code, replacing MYAPI key with your string of letters and numbers:
+ 
+```{r creds3, eval = FALSE}
+directus_token <- "Bearer MYAPIKEY"
+
+```
+ 
 
 
 ## Setup steps
 If you format your setup script as described above, you should include these lines of code at the beginning of every any script that downloads DRIVES tables:
 
-```{r silent_setup, include = FALSE}
-library(drivesR)
-```
-
-```{r setup1, eval=TRUE}
+```{r silent_setup, include = FALSE, eval=TRUE}
 library(drivesR)
 source("directus_creds.R")
+options("drivesR.default.url" = directus_url)
 set_default_token(directus_token)
+
 ```
 
-```{r setup2, eval = TRUE, include = FALSE}
-options("drivesR.default.url" = directus_url)
+```{r setup1, eval=FALSE}
+library(drivesR)
+directus_token <- read_directus_pat("directus_PAT.txt")
+set_default_token(directus_token)
 ```
 
 The last line sets the global option for the Directus token that is used by functions in the drivesR package. You can view this option with getOption("drivesR.default.directus.token").
@@ -153,7 +163,7 @@ table_dict_info <- get_db_info(mytarget = "collections/table_dictionary",
                              output_format = "json")
 print(table_dict_info)
 ```
-One detail to note is that non-dictionary tables with approved public viewer access have a prefix "public_". This only comes up when viewing tables in the [Directus Studio App](https://data.drives-network.org/admin/login) or specifying API endpoints directly, as shown below. 
+One detail to note is that non-dictionary tables with approved public viewer access have a prefix "public_". This only comes up when viewing tables in the [Directus Studio App](https://drivesmachine.cals.ncsu.edu/admin/login) or specifying API endpoints directly, as shown below. 
 
 # Harmonizing DRIVES tables
 The DRIVES database was designed to be flexible for various end-uses and preserve as much information as possible within each experiment. The relational database design is useful for these objectives, but adds a layer of difficulty for analyzing the data. Therefore, the drivesR package provides data harmonization functions that reshape and combine data tables to ease downstream analysis. Each function has arguments to facilitate different end uses. We start with lower-level harmonization functions that preserve information in individual tables, then higher level functions that combine tables with some loss of information.

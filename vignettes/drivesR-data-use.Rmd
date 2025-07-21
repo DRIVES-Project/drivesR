@@ -9,7 +9,7 @@ vignette: >
 
 
 
-This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [data.drives-network.org](https://data.drives-network.org). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVES project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
+This vignette documents a workflow for accessing and harmonizing tables from the Diverse Rotations Improve Valuable Ecosystem Services (DRIVES) database at [drivesmachine.cals.ncsu.edu](https://drivesmachine.cals.ncsu.edu). The database contains yield and weather data from 21 long-term agricultural field experiments with a crop rotation component. You can find out more about the DRIVES project and request access at our website, [drives-network.org/](https://www.drives-network.org/). Metadata and a full data inventory can be found at the DRIVES database repository on Ag Data Commons: https://hdl.handle.net/10779/USDA.ADC.28654694.
 
 This package has two main purposes for users interested in analyzing DRIVES data. First, it provides easy-to-use functions to download data tables from the Directus API. Second, it provides harmonization functions to combine and reshape tables for analysis. 
 
@@ -27,29 +27,40 @@ library(drivesR)
 
 # Accessing the DRIVES database
 ## Requesting access
- The DRIVES database is hosted at [data.drives-network.org/](https://data.drives-network.org/). We ask that anyone interesting in using DRIVES data complete the [data request form](https://www.drives-network.org/data-request). Direct collaborators and project members can request access directly from the DRIVES data manager. Either way, you will receive an email with a username and password.  
+ The DRIVES database is hosted at [drivesmachine.cals.ncsu.edu/](https://drivesmachine.cals.ncsu.edu/). We ask that anyone interesting in using DRIVES data complete the [data request form](https://www.drives-network.org/data-request). Direct collaborators and project members can request access directly from the DRIVES data manager. Either way, you will receive an email with a username and password.  
 
- You can use the username and password to log in to the [Directus Data Studio Application](https://data.drives-network.org/admin/login), where you can view tables through the graphical interface. You can change your password through the log-in page. 
+ You can use the username and password to log in to the [Directus Data Studio Application](https://drivesmachine.cals.ncsu.edu/admin/login), where you can view tables through the graphical interface. You can change your password through the log-in page. 
 
-After you complete the request process, you can use your user email and password to create a personal access token (PAT) for the API. The PAT expires after 7 days and can be regenerated using a 'refresh' token. The drivesR package has an easy-to-use function for generating and refreshing tokens (see below). Approved users can request a long-term API key from the data manager. The PAT and the API key are interchangeable in the examples below. See ?generate_directus_pat for details on how to generate a PAT.
+After you complete the request process, you can use your user email and password to create a personal access token (PAT) for the API. The PAT expires after 7 days and can be regenerated using a 'refresh' token. The drivesR package has an easy-to-use function for generating and refreshing tokens (see below). Approved users can request a long-term API key from the data manager. The PAT and the API key are interchangeable in the examples below. See below details on how to generate a PAT.
 
 The PAT or API key is a string of random letters and numbers. For use with this package, the Directus API key must be formatted, "Bearer APIKEY". It is best practice never to hard-code a PAT or API key into a script. We recommend making a setup script that is sourced by other scripts (be sure to add this to your .gitignore if you're using github). Alternatively, you can use this script to read credentials from a non-indexed location.
 
 
-The code below generates an empty script file in your working directory that opens in R studio.
+The function generate_directus_pat() uses your user email and password to generate a PAT, then saves it in a specified location. For security, run this in the console or import your password from a non-indexed location.
 
 ``` r
-usethis::edit_file("directus_creds.R")
+generate_directus_pat(useremail = "myemail@fake.com", 
+                      userpassword = "mysupersecurepassword",
+                      savedir = ".", # default is the working directory.  
+                      savename = "directus_PAT.txt")
 ```
 
-
-Once you have an empty script file, you can add something like this, replacing MYAPI key with the API key or PAT.
+The Directus PAT should last 7 days. You can always regenerate it.
+You can use this code to read and check the validity of your PAT:
 
 
 ``` r
-directus_token = "Bearer MYAPIKEY"
-```
+directus_token <- read_directus_pat("directus_PAT.txt"))
 
+```
+ If you have an API key, you can read it in from a non-indexed location. For example, you can source an R script with the following code, replacing MYAPI key with your string of letters and numbers:
+ 
+
+``` r
+directus_token <- "Bearer MYAPIKEY"
+
+```
+ 
 
 
 ## Setup steps
@@ -60,11 +71,9 @@ If you format your setup script as described above, you should include these lin
 
 ``` r
 library(drivesR)
-source("directus_creds.R")
+directus_token <- read_directus_pat("directus_PAT.txt")
 set_default_token(directus_token)
 ```
-
-
 
 The last line sets the global option for the Directus token that is used by functions in the drivesR package. You can view this option with getOption("drivesR.default.directus.token").
 
@@ -79,7 +88,7 @@ The *get_db_table* function uses table names as inputs.
 
 ``` r
 crop_info <- get_db_table("crop_info")
-#> Error in get_db_table("crop_info"): Invalid Directus API token.
+#> Error in curl::curl_fetch_memory(url, handle = handle): Could not resolve hostname [https]: Could not resolve host: https
 str(crop_info)
 #> Error: object 'crop_info' not found
 ```
@@ -182,11 +191,11 @@ If you're interested in seeing how the database is structured in Directus, you c
 ``` r
 table_dict_info <- get_db_info(mytarget = "collections/table_dictionary",
                              output_format = "json")
-#> Error in get_db_info(mytarget = "collections/table_dictionary", output_format = "json"): Invalid Directus API token.
+#> Error in curl::curl_fetch_memory(url, handle = handle): Could not resolve hostname [https]: Could not resolve host: https
 print(table_dict_info)
 #> Error: object 'table_dict_info' not found
 ```
-One detail to note is that non-dictionary tables with approved public viewer access have a prefix "public_". This only comes up when viewing tables in the [Directus Studio App](https://data.drives-network.org/admin/login) or specifying API endpoints directly, as shown below. 
+One detail to note is that non-dictionary tables with approved public viewer access have a prefix "public_". This only comes up when viewing tables in the [Directus Studio App](https://drivesmachine.cals.ncsu.edu/admin/login) or specifying API endpoints directly, as shown below. 
 
 # Harmonizing DRIVES tables
 The DRIVES database was designed to be flexible for various end-uses and preserve as much information as possible within each experiment. The relational database design is useful for these objectives, but adds a layer of difficulty for analyzing the data. Therefore, the drivesR package provides data harmonization functions that reshape and combine data tables to ease downstream analysis. Each function has arguments to facilitate different end uses. We start with lower-level harmonization functions that preserve information in individual tables, then higher level functions that combine tables with some loss of information.
@@ -308,20 +317,20 @@ trtlist <- list_treatments_by_management_practice(db)
 trtcolz <- trtlist$`N fertility`
 trtsubset <- trt[c("site_id","year", trtcolz)]
 head(trtsubset)
-#>   site_id year         N fertility nutrient management system N rate
-#> 1   CATCE 2013 low input synthetic                       <NA>   <NA>
-#> 2   CATCE 2014 low input synthetic                       <NA>   <NA>
-#> 3   CATCE 2015 low input synthetic                       <NA>   <NA>
-#> 4   CATCE 2016 low input synthetic                       <NA>   <NA>
-#> 5   CATCE 2017 low input synthetic                       <NA>   <NA>
-#> 6   CATCE 2018 low input synthetic                       <NA>   <NA>
-#>   soil amendment grassland N addition
-#> 1           <NA>                 <NA>
-#> 2           <NA>                 <NA>
-#> 3           <NA>                 <NA>
-#> 4           <NA>                 <NA>
-#> 5           <NA>                 <NA>
-#> 6           <NA>                 <NA>
+#>   site_id year         N fertility nutrient management system N rate soil amendment
+#> 1   CATCE 2013 low input synthetic                       <NA>   <NA>           <NA>
+#> 2   CATCE 2014 low input synthetic                       <NA>   <NA>           <NA>
+#> 3   CATCE 2015 low input synthetic                       <NA>   <NA>           <NA>
+#> 4   CATCE 2016 low input synthetic                       <NA>   <NA>           <NA>
+#> 5   CATCE 2017 low input synthetic                       <NA>   <NA>           <NA>
+#> 6   CATCE 2018 low input synthetic                       <NA>   <NA>           <NA>
+#>   grassland N addition
+#> 1                 <NA>
+#> 2                 <NA>
+#> 3                 <NA>
+#> 4                 <NA>
+#> 5                 <NA>
+#> 6                 <NA>
 ```
 
 ## 3) Management data
@@ -375,48 +384,34 @@ p3 <- harmonize_planting_info(db$planting_info, replant_dates = "columns",includ
 dim(p3)
 #> [1] 44537    85
 names(p3) # names include suffixes d and c for planting dates and component crops, respectively.
-#>  [1] "site_id"                  "unit_id"                 
-#>  [3] "expected_crop_id"         "actual_crop_id"          
-#>  [5] "stand_year"               "rotation_phase"          
-#>  [7] "harvest_year"             "component_crop_id_d1_c2" 
-#>  [9] "component_crop_id_d1_c1"  "component_crop_id_d2_c1" 
-#> [11] "component_crop_id_d1_c3"  "component_crop_id_d3_c1" 
-#> [13] "component_crop_id_d1_c5"  "component_crop_id_d1_c4" 
-#> [15] "component_crop_id_d1_c6"  "component_crop_id_d1_c10"
-#> [17] "component_crop_id_d1_c9"  "component_crop_id_d1_c7" 
-#> [19] "component_crop_id_d1_c8"  "component_crop_id_d3_c2" 
-#> [21] "component_crop_id_d2_c2"  "component_crop_id_d4_c1" 
-#> [23] "planting_date_d1_c2"      "planting_date_d1_c1"     
-#> [25] "planting_date_d2_c1"      "planting_date_d1_c3"     
-#> [27] "planting_date_d3_c1"      "planting_date_d1_c5"     
-#> [29] "planting_date_d1_c4"      "planting_date_d1_c6"     
-#> [31] "planting_date_d1_c10"     "planting_date_d1_c9"     
-#> [33] "planting_date_d1_c7"      "planting_date_d1_c8"     
-#> [35] "planting_date_d3_c2"      "planting_date_d2_c2"     
-#> [37] "planting_date_d4_c1"      "variety_id_d1_c2"        
-#> [39] "variety_id_d1_c1"         "variety_id_d2_c1"        
-#> [41] "variety_id_d1_c3"         "variety_id_d3_c1"        
-#> [43] "variety_id_d1_c5"         "variety_id_d1_c4"        
-#> [45] "variety_id_d1_c6"         "variety_id_d1_c10"       
-#> [47] "variety_id_d1_c9"         "variety_id_d1_c7"        
-#> [49] "variety_id_d1_c8"         "variety_id_d3_c2"        
-#> [51] "variety_id_d2_c2"         "variety_id_d4_c1"        
-#> [53] "planting_rate_d1_c2"      "planting_rate_d1_c1"     
-#> [55] "planting_rate_d2_c1"      "planting_rate_d1_c3"     
-#> [57] "planting_rate_d3_c1"      "planting_rate_d1_c5"     
-#> [59] "planting_rate_d1_c4"      "planting_rate_d1_c6"     
-#> [61] "planting_rate_d1_c10"     "planting_rate_d1_c9"     
-#> [63] "planting_rate_d1_c7"      "planting_rate_d1_c8"     
-#> [65] "planting_rate_d3_c2"      "planting_rate_d2_c2"     
-#> [67] "planting_rate_d4_c1"      "uid_d1_c2"               
-#> [69] "uid_d1_c1"                "uid_d2_c1"               
-#> [71] "uid_d1_c3"                "uid_d3_c1"               
-#> [73] "uid_d1_c5"                "uid_d1_c4"               
-#> [75] "uid_d1_c6"                "uid_d1_c10"              
-#> [77] "uid_d1_c9"                "uid_d1_c7"               
-#> [79] "uid_d1_c8"                "uid_d3_c2"               
-#> [81] "uid_d2_c2"                "uid_d4_c1"               
-#> [83] "planting_notes"           "planting_units"          
+#>  [1] "site_id"                  "unit_id"                  "expected_crop_id"        
+#>  [4] "actual_crop_id"           "stand_year"               "rotation_phase"          
+#>  [7] "harvest_year"             "component_crop_id_d1_c2"  "component_crop_id_d1_c1" 
+#> [10] "component_crop_id_d2_c1"  "component_crop_id_d1_c3"  "component_crop_id_d3_c1" 
+#> [13] "component_crop_id_d1_c5"  "component_crop_id_d1_c4"  "component_crop_id_d1_c6" 
+#> [16] "component_crop_id_d1_c10" "component_crop_id_d1_c9"  "component_crop_id_d1_c7" 
+#> [19] "component_crop_id_d1_c8"  "component_crop_id_d3_c2"  "component_crop_id_d2_c2" 
+#> [22] "component_crop_id_d4_c1"  "planting_date_d1_c2"      "planting_date_d1_c1"     
+#> [25] "planting_date_d2_c1"      "planting_date_d1_c3"      "planting_date_d3_c1"     
+#> [28] "planting_date_d1_c5"      "planting_date_d1_c4"      "planting_date_d1_c6"     
+#> [31] "planting_date_d1_c10"     "planting_date_d1_c9"      "planting_date_d1_c7"     
+#> [34] "planting_date_d1_c8"      "planting_date_d3_c2"      "planting_date_d2_c2"     
+#> [37] "planting_date_d4_c1"      "variety_id_d1_c2"         "variety_id_d1_c1"        
+#> [40] "variety_id_d2_c1"         "variety_id_d1_c3"         "variety_id_d3_c1"        
+#> [43] "variety_id_d1_c5"         "variety_id_d1_c4"         "variety_id_d1_c6"        
+#> [46] "variety_id_d1_c10"        "variety_id_d1_c9"         "variety_id_d1_c7"        
+#> [49] "variety_id_d1_c8"         "variety_id_d3_c2"         "variety_id_d2_c2"        
+#> [52] "variety_id_d4_c1"         "planting_rate_d1_c2"      "planting_rate_d1_c1"     
+#> [55] "planting_rate_d2_c1"      "planting_rate_d1_c3"      "planting_rate_d3_c1"     
+#> [58] "planting_rate_d1_c5"      "planting_rate_d1_c4"      "planting_rate_d1_c6"     
+#> [61] "planting_rate_d1_c10"     "planting_rate_d1_c9"      "planting_rate_d1_c7"     
+#> [64] "planting_rate_d1_c8"      "planting_rate_d3_c2"      "planting_rate_d2_c2"     
+#> [67] "planting_rate_d4_c1"      "uid_d1_c2"                "uid_d1_c1"               
+#> [70] "uid_d2_c1"                "uid_d1_c3"                "uid_d3_c1"               
+#> [73] "uid_d1_c5"                "uid_d1_c4"                "uid_d1_c6"               
+#> [76] "uid_d1_c10"               "uid_d1_c9"                "uid_d1_c7"               
+#> [79] "uid_d1_c8"                "uid_d3_c2"                "uid_d2_c2"               
+#> [82] "uid_d4_c1"                "planting_notes"           "planting_units"          
 #> [85] "material_planted"
 ```
 
@@ -432,14 +427,12 @@ h1 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = FALS
 dim(h1)
 #> [1] 45299    26
 names(h1)
-#>  [1] "site_id"            "unit_id"            "expected_crop_id"  
-#>  [4] "actual_crop_id"     "stand_year"         "rotation_phase"    
-#>  [7] "phase_year_harvest" "harvest_year"       "harvested_fraction"
-#> [10] "harvest_notes"      "termination_date"   "termination_notes" 
-#> [13] "harvest_date_1"     "harvest_date_2"     "harvest_date_3"    
-#> [16] "harvest_date_4"     "harvest_date_5"     "harvest_date_6"    
-#> [19] "harvest_date_7"     "uid_1"              "uid_2"             
-#> [22] "uid_3"              "uid_4"              "uid_5"             
+#>  [1] "site_id"            "unit_id"            "expected_crop_id"   "actual_crop_id"    
+#>  [5] "stand_year"         "rotation_phase"     "phase_year_harvest" "harvest_year"      
+#>  [9] "harvested_fraction" "harvest_notes"      "termination_date"   "termination_notes" 
+#> [13] "harvest_date_1"     "harvest_date_2"     "harvest_date_3"     "harvest_date_4"    
+#> [17] "harvest_date_5"     "harvest_date_6"     "harvest_date_7"     "uid_1"             
+#> [21] "uid_2"              "uid_3"              "uid_4"              "uid_5"             
 #> [25] "uid_6"              "uid_7"
 
 h2 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = TRUE)
