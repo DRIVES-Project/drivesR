@@ -65,10 +65,11 @@
     
 <p>This vignette documents a workflow for accessing and harmonizing
 tables from the Diverse Rotations Improve Valuable Ecosystem Services
-(DRIVES) database at <a href="https://data.drives-network.org" class="external-link">data.drives-network.org</a>. The
-database contains yield and weather data from 21 long-term agricultural
-field experiments with a crop rotation component. You can find out more
-about the DRIVES project and request access at our website, <a href="https://www.drives-network.org/" class="external-link">drives-network.org/</a>. Metadata
+(DRIVES) database at <a href="https://drivesmachine.cals.ncsu.edu" class="external-link">drivesmachine.cals.ncsu.edu</a>.
+The database contains yield and weather data from 21 long-term
+agricultural field experiments with a crop rotation component. You can
+find out more about the DRIVES project and request access at our
+website, <a href="https://www.drives-network.org/" class="external-link">drives-network.org/</a>. Metadata
 and a full data inventory can be found at the DRIVES database repository
 on Ag Data Commons: <a href="https://hdl.handle.net/10779/USDA.ADC.28654694" class="external-link uri">https://hdl.handle.net/10779/USDA.ADC.28654694</a>.</p>
 <p>This package has two main purposes for users interested in analyzing
@@ -98,13 +99,13 @@ the devtools package.</p>
 <div class="section level3">
 <h3 id="requesting-access">Requesting access<a class="anchor" aria-label="anchor" href="#requesting-access"></a>
 </h3>
-<p>The DRIVES database is hosted at <a href="https://data.drives-network.org/" class="external-link">data.drives-network.org/</a>. We
-ask that anyone interesting in using DRIVES data complete the <a href="https://www.drives-network.org/data-request" class="external-link">data request
+<p>The DRIVES database is hosted at <a href="https://drivesmachine.cals.ncsu.edu/" class="external-link">drivesmachine.cals.ncsu.edu/</a>.
+We ask that anyone interesting in using DRIVES data complete the <a href="https://www.drives-network.org/data-request" class="external-link">data request
 form</a>. Direct collaborators and project members can request access
 directly from the DRIVES data manager. Either way, you will receive an
 email with a username and password.</p>
-<p>You can use the username and password to log in to the <a href="https://data.drives-network.org/admin/login" class="external-link">Directus Data Studio
-Application</a>, where you can view tables through the graphical
+<p>You can use the username and password to log in to the <a href="https://drivesmachine.cals.ncsu.edu/admin/login" class="external-link">Directus Data
+Studio Application</a>, where you can view tables through the graphical
 interface. You can change your password through the log-in page.</p>
 <p>After you complete the request process, you can use your user email
 and password to create a personal access token (PAT) for the API. The
@@ -112,8 +113,8 @@ PAT expires after 7 days and can be regenerated using a ‘refresh’ token.
 The drivesR package has an easy-to-use function for generating and
 refreshing tokens (see below). Approved users can request a long-term
 API key from the data manager. The PAT and the API key are
-interchangeable in the examples below. See ?generate_directus_pat for
-details on how to generate a PAT.</p>
+interchangeable in the examples below. See below details on how to
+generate a PAT.</p>
 <p>The PAT or API key is a string of random letters and numbers. For use
 with this package, the Directus API key must be formatted, “Bearer
 APIKEY”. It is best practice never to hard-code a PAT or API key into a
@@ -121,14 +122,23 @@ script. We recommend making a setup script that is sourced by other
 scripts (be sure to add this to your .gitignore if you’re using github).
 Alternatively, you can use this script to read credentials from a
 non-indexed location.</p>
-<p>The code below generates an empty script file in your working
-directory that opens in R studio.</p>
+<p>The function generate_directus_pat() uses your user email and
+password to generate a PAT, then saves it in a specified location. For
+security, run this in the console or import your password from a
+non-indexed location.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">edit_file</span><span class="op">(</span><span class="st">"directus_creds.R"</span><span class="op">)</span></span></code></pre></div>
-<p>Once you have an empty script file, you can add something like this,
-replacing MYAPI key with the API key or PAT.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">directus_token</span> <span class="op">=</span> <span class="st">"Bearer MYAPIKEY"</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/generate_directus_pat.html">generate_directus_pat</a></span><span class="op">(</span>useremail <span class="op">=</span> <span class="st">"myemail@fake.com"</span>, </span>
+<span>                      userpassword <span class="op">=</span> <span class="st">"mysupersecurepassword"</span>,</span>
+<span>                      savedir <span class="op">=</span> <span class="st">"."</span>, <span class="co"># default is the working directory.  </span></span>
+<span>                      savename <span class="op">=</span> <span class="st">"directus_PAT.txt"</span><span class="op">)</span></span></code></pre></div>
+<p>The Directus PAT should last 7 days. You can always regenerate it.
+You can use this code to read and check the validity of your PAT:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>directus_token <span class="ot">&lt;-</span> <span class="fu">read_directus_pat</span>(<span class="st">"directus_PAT.txt"</span>)<span class="er">)</span></span></code></pre></div>
+<p>If you have an API key, you can read it in from a non-indexed
+location. For example, you can source an R script with the following
+code, replacing MYAPI key with your string of letters and numbers:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">directus_token</span> <span class="op">&lt;-</span> <span class="st">"Bearer MYAPIKEY"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="setup-steps">Setup steps<a class="anchor" aria-label="anchor" href="#setup-steps"></a>
@@ -136,9 +146,9 @@ replacing MYAPI key with the API key or PAT.</p>
 <p>If you format your setup script as described above, you should
 include these lines of code at the beginning of every any script that
 downloads DRIVES tables:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://drives-project.github.io/drivesR/">drivesR</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"directus_creds.R"</span><span class="op">)</span></span>
+<span><span class="va">directus_token</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_directus_pat.html">read_directus_pat</a></span><span class="op">(</span><span class="st">"directus_PAT.txt"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/set_default_token.html">set_default_token</a></span><span class="op">(</span><span class="va">directus_token</span><span class="op">)</span></span></code></pre></div>
 <p>The last line sets the global option for the Directus token that is
 used by functions in the drivesR package. You can view this option with
@@ -154,15 +164,15 @@ tables</p>
 <em>Download individual tables.</em> The <em>get_db_table</em>
 function uses table names as inputs.</li>
 </ol>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">crop_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_db_table.html">get_db_table</a></span><span class="op">(</span><span class="st">"crop_info"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in get_db_table("crop_info"): Invalid Directus API token.</span></span>
+<span><span class="co">#&gt; Error in curl::curl_fetch_memory(url, handle = handle): Could not resolve hostname [https]: Could not resolve host: https</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">crop_info</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: object 'crop_info' not found</span></span></code></pre></div>
 <p>You can see the names of tables available for public access by
 running this code after the package is loaded (this excludes dictionary
 tables that are available without an API key).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">"drivesR.default.tablevec"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $drivesR.default.tablevec</span></span>
 <span><span class="co">#&gt;  [1] "crop_info"                    "crop_variety_info"           </span></span>
@@ -185,7 +195,7 @@ downloaded. By default, the function downloads all tables in
 <em>getOption(“drivesR.default.tablevec”)</em>. If set to NULL, the
 function will download all tables available to your user role. You can
 also provide a vector of table names.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_db_tables.html">import_db_tables</a></span><span class="op">(</span>tablevec <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"crop_yields"</span>,<span class="st">"site_info"</span>,<span class="st">"experimental_unit_treatments"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>For the remaining examples, we’ll assume the default “tablevec”
 option.</p>
@@ -198,14 +208,14 @@ code without having to repeat the time-consuming step of downloading the
 tables. For example, you could run the following code to download tables
 into a list in your global R environment and saved as an RData file on
 your local directory:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_db_tables.html">import_db_tables</a></span><span class="op">(</span>fetch_option <span class="op">=</span> <span class="st">"download.save"</span>,</span>
 <span>                       <span class="co">#fetch_option = "upload",</span></span>
 <span>                       savedir <span class="op">=</span> <span class="st">"data"</span>,</span>
 <span>                       savename <span class="op">=</span> <span class="st">"sampledblist"</span><span class="op">)</span></span></code></pre></div>
 <p>Then, you can move the comment and rerun the same code to load the
 tables from the local directory:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_db_tables.html">import_db_tables</a></span><span class="op">(</span><span class="co">#fetch_option = "download.save",</span></span>
 <span>                       fetch_option <span class="op">=</span> <span class="st">"upload"</span>,</span>
 <span>                       savedir <span class="op">=</span> <span class="st">"data"</span>,</span>
@@ -240,7 +250,7 @@ may work better to save tables as separate files and load individual
 tables as needed.</p>
 <p>Users who plan to work with the data tables outside of R may want to
 save the tables into separate CSV files locally:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_db_tables.html">import_db_tables</a></span><span class="op">(</span>fetch_option <span class="op">=</span> <span class="st">"save.only"</span>,</span>
 <span>                       save_option <span class="op">=</span> <span class="st">"csv"</span>,</span>
 <span>                       savedir <span class="op">=</span> <span class="st">"myChosenFolder"</span>,</span>
@@ -258,7 +268,7 @@ relationships.</p>
 <p>Dictionary tables can be downloaded individually, using the
 <em>get_db_table</em> function, or all at once as a list with
 <em>import_dictionary_tables</em>.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## separate:</span></span>
 <span><span class="va">table_dictionary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_db_table.html">get_db_table</a></span><span class="op">(</span><span class="st">"table_dictionary"</span><span class="op">)</span></span>
 <span><span class="va">column_dictionary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_db_table.html">get_db_table</a></span><span class="op">(</span><span class="st">"column_dictionary"</span><span class="op">)</span></span>
@@ -272,15 +282,15 @@ table dictionary. The output can be formatted as a json or a dataframe.
 The json option is a clearer representation of how information is
 structured in Directus. See <a href="https://directus.io/docs/api" class="external-link">https://directus.io/docs/api</a>.
 For more information on the Directus API.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">table_dict_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_db_info.html">get_db_info</a></span><span class="op">(</span>mytarget <span class="op">=</span> <span class="st">"collections/table_dictionary"</span>,</span>
 <span>                             output_format <span class="op">=</span> <span class="st">"json"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in get_db_info(mytarget = "collections/table_dictionary", output_format = "json"): Invalid Directus API token.</span></span>
+<span><span class="co">#&gt; Error in curl::curl_fetch_memory(url, handle = handle): Could not resolve hostname [https]: Could not resolve host: https</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">table_dict_info</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: object 'table_dict_info' not found</span></span></code></pre></div>
 <p>One detail to note is that non-dictionary tables with approved public
 viewer access have a prefix “public_”. This only comes up when viewing
-tables in the <a href="https://data.drives-network.org/admin/login" class="external-link">Directus Studio
+tables in the <a href="https://drivesmachine.cals.ncsu.edu/admin/login" class="external-link">Directus Studio
 App</a> or specifying API endpoints directly, as shown below.</p>
 </div>
 </div>
@@ -303,7 +313,7 @@ level functions that combine tables with some loss of information.</p>
 the crop_yields table. If the table is already downloaded, it can be
 used as an argument. Otherwise, the function downloads the table using
 the Directus API.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## without pre-downloaded tables:</span></span>
 <span><span class="va">yields</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields.html">harmonize_yields</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">## with pre-downloaded tables:</span></span>
@@ -316,7 +326,7 @@ calculating dry yields and adding a TRUE or FALSE column for cover
 crops. It also provides the option to keep crop fractions from the same
 crop/unit/year (e.g. grain and straw) in separate rows, to rearrange
 them into columns.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## crop fractions in rows</span></span>
 <span><span class="co">#crop_yields &lt;- get_db_table("crop_yields")</span></span>
 <span><span class="va">yields</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields.html">harmonize_yields</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">crop_yields</span><span class="op">)</span> <span class="co"># could be a separate dataframe or part of a list</span></span>
@@ -422,7 +432,7 @@ function accepts a list of database tables named
 <em>treatment_id_info</em> and <em>treatment_id_components</em>. If
 those are not provided, it fetches those tables from the Directus
 database.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## tables provided</span></span>
 <span><span class="va">trt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_treatments.html">harmonize_treatments</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="co"># db is a named list with 'treatment_id_info' and 'treatment_id_components'</span></span>
 <span></span>
@@ -433,7 +443,7 @@ row per unit_id and year, and separate columns for each treatment id and
 component. This structure allows it to be merged with yield data.
 Similar to other harmonization functions, it accepts a named list or
 fetches tables from the database.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## tables provided</span></span>
 <span><span class="va">trtunit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_treatments_units.html">harmonize_treatments_units</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="co"># db is a named list with 'treatment_id_info', 'treatment_id_components', and 'experimental_unit_treatments'</span></span>
 <span></span>
@@ -445,7 +455,7 @@ to help subset column names corresponding to particular management
 practices. This uses information in the site_treatment_type_info table.
 The function accepts this table as an argument, or fetches it from the
 database.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_treatments.html">harmonize_treatments</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
 <span><span class="va">trtlist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/list_treatments_by_management_practice.html">list_treatments_by_management_practice</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
@@ -453,20 +463,20 @@ database.</p>
 <span><span class="va">trtcolz</span> <span class="op">&lt;-</span> <span class="va">trtlist</span><span class="op">$</span><span class="va">`N fertility`</span></span>
 <span><span class="va">trtsubset</span> <span class="op">&lt;-</span> <span class="va">trt</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site_id"</span>,<span class="st">"year"</span>, <span class="va">trtcolz</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">trtsubset</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   site_id year         N fertility nutrient management system N rate</span></span>
-<span><span class="co">#&gt; 1   CATCE 2013 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2   CATCE 2014 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 3   CATCE 2015 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 4   CATCE 2016 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 5   CATCE 2017 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 6   CATCE 2018 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;</span></span>
-<span><span class="co">#&gt;   soil amendment grassland N addition</span></span>
-<span><span class="co">#&gt; 1           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 3           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 4           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 5           &lt;NA&gt;                 &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 6           &lt;NA&gt;                 &lt;NA&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt;   site_id year         N fertility nutrient management system N rate soil amendment</span></span>
+<span><span class="co">#&gt; 1   CATCE 2013 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2   CATCE 2014 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3   CATCE 2015 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4   CATCE 2016 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5   CATCE 2017 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6   CATCE 2018 low input synthetic                       &lt;NA&gt;   &lt;NA&gt;           &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;   grassland N addition</span></span>
+<span><span class="co">#&gt; 1                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6                 &lt;NA&gt;</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="management-data">3) Management data<a class="anchor" aria-label="anchor" href="#management-data"></a>
@@ -489,7 +499,7 @@ mixtures can be retained as separate columns or excluded. See
 ?harmonize_planting_info for details on options and output.</p>
 <p>Like other harmonization functions, it can accept the planting_info
 table as an input or fetch it from the database.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#planting_info &lt;- get_db_table("planting_info") # can be a separate table or part of a list.</span></span>
 <span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_planting_info.html">harmonize_planting_info</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">planting_info</span>, replant_dates <span class="op">=</span> <span class="st">"latest"</span>,include_component_crops <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">p1</span><span class="op">)</span></span>
@@ -530,48 +540,34 @@ table as an input or fetch it from the database.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">p3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 44537    85</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">p3</span><span class="op">)</span> <span class="co"># names include suffixes d and c for planting dates and component crops, respectively.</span></span>
-<span><span class="co">#&gt;  [1] "site_id"                  "unit_id"                 </span></span>
-<span><span class="co">#&gt;  [3] "expected_crop_id"         "actual_crop_id"          </span></span>
-<span><span class="co">#&gt;  [5] "stand_year"               "rotation_phase"          </span></span>
-<span><span class="co">#&gt;  [7] "harvest_year"             "component_crop_id_d1_c2" </span></span>
-<span><span class="co">#&gt;  [9] "component_crop_id_d1_c1"  "component_crop_id_d2_c1" </span></span>
-<span><span class="co">#&gt; [11] "component_crop_id_d1_c3"  "component_crop_id_d3_c1" </span></span>
-<span><span class="co">#&gt; [13] "component_crop_id_d1_c5"  "component_crop_id_d1_c4" </span></span>
-<span><span class="co">#&gt; [15] "component_crop_id_d1_c6"  "component_crop_id_d1_c10"</span></span>
-<span><span class="co">#&gt; [17] "component_crop_id_d1_c9"  "component_crop_id_d1_c7" </span></span>
-<span><span class="co">#&gt; [19] "component_crop_id_d1_c8"  "component_crop_id_d3_c2" </span></span>
-<span><span class="co">#&gt; [21] "component_crop_id_d2_c2"  "component_crop_id_d4_c1" </span></span>
-<span><span class="co">#&gt; [23] "planting_date_d1_c2"      "planting_date_d1_c1"     </span></span>
-<span><span class="co">#&gt; [25] "planting_date_d2_c1"      "planting_date_d1_c3"     </span></span>
-<span><span class="co">#&gt; [27] "planting_date_d3_c1"      "planting_date_d1_c5"     </span></span>
-<span><span class="co">#&gt; [29] "planting_date_d1_c4"      "planting_date_d1_c6"     </span></span>
-<span><span class="co">#&gt; [31] "planting_date_d1_c10"     "planting_date_d1_c9"     </span></span>
-<span><span class="co">#&gt; [33] "planting_date_d1_c7"      "planting_date_d1_c8"     </span></span>
-<span><span class="co">#&gt; [35] "planting_date_d3_c2"      "planting_date_d2_c2"     </span></span>
-<span><span class="co">#&gt; [37] "planting_date_d4_c1"      "variety_id_d1_c2"        </span></span>
-<span><span class="co">#&gt; [39] "variety_id_d1_c1"         "variety_id_d2_c1"        </span></span>
-<span><span class="co">#&gt; [41] "variety_id_d1_c3"         "variety_id_d3_c1"        </span></span>
-<span><span class="co">#&gt; [43] "variety_id_d1_c5"         "variety_id_d1_c4"        </span></span>
-<span><span class="co">#&gt; [45] "variety_id_d1_c6"         "variety_id_d1_c10"       </span></span>
-<span><span class="co">#&gt; [47] "variety_id_d1_c9"         "variety_id_d1_c7"        </span></span>
-<span><span class="co">#&gt; [49] "variety_id_d1_c8"         "variety_id_d3_c2"        </span></span>
-<span><span class="co">#&gt; [51] "variety_id_d2_c2"         "variety_id_d4_c1"        </span></span>
-<span><span class="co">#&gt; [53] "planting_rate_d1_c2"      "planting_rate_d1_c1"     </span></span>
-<span><span class="co">#&gt; [55] "planting_rate_d2_c1"      "planting_rate_d1_c3"     </span></span>
-<span><span class="co">#&gt; [57] "planting_rate_d3_c1"      "planting_rate_d1_c5"     </span></span>
-<span><span class="co">#&gt; [59] "planting_rate_d1_c4"      "planting_rate_d1_c6"     </span></span>
-<span><span class="co">#&gt; [61] "planting_rate_d1_c10"     "planting_rate_d1_c9"     </span></span>
-<span><span class="co">#&gt; [63] "planting_rate_d1_c7"      "planting_rate_d1_c8"     </span></span>
-<span><span class="co">#&gt; [65] "planting_rate_d3_c2"      "planting_rate_d2_c2"     </span></span>
-<span><span class="co">#&gt; [67] "planting_rate_d4_c1"      "uid_d1_c2"               </span></span>
-<span><span class="co">#&gt; [69] "uid_d1_c1"                "uid_d2_c1"               </span></span>
-<span><span class="co">#&gt; [71] "uid_d1_c3"                "uid_d3_c1"               </span></span>
-<span><span class="co">#&gt; [73] "uid_d1_c5"                "uid_d1_c4"               </span></span>
-<span><span class="co">#&gt; [75] "uid_d1_c6"                "uid_d1_c10"              </span></span>
-<span><span class="co">#&gt; [77] "uid_d1_c9"                "uid_d1_c7"               </span></span>
-<span><span class="co">#&gt; [79] "uid_d1_c8"                "uid_d3_c2"               </span></span>
-<span><span class="co">#&gt; [81] "uid_d2_c2"                "uid_d4_c1"               </span></span>
-<span><span class="co">#&gt; [83] "planting_notes"           "planting_units"          </span></span>
+<span><span class="co">#&gt;  [1] "site_id"                  "unit_id"                  "expected_crop_id"        </span></span>
+<span><span class="co">#&gt;  [4] "actual_crop_id"           "stand_year"               "rotation_phase"          </span></span>
+<span><span class="co">#&gt;  [7] "harvest_year"             "component_crop_id_d1_c2"  "component_crop_id_d1_c1" </span></span>
+<span><span class="co">#&gt; [10] "component_crop_id_d2_c1"  "component_crop_id_d1_c3"  "component_crop_id_d3_c1" </span></span>
+<span><span class="co">#&gt; [13] "component_crop_id_d1_c5"  "component_crop_id_d1_c4"  "component_crop_id_d1_c6" </span></span>
+<span><span class="co">#&gt; [16] "component_crop_id_d1_c10" "component_crop_id_d1_c9"  "component_crop_id_d1_c7" </span></span>
+<span><span class="co">#&gt; [19] "component_crop_id_d1_c8"  "component_crop_id_d3_c2"  "component_crop_id_d2_c2" </span></span>
+<span><span class="co">#&gt; [22] "component_crop_id_d4_c1"  "planting_date_d1_c2"      "planting_date_d1_c1"     </span></span>
+<span><span class="co">#&gt; [25] "planting_date_d2_c1"      "planting_date_d1_c3"      "planting_date_d3_c1"     </span></span>
+<span><span class="co">#&gt; [28] "planting_date_d1_c5"      "planting_date_d1_c4"      "planting_date_d1_c6"     </span></span>
+<span><span class="co">#&gt; [31] "planting_date_d1_c10"     "planting_date_d1_c9"      "planting_date_d1_c7"     </span></span>
+<span><span class="co">#&gt; [34] "planting_date_d1_c8"      "planting_date_d3_c2"      "planting_date_d2_c2"     </span></span>
+<span><span class="co">#&gt; [37] "planting_date_d4_c1"      "variety_id_d1_c2"         "variety_id_d1_c1"        </span></span>
+<span><span class="co">#&gt; [40] "variety_id_d2_c1"         "variety_id_d1_c3"         "variety_id_d3_c1"        </span></span>
+<span><span class="co">#&gt; [43] "variety_id_d1_c5"         "variety_id_d1_c4"         "variety_id_d1_c6"        </span></span>
+<span><span class="co">#&gt; [46] "variety_id_d1_c10"        "variety_id_d1_c9"         "variety_id_d1_c7"        </span></span>
+<span><span class="co">#&gt; [49] "variety_id_d1_c8"         "variety_id_d3_c2"         "variety_id_d2_c2"        </span></span>
+<span><span class="co">#&gt; [52] "variety_id_d4_c1"         "planting_rate_d1_c2"      "planting_rate_d1_c1"     </span></span>
+<span><span class="co">#&gt; [55] "planting_rate_d2_c1"      "planting_rate_d1_c3"      "planting_rate_d3_c1"     </span></span>
+<span><span class="co">#&gt; [58] "planting_rate_d1_c5"      "planting_rate_d1_c4"      "planting_rate_d1_c6"     </span></span>
+<span><span class="co">#&gt; [61] "planting_rate_d1_c10"     "planting_rate_d1_c9"      "planting_rate_d1_c7"     </span></span>
+<span><span class="co">#&gt; [64] "planting_rate_d1_c8"      "planting_rate_d3_c2"      "planting_rate_d2_c2"     </span></span>
+<span><span class="co">#&gt; [67] "planting_rate_d4_c1"      "uid_d1_c2"                "uid_d1_c1"               </span></span>
+<span><span class="co">#&gt; [70] "uid_d2_c1"                "uid_d1_c3"                "uid_d3_c1"               </span></span>
+<span><span class="co">#&gt; [73] "uid_d1_c5"                "uid_d1_c4"                "uid_d1_c6"               </span></span>
+<span><span class="co">#&gt; [76] "uid_d1_c10"               "uid_d1_c9"                "uid_d1_c7"               </span></span>
+<span><span class="co">#&gt; [79] "uid_d1_c8"                "uid_d3_c2"                "uid_d2_c2"               </span></span>
+<span><span class="co">#&gt; [82] "uid_d4_c1"                "planting_notes"           "planting_units"          </span></span>
 <span><span class="co">#&gt; [85] "material_planted"</span></span></code></pre></div>
 <p><em>harvest_dates</em> provides harvest dates for every
 unit/year/crop where available. It includes separate rows for multiple
@@ -583,20 +579,18 @@ unit/year/crop). It has an option to put crop fractions with different
 harvest dates in separate columns (rarely an issue).</p>
 <p>Like other harmonization functions, it can accept the harvest_dates
 table as an input or fetch it from the database</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#harvest_dates &lt;- get_db_table("harvest_dates")# can be a separate table or part of a list.</span></span>
 <span><span class="va">h1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_harvest_dates.html">harmonize_harvest_dates</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">harvest_dates</span>, crop_fractions_as_columns <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">h1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 45299    26</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">h1</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "site_id"            "unit_id"            "expected_crop_id"  </span></span>
-<span><span class="co">#&gt;  [4] "actual_crop_id"     "stand_year"         "rotation_phase"    </span></span>
-<span><span class="co">#&gt;  [7] "phase_year_harvest" "harvest_year"       "harvested_fraction"</span></span>
-<span><span class="co">#&gt; [10] "harvest_notes"      "termination_date"   "termination_notes" </span></span>
-<span><span class="co">#&gt; [13] "harvest_date_1"     "harvest_date_2"     "harvest_date_3"    </span></span>
-<span><span class="co">#&gt; [16] "harvest_date_4"     "harvest_date_5"     "harvest_date_6"    </span></span>
-<span><span class="co">#&gt; [19] "harvest_date_7"     "uid_1"              "uid_2"             </span></span>
-<span><span class="co">#&gt; [22] "uid_3"              "uid_4"              "uid_5"             </span></span>
+<span><span class="co">#&gt;  [1] "site_id"            "unit_id"            "expected_crop_id"   "actual_crop_id"    </span></span>
+<span><span class="co">#&gt;  [5] "stand_year"         "rotation_phase"     "phase_year_harvest" "harvest_year"      </span></span>
+<span><span class="co">#&gt;  [9] "harvested_fraction" "harvest_notes"      "termination_date"   "termination_notes" </span></span>
+<span><span class="co">#&gt; [13] "harvest_date_1"     "harvest_date_2"     "harvest_date_3"     "harvest_date_4"    </span></span>
+<span><span class="co">#&gt; [17] "harvest_date_5"     "harvest_date_6"     "harvest_date_7"     "uid_1"             </span></span>
+<span><span class="co">#&gt; [21] "uid_2"              "uid_3"              "uid_4"              "uid_5"             </span></span>
 <span><span class="co">#&gt; [25] "uid_6"              "uid_7"</span></span>
 <span></span>
 <span><span class="va">h2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_harvest_dates.html">harmonize_harvest_dates</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">harvest_dates</span>, crop_fractions_as_columns <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -639,7 +633,7 @@ harmonization steps for treatments, units, and yields and merges them
 together. It includes the option to keep crop fractions in separate rows
 or reorganize them into columns. It can operate on a list of
 pre-downloaded tables, or fetch the tables from Directus.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># db &lt;- import_db_tables(c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields"),fetch_option = "download.only")</span></span>
 <span><span class="va">hyt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields_treatments.html">harmonize_yields_treatments</a></span><span class="op">(</span><span class="va">db</span>, crop_fractions_as_columns <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
@@ -711,7 +705,7 @@ from planting_info are excluded. Multiple harvest dates are included as
 separate columns, as in <em>harmonize_harvest_dates</em>. Multiple
 fractions per crop are included as separate columns with suffixes _f1,
 _f2, etc.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="co"># full list including yield, planting, and harvest data. </span></span>
 <span><span class="co">#&gt;  [1] "crop_info"                    "crop_variety_info"           </span></span>
 <span><span class="co">#&gt;  [3] "crop_yields"                  "experimental_unit_info"      </span></span>
@@ -762,7 +756,7 @@ the previous data download and harmonization steps (excluding weather
 data) and just use this function. The code below fetches the tables from
 the database and puts them all together. You can provide a list of
 previously downloaded database tables as an input.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">monsterdf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/harmonize_yields_planting_harvest_treatments.html">harmonize_yields_planting_harvest_treatments</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(treatment_id)`</span></span>
