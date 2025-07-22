@@ -70,8 +70,9 @@ get_db_table <- function(table_name = "site_info",
     message("Directus API token set to NULL. Will only work for certain tables.")
   }
   
-  ## get column order from column dictionary.
-  column_order <- get_column_dict_for_table(table_name)[,c("column_name","column_order")]
+  ## get column order and data type from column dictionary.
+  # this function sorts the output by column order. 
+  column_order <- get_column_dict_for_table(table_name)[,c("column_name","postgres_data_type","column_order")]
   
   ## Bulk import------- 
   ## batch import didn't work for more than 10K rows.
@@ -89,6 +90,22 @@ get_db_table <- function(table_name = "site_info",
 
     table_resp <- content(table_req, as="text")
     table_df <- jsonlite::fromJSON(table_resp)[["data"]]
+    
+    # convert geometry columns back to geojson.
+    # could also go by class data frame in the column.
+    geometrycols <- column_order$column_name[which(column_order$postgres_data_type=="geometry")]
+    
+    if(length(geometrycols) > 0){
+      for(mycol in geometrycols){
+        ## should ignore any geometry columns that are totally empty 
+        if(class(table_df[,mycol])=="data.frame"){ # geojson will be read as data frame.
+          mygeodf <- table_df[,mycol]
+          outgeom <- apply(mygeodf, 1, function(x){ifelse(is.na(x["type"]),NA,jsonlite::toJSON(x, auto_unbox = TRUE))})
+          table_df[,mycol] <- NA
+          table_df[,mycol] <- outgeom
+        }
+      }
+    }
     
     # put columns in the correct order
     table_df <- table_df[,column_order$column_name]
