@@ -107,3 +107,49 @@ transform_geometry <- function(sfgeom, counterclockwise_angle_deg, origin,outcrs
   return(st_sfc(transformed_geom, crs = outcrs))
 }
 
+#' Get origin XY coordinates from longitude and latitude points.
+#' Used to estimate georeferenced plot geometry from map dimensions and 
+#' points selected from Google Earth imagery.
+#' @param lonlatvec 
+#' A numeric vector of length 2 containing longitude followed by latitude 
+#' in decimal degrees. Usually a point taken from Google Earth imagery. 
+#' @param lonlatcrs 
+#' The Coordinate Reference System for the longitude latitude points. 
+#' The default is WGS 84, ID EPSG 4326.
+#' @param outcrs 
+#' The Coordinate Reference System for the output coordinates.
+#' Usually this is a projection to meters. The default is ESRI:102008.
+#' @param outputtype 
+#' An option for whether the output should be a 1-row matrix of 
+#' X Y coordinates (default) or an sf dataframe.
+#'
+#' @import sf
+#' @returns
+#' A 1-row matrix or sf object with the input lon/lat points projected to 
+#' a specified CRS. Used as the origin for georeferencing.
+#' @export
+#' 
+#' @examples
+#' bottomright <- c("lon" = -98.846982 ,"lat" =  19.532234)
+#' myorigin <- originFromLonLat(bottomright)
+#' print(myorigin) 
+originFromLonLat <- function(lonlatvec, 
+                             lonlatcrs = 4326,
+                             outcrs = "ESRI:102008",
+                             outputtype = c('coordinates','sf')[1]){
+  if(class(lonlatvec) != "numeric" & length(lonlatvec)!=2){
+    stop("lonlatvec must be a numeric vector of length 2 with decimal degree longitude followed by latitute")
+  }
+  lonlatdf <- as.data.frame(t(lonlatvec))
+  names(lonlatdf) <- c('lon','lat')
+  lonlatsf <- st_as_sf(lonlatdf,coords = c("lon","lat"),crs = lonlatcrs)
+  outsf <- st_transform(lonlatsf, crs = outcrs)
+  if(outputtype =="sf"){
+    return(outsf)
+  }
+  if(outputtype=="coordinates"){
+    outcoord <-  st_coordinates(outsf)
+    return(outcoord)
+  }
+}
+
