@@ -10,6 +10,7 @@
 <url><loc>https://drives-project.github.io/drivesR/reference/F_to_C.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/acre_to_hectare.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/api_request.html</loc></url>
+<url><loc>https://drives-project.github.io/drivesR/reference/bearing.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/check_categories.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/check_column_names.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/check_dictionary.html</loc></url>
@@ -53,6 +54,7 @@
 <url><loc>https://drives-project.github.io/drivesR/reference/modify_rows.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/order_rows_by_internal_fk.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/order_tables_by_fk.html</loc></url>
+<url><loc>https://drives-project.github.io/drivesR/reference/originFromLonLat.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/pg_to_directus_type.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/post_rows.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/post_rows_in_batches.html</loc></url>
@@ -64,6 +66,7 @@
 <url><loc>https://drives-project.github.io/drivesR/reference/test_category_dict.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/test_column_dict.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/test_table_dict.html</loc></url>
+<url><loc>https://drives-project.github.io/drivesR/reference/transform_geometry.html</loc></url>
 <url><loc>https://drives-project.github.io/drivesR/reference/unitacre_to_unithectare.html</loc></url>
 </urlset>
 
