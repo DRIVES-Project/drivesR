@@ -70,8 +70,9 @@ get_db_table <- function(table_name = "site_info",
     message("Directus API token set to NULL. Will only work for certain tables.")
   }
   
-  ## get column order from column dictionary.
-  column_order <- get_column_dict_for_table(table_name)[,c("column_name","column_order")]
+  ## get column order and data type from column dictionary.
+  # this function sorts the output by column order. 
+  column_order <- get_column_dict_for_table(table_name)[,c("column_name","postgres_data_type","column_order")]
   
   ## Bulk import------- 
   ## batch import didn't work for more than 10K rows.
@@ -89,6 +90,22 @@ get_db_table <- function(table_name = "site_info",
 
     table_resp <- content(table_req, as="text")
     table_df <- jsonlite::fromJSON(table_resp)[["data"]]
+    
+    # convert geometry columns back to geojson.
+    # could also go by class data frame in the column.
+    geometrycols <- column_order$column_name[which(column_order$postgres_data_type=="geometry")]
+    
+    if(length(geometrycols) > 0){
+      for(mycol in geometrycols){
+        ## should ignore any geometry columns that are totally empty 
+        if(class(table_df[,mycol])=="data.frame"){ # geojson will be read as data frame.
+          mygeodf <- table_df[,mycol]
+          outgeom <- apply(mygeodf, 1, function(x){ifelse(is.na(x["type"]),NA,jsonlite::toJSON(x, auto_unbox = TRUE))})
+          table_df[,mycol] <- NA
+          table_df[,mycol] <- outgeom
+        }
+      }
+    }
     
     # put columns in the correct order
     table_df <- table_df[,column_order$column_name]
@@ -203,12 +220,6 @@ get_table_from_req <- function(apirequest = NULL){
 #' @param pkfield
 #' The name of the column name that holds the table's primary key. 
 #' For most tables, this is 'uid'. 
-#' @param public
-#' If TRUE, the function queries publicly available data tables. 
-#' Since this function is mostly for internal use, the default is FALSE.
-#' @param public_tables
-#' Vector of tables that receive the public_ prefix if public==TRUE.
-#' Set as a global default. 
 #' @returns
 #' A dataframe of the specified tables subsetted for rows matching the 
 #' primary key vector.
@@ -220,16 +231,9 @@ get_table_from_req <- function(apirequest = NULL){
 query_table_by_pk <- function(
     table_name = NULL,
     pkvec = NULL,
-    pkfield = "uid",
-    public = getOption("drivesR.default.public"),
-    public_tables = getOption("drivesR.default.tablevec")){
+    pkfield = "uid"
+    ){
 
-    # set table name as public or internal:
-  if(public == TRUE & table_name %in% public_tables){
-    tname <- paste0("public_",table_name)
-  }else{
-    tname <- table_name
-  }
   # set up request
   
   reqlist <- list("query"= list("filter" = 
@@ -238,7 +242,7 @@ query_table_by_pk <- function(
                   "limit" = -1))
   names(reqlist[[1]][[1]]) <- pkfield
   reqjson <- jsonlite::toJSON(reqlist,auto_unbox = TRUE)
-  testreq <- api_request("SEARCH", glue::glue("items/{tname}"),jsonbody = reqjson)
+  testreq <- api_request("SEARCH", glue::glue("items/{table_name}"),jsonbody = reqjson)
   outdf <- get_table_from_req(testreq)
   return(outdf)
 }

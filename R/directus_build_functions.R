@@ -16,7 +16,8 @@ pg_to_directus_type <- function(pgtype){
                                        "boolean",
                                        "numeric",
                                        "array",
-                                       "date"
+                                       "date",
+                                       "geometry"
   ),
   dir_type = c("integer",
                "text",
@@ -24,7 +25,8 @@ pg_to_directus_type <- function(pgtype){
                "boolean",
                "float",
                "text",
-               "date"))
+               "date",
+               "geometry"))
   if(length(pgtype) > 1){
     stop("pgtype must be of length 1")
   }
@@ -267,7 +269,9 @@ make_field_json <- function(column_dictionary_row = NULL){
                                   is_unique = column_dictionary_row$unique_value,
                                   has_auto_increment = column_dictionary_row$auto_increment
                     ))  
-  
+  if(fieldlist$type =="geometry"){
+    fieldlist$meta$special <- list("geometry") # special tag for geometry field
+  }
   fieldjson <- jsonlite::toJSON(fieldlist, pretty = TRUE, auto_unbox = TRUE) 
   return(fieldjson)  
 }
