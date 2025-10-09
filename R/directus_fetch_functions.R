@@ -220,12 +220,6 @@ get_table_from_req <- function(apirequest = NULL){
 #' @param pkfield
 #' The name of the column name that holds the table's primary key. 
 #' For most tables, this is 'uid'. 
-#' @param public
-#' If TRUE, the function queries publicly available data tables. 
-#' Since this function is mostly for internal use, the default is FALSE.
-#' @param public_tables
-#' Vector of tables that receive the public_ prefix if public==TRUE.
-#' Set as a global default. 
 #' @returns
 #' A dataframe of the specified tables subsetted for rows matching the 
 #' primary key vector.
@@ -237,16 +231,9 @@ get_table_from_req <- function(apirequest = NULL){
 query_table_by_pk <- function(
     table_name = NULL,
     pkvec = NULL,
-    pkfield = "uid",
-    public = getOption("drivesR.default.public"),
-    public_tables = getOption("drivesR.default.tablevec")){
+    pkfield = "uid"
+    ){
 
-    # set table name as public or internal:
-  if(public == TRUE & table_name %in% public_tables){
-    tname <- paste0("public_",table_name)
-  }else{
-    tname <- table_name
-  }
   # set up request
   
   reqlist <- list("query"= list("filter" = 
@@ -255,7 +242,7 @@ query_table_by_pk <- function(
                   "limit" = -1))
   names(reqlist[[1]][[1]]) <- pkfield
   reqjson <- jsonlite::toJSON(reqlist,auto_unbox = TRUE)
-  testreq <- api_request("SEARCH", glue::glue("items/{tname}"),jsonbody = reqjson)
+  testreq <- api_request("SEARCH", glue::glue("items/{table_name}"),jsonbody = reqjson)
   outdf <- get_table_from_req(testreq)
   return(outdf)
 }
