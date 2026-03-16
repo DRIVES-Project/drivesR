@@ -235,6 +235,8 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
 #' @param db
 #' A list of database tables containing named dataframes treatment_id_info and treatment_id_components.
 #' If left NULL, these tables are imported from Directus.
+#' @param maxyear
+#' The maximum year to use for ongoing experiments. The default is 2022.
 #' @returns
 #' A data frame with columns for site, year, treatmentID1, and treatmentID2 and all treatment types
 #' described in the table site_treatment_type_info
@@ -244,7 +246,7 @@ import_db_tables <- function(tablevec = getOption("drivesR.default.tablevec"),
 #' @import purrr
 #' @examples
 #' #not run: tcw <- harmonize_treatments()
-harmonize_treatments <- function(db = NULL){
+harmonize_treatments <- function(db = NULL, maxyear = 2022){
   # if db is supplied, check for required tables. 
   trttables <- c("treatment_id_info","treatment_id_components")
   if(!is.null(db)){
@@ -263,8 +265,8 @@ harmonize_treatments <- function(db = NULL){
   # add treatment_id_info to components
   treatment_id_components <- dplyr::left_join(db$treatment_id_components, db$treatment_id_info)
   # make a wide version, separating treatment types 1 and 2. 
-  tc1 <- treatment_id_components[which(treatment_id_components$treatment_id_type=="treatmentID1"),] %>% expand_years()
-  tc2 <- treatment_id_components[which(treatment_id_components$treatment_id_type=="treatmentID2"),] %>% expand_years()
+  tc1 <- treatment_id_components[which(treatment_id_components$treatment_id_type=="treatmentID1"),] %>% expand_years(na_end_year = maxyear)
+  tc2 <- treatment_id_components[which(treatment_id_components$treatment_id_type=="treatmentID2"),] %>% expand_years(na_end_year = maxyear)
   tc1w <- dplyr::select(tc1,-uid,-treatment_level_uid,-note,-treatment_id_type) %>% 
     tidyr::pivot_wider(id_cols = c("site_id","treatment_id","year"),
                 names_from = "treatment_type",
@@ -310,6 +312,8 @@ harmonize_treatments <- function(db = NULL){
 #' A list of database tables containing named dataframes treatment_id_info,
 #' treatment_id_components, and experimental_unit_treatments.
 #' If left NULL, these tables are imported from Directus.
+#' @param maxyear
+#' The maximum year to use for ongoing experiments. The default is 2022.
 #' @returns
 #' A data frame with one row per unit ID per year and all treatment components in columns. 
 #' @export
@@ -317,7 +321,7 @@ harmonize_treatments <- function(db = NULL){
 #' @import dplyr
 #' @examples
 #' # not run: trt_units <- harmonize_treatment_units()
-harmonize_treatments_units <- function(db = NULL){
+harmonize_treatments_units <- function(db = NULL, maxyear = 2022){
   trttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments")
   if(!is.null(db)){
     if(any(!trttables %in% names(db))){
@@ -336,7 +340,7 @@ harmonize_treatments_units <- function(db = NULL){
   ## add treatment_id info
   experimental_unit_treatments <- dplyr::left_join(db$experimental_unit_treatments, db$treatment_id_info)
   ## expand to a yearly time series and put treatment types in separate columns. 
-  yearly_unit_trt <- expand_years(experimental_unit_treatments) %>%
+  yearly_unit_trt <- expand_years(experimental_unit_treatments, na_end_year = maxyear) %>%
     tidyr::pivot_wider(id_cols = c('site_id',"unit_id","year"), 
                 names_from = "treatment_id_type",
                 values_from = "treatment_id" )

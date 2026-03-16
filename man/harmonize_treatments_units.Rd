@@ -4,12 +4,14 @@
 \alias{harmonize_treatments_units}
 \title{Harmonize treatment and unit information}
 \usage{
-harmonize_treatments_units(db = NULL)
+harmonize_treatments_units(db = NULL, maxyear = 2022)
 }
 \arguments{
 \item{db}{A list of database tables containing named dataframes treatment_id_info,
 treatment_id_components, and experimental_unit_treatments.
 If left NULL, these tables are imported from Directus.}
+
+\item{maxyear}{The maximum year to use for ongoing experiments. The default is 2022.}
 }
 \value{
 A data frame with one row per unit ID per year and all treatment components in columns.
