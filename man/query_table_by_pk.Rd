@@ -7,13 +7,7 @@ Function to query contents of a database table with a vector of primary key valu
 Useful for double-checking before running 'modify_rows' or 'delete_rows'.
 It could be useful for querying information across tables.}
 \usage{
-query_table_by_pk(
-  table_name = NULL,
-  pkvec = NULL,
-  pkfield = "uid",
-  public = getOption("drivesR.default.public"),
-  public_tables = getOption("drivesR.default.tablevec")
-)
+query_table_by_pk(table_name = NULL, pkvec = NULL, pkfield = "uid")
 }
 \arguments{
 \item{table_name}{The table identifier in the DRIVES database. If public = TRUE, the table name is automatically 
@@ -23,12 +17,6 @@ modified to query the public version of the database table.}
 
 \item{pkfield}{The name of the column name that holds the table's primary key. 
 For most tables, this is 'uid'.}
-
-\item{public}{If TRUE, the function queries publicly available data tables. 
-Since this function is mostly for internal use, the default is FALSE.}
-
-\item{public_tables}{Vector of tables that receive the public_ prefix if public==TRUE.
-Set as a global default.}
 }
 \value{
 A dataframe of the specified tables subsetted for rows matching the 
