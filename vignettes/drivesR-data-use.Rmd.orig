@@ -237,8 +237,22 @@ trtunit <- harmonize_treatments_units(db) # db is a named list with 'treatment_i
 # tables not provided
 trtunit <- harmonize_treatments_units()
 
+```
+
+The harmonize_treatments_units_crops function produces a dataframe with one row per unit_id, year, and expected crop_id. Treatment information is organized in separate columns as in harmonize_treatments_units. This function is useful for making template cropping sequences. It also contains most of the columns from the rotation_phases table. 
+
+```{r harmonize_treatments_units_crops, eval=FALSE}
+## tables provided
+trtunitcrop <- harmonize_treatments_units_crops(db) 
+# db is  A named list containing the database tables "treatment_id_info","treatment_id_components","experimental_unit_info",
+# "experimental_unit_treatments","rotation_phases", and "rotation_id_info". 
+
+
+# If db is not supplied, it will be imported from Directus (assuming credentials have been set up)
+trtunitcrop <- harmonize_treatments_units()
 
 ```
+
 
 The full dataframe with all treatment components may be a little daunting. We made a function list_treatment_types_by_management_practice to help subset column names corresponding to particular management practices. This uses information in the site_treatment_type_info table. The function accepts this table as an argument, or fetches it from the database. 
 
