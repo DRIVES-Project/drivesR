@@ -44,7 +44,7 @@ were applied to which experimental units in which years.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">harmonize_treatments_units</span><span class="op">(</span>db <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">harmonize_treatments_units</span><span class="op">(</span>db <span class="op">=</span> <span class="cn">NULL</span>, maxyear <span class="op">=</span> <span class="fl">2022</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -55,6 +55,10 @@ were applied to which experimental units in which years.</p>
 <dd><p>A list of database tables containing named dataframes treatment_id_info,
 treatment_id_components, and experimental_unit_treatments.
 If left NULL, these tables are imported from Directus.</p></dd>
+
+
+<dt id="arg-maxyear">maxyear<a class="anchor" aria-label="anchor" href="#arg-maxyear"></a></dt>
+<dd><p>The maximum year to use for ongoing experiments. The default is 2022.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -76,7 +80,7 @@ If left NULL, these tables are imported from Directus.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

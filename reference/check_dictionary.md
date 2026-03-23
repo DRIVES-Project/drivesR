@@ -1,0 +1,45 @@
+# Check dictionary metadata for a database table.
+
+Check for discrepancies between collection metadata stored in Directus
+and in data dictionaries for a specified table. Conditions tested
+are: 1) The table_name is present in the column_dictionary. 2) The
+number of columns matches between the table schema and
+column_dictionary. 3) Column names match between the table schema and
+column_dictionary. 4) Column names are in the same order, as specified
+by the column_order field in in column_dictionary. 5) Data constraints
+coded in the column_dictionary match what is in the table schema. These
+constraints are: - data type - primary key - unique - nullable -
+autoincremented - foreign key tables and fields.
+
+## Usage
+
+``` r
+check_dictionary(
+  table_name = "site_info",
+  mytoken = getOption("drivesR.default.directustoken")
+)
+```
+
+## Arguments
+
+- table_name:
+
+  Table (collection) name.
+
+- mytoken:
+
+  API token, formatted as "Bearer apitoken"
+
+## Value
+
+A data frame with a set of conditions, outcome (TRUE = pass or FALSE =
+fails), and fields that fail the condition. In case of mismatched field
+names, there are separate columns for fields in the column_dictionary
+(dcols) and Directus table schema (tcols).
+
+## Examples
+
+``` r
+# set mytoken in function or with set_default_token()
+# Not run:  site_info_check <- check_dictionary(table_name = "site_info") 
+```

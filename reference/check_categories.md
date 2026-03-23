@@ -1,0 +1,64 @@
+# Check category dictionary
+
+Checks for discrepancies between the category dictionary and column
+dictionary and input data.
+
+## Usage
+
+``` r
+check_categories(
+  table_name = "site_info",
+  inputdf = NULL,
+  mytoken = getOption("drivesR.default.directustoken")
+)
+```
+
+## Arguments
+
+- table_name:
+
+  The table (collection) identifier
+
+- inputdf:
+
+  A data frame of prospective rows to be added to the table. If NULL,
+  the function checks the category and column dictionaries.
+
+- mytoken:
+
+  API token, formatted as "Bearer apitoken".
+
+## Value
+
+If inputdf = NULL, it returns a data frame describing conditions and
+outcomes corresponding to particular tables and fields. If inputdf is
+provided, it returns a list with a dataframe of conditions (checkdf) and
+a list of categorical values in the input data that are missing from the
+category dictionary. This list can be used to ammend the category
+dictionary.
+
+## Details
+
+First the function tests a set of preliminary conditions. Failure in any
+of these throws out an error message. 1) The table name is present in
+the column dictionary 2) The column dictionary for this table contains
+no category fields. 3) The table name is present in the category
+dictionary.
+
+If these conditions are met, the function checks for correspondence
+between the category dictionary and the column dictionary. These
+conditions are: 1) All column_name values in the category_dictionary are
+specified as categories in column_dictionary. 2) No fields are missing
+from category_dictionary
+
+If an input table is provided under the inputdf argument, the function
+checks that the contents of this table match what is in the category
+dictionary. The two conditions are: 1) No category columns are missing
+from inputdf. 2) All category levels in inputdf are present in
+category_dictionary.
+
+## Examples
+
+``` r
+#Not run: check_categories("site_info") 
+```

@@ -1,0 +1,114 @@
+# Create Directus Personal Access Token
+
+This function generates a personal access token (PAT) for a user who has
+been registered on data.drives-network.org. The PAT is an alternative to
+an API key, meant for short-term use within the API. There are two ways
+to generate a PAT. The first is to enter user credentials (email and
+password) to generate a new API session (fetch_option = "regenerate").
+The second is to extend an API session without re-entering credentials
+(fetch_option = "refresh"). The "regenerate" option is recommended for
+new users and users with a week or more of inactivity. The "refresh"
+option is recommended as a more secure option for users with a valid
+refresh token. The PAT expires after about 15 minutes. The refresh token
+expires after seven days.
+
+## Usage
+
+``` r
+generate_directus_pat(
+  useremail = NULL,
+  userpassword = NULL,
+  fetch_option = c("regenerate", "refresh", "load")[1],
+  refresh_token = NULL,
+  save = TRUE,
+  output_type = c("auth", "list")[1],
+  savedir = ".",
+  savename = "directus_PAT.txt",
+  myurl = getOption("drivesR.default.url")
+)
+```
+
+## Arguments
+
+- useremail:
+
+  Email address registered with data.drives-network.org. Not needed if
+  fetch_option = "refresh".
+
+- userpassword:
+
+  Account password. Not needed if fetch_option = "refresh".
+
+- fetch_option:
+
+  Options are "regenerate", "refresh", or "load". "regenerate" means
+  that a new personal access token and refresh token are generated for
+  the user. This option should be used for first-time access, or
+  "refresh" means that a new personal access token and refresh token are
+  generated without needing to re-enter user credentials. Previous PATs
+  and refresh tokens will not work after refreshing.
+
+- refresh_token:
+
+  An optional string input for the refresh token used to update the PAT.
+  Only applies if fetch_option = "refresh". If NULL, the refresh token
+  is read from the file specified in savedir and savename. Because the
+  refresh token is reset after each use, we recommend reading from a
+  file.
+
+- save:
+
+  If TRUE, the personal access token is saved to a file specified in
+  savedir and savename.
+
+- output_type:
+
+  If set to "auth" (default), the function returns a character string
+  ready for Directus API calls ("Bearer insertaccesstoken"). If set to
+  "list" the function returns a list of variables supplied by the
+  Directus API (expiration time, refresh_token, access_token). The list
+  output is included for troubleshooting and in case there is some issue
+  with saving data to files.
+
+- savedir:
+
+  Directory where the text file containing the personal access token
+  should be saved. Defaults to the working directory.
+
+- savename:
+
+  Name of the file containing the PAT. Default is directus_PAT.txt.
+
+- myurl:
+
+  Default url (data.drives-network.org)
+
+## Value
+
+Returns a text object "Bearer newPAT" that can be used as the input for
+set_default_token().
+
+## Details
+
+By default, this function saves and loads the PAT to and from an
+external file. This file should not be edited by the user. If you're
+using Git, be sure to add this file to your git ignore.
+
+## Examples
+
+``` r
+# to begin a new API session:
+#not run: mypat <- generate_directus_pat(useremail = "yourDirectusEmail", 
+#                                          userpassword = "yourDirectusPassword",
+#                                           fetch_option = "regenerate",
+#                                             savedir = "mysupersafefolder", # default is working directory
+#                                           savename = "directus_pat.txt")
+#
+#
+# to extend an existing API session:
+# not run: mypat <- generate_directus_pat(fetch_option = "refresh",
+#                                            savedir = "mysupersafefolder", # dir and 
+#                                           savename = "directus_pat.txt) # name must match initial run
+# not run: set_default_token(mypat)
+# not run: test_api_token(mypat) # to check if it works. 
+```
