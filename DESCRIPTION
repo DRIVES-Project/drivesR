@@ -25,7 +25,8 @@ Imports:
     tibble,
     purrr,
     tidyr,
-    sf
+    sf,
+    geojsonsf
 Depends: 
     R (>= 2.10)
 VignetteBuilder: knitr
