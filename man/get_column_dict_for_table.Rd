@@ -11,8 +11,6 @@ get_column_dict_for_table(
 )
 }
 \arguments{
-\item{table_name}{}
-
 \item{myurl}{Base url for the Directus database.}
 }
 \value{

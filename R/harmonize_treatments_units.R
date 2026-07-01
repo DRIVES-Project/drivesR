@@ -16,11 +16,11 @@
 #' @examples
 #' # not run: trt_units <- harmonize_treatment_units()
 harmonize_treatments_units <- function(db = NULL, maxyear = 2022){
-  trttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments")
+  trttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments","experimental_unit_info")
   if(!is.null(db)){
     if(any(!trttables %in% names(db))){
       stop("List supplied to db must contain data frames named treatment_id_info,
-           treatment_id_components, and experimental_unit_treatments.")
+           treatment_id_components, experimental_unit_treatments, and experimental_unit_info.")
     }
   }
   if(is.null(db)){
@@ -33,12 +33,14 @@ harmonize_treatments_units <- function(db = NULL, maxyear = 2022){
   tcw <- harmonize_treatments(db = db)
   ## add treatment_id info
   experimental_unit_treatments <- dplyr::left_join(db$experimental_unit_treatments, db$treatment_id_info)
+  ## add in the experimental replicate and parent unit id
+  experimental_unit_treatments <- dplyr::left_join(experimental_unit_treatments, dplyr::select(db$experimental_unit_info,unit_id,parent_unit_id, experimental_replicate))
   ## expand to a yearly time series and put treatment types in separate columns. 
-  yearly_unit_trt <- expand_years(experimental_unit_treatments, na_end_year = maxyear) %>%
-    tidyr::pivot_wider(id_cols = c('site_id',"unit_id","year"), 
+  yearly_unit_trt <- expand_years(experimental_unit_treatments, na_end_year = maxyear) |>
+    tidyr::pivot_wider(id_cols = c('site_id',"unit_id","parent_unit_id","experimental_replicate","year"), 
                        names_from = "treatment_id_type",
                        values_from = "treatment_id" )
   # merge yearly treatment components with yearly_unit_trt.
-  yearly_unit_trt2 <- left_join(yearly_unit_trt, tcw, by = c("site_id", "treatmentID1","treatmentID2", "year"))
+  yearly_unit_trt2 <- dplyr::left_join(yearly_unit_trt, tcw, by = c("site_id", "treatmentID1","treatmentID2", "year"))
   return(yearly_unit_trt2) 
 }# end function

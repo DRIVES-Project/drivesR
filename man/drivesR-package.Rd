@@ -18,5 +18,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Katherine Muller \email{katherine.muller@usda.gov} (\href{https://orcid.org/0000-0001-9144-3867}{ORCID})
 
+Authors:
+\itemize{
+  \item Katherine Muller \email{katherine.muller@usda.gov} (\href{https://orcid.org/0000-0001-9144-3867}{ORCID})
+}
+
 }
 \keyword{internal}
