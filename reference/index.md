@@ -100,6 +100,8 @@
   : Convert a dataframe or tibble to a json object suitable to insert
   rows (items) Basically just the jsonlite::toJSON function with options
   set to non-defaults for conventience
+- [`make_spatial_unitdf()`](https://drives-project.github.io/drivesR/reference/make_spatial_unitdf.md)
+  : Make a spatial dataframe for experimental units
 - [`make_template_df()`](https://drives-project.github.io/drivesR/reference/make_template_df.md)
   : Make a template data frame from a vector of column names
 - [`modify_rows()`](https://drives-project.github.io/drivesR/reference/modify_rows.md)

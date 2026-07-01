@@ -47,6 +47,7 @@ A list of json objects. This list must be subsetted to use in api calls
 ## Examples
 
 ``` r
+
 #testrel <- make_relations_json(columndf = 
  #                                 test_column_dict[
   #                                which(test_column_dict$table_name=="test_favorite_toy"),],

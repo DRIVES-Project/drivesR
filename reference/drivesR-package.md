@@ -14,3 +14,8 @@ Useful links:
 
 **Maintainer**: Katherine Muller <katherine.muller@usda.gov>
 ([ORCID](https://orcid.org/0000-0001-9144-3867))
+
+Authors:
+
+- Katherine Muller <katherine.muller@usda.gov>
+  ([ORCID](https://orcid.org/0000-0001-9144-3867))

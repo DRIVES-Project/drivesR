@@ -31,6 +31,7 @@ To install the drivesR package, use the install_github function from the
 devtools package.
 
 ``` r
+
 devtools::install_github("DRIVES-project/drivesR", ref = "main")
 library(drivesR)
 ```
@@ -75,6 +76,7 @@ run this in the console or import your password from a non-indexed
 location.
 
 ``` r
+
 generate_directus_pat(useremail = "myemail@fake.com", 
                       userpassword = "mysupersecurepassword",
                       savedir = ".", # default is the working directory.  
@@ -93,6 +95,7 @@ For example, you can source an R script with the following code,
 replacing MYAPI key with your string of letters and numbers:
 
 ``` r
+
 directus_token <- "Bearer MYAPIKEY"
 ```
 
@@ -103,6 +106,7 @@ these lines of code at the beginning of every any script that downloads
 DRIVES tables:
 
 ``` r
+
 library(drivesR)
 directus_token <- read_directus_pat("directus_PAT.txt")
 set_default_token(directus_token)
@@ -121,6 +125,7 @@ tables
     names as inputs.
 
 ``` r
+
 crop_info <- get_db_table("crop_info")
 #> Error in curl::curl_fetch_memory(url, handle = handle): Could not resolve hostname [https]: Could not resolve host: https
 str(crop_info)
@@ -132,6 +137,7 @@ this code after the package is loaded (this excludes dictionary tables
 that are available without an API key).
 
 ``` r
+
 options("drivesR.default.tablevec")
 #> $drivesR.default.tablevec
 #>  [1] "crop_info"                    "crop_variety_info"            "crop_yields"                  "experimental_unit_info"      
@@ -151,6 +157,7 @@ will download all tables available to your user role. You can also
 provide a vector of table names.
 
 ``` r
+
 db <- import_db_tables(tablevec =  c("crop_yields","site_info","experimental_unit_treatments"))
 ```
 
@@ -167,6 +174,7 @@ into a list in your global R environment and saved as an RData file on
 your local directory:
 
 ``` r
+
 db <- import_db_tables(fetch_option = "download.save",
                        #fetch_option = "upload",
                        savedir = "data",
@@ -177,6 +185,7 @@ Then, you can move the comment and rerun the same code to load the
 tables from the local directory:
 
 ``` r
+
 db <- import_db_tables(#fetch_option = "download.save",
                        fetch_option = "upload",
                        savedir = "data",
@@ -216,6 +225,7 @@ Users who plan to work with the data tables outside of R may want to
 save the tables into separate CSV files locally:
 
 ``` r
+
 db <- import_db_tables(fetch_option = "save.only",
                        save_option = "csv",
                        savedir = "myChosenFolder",
@@ -236,6 +246,7 @@ Dictionary tables can be downloaded individually, using the
 *import_dictionary_tables*.
 
 ``` r
+
 ## separate:
 table_dictionary <- get_db_table("table_dictionary")
 column_dictionary <- get_db_table("column_dictionary")
@@ -253,6 +264,7 @@ in Directus. See <https://directus.io/docs/api>. For more information on
 the Directus API.
 
 ``` r
+
 table_dict_info <- get_db_info(mytarget = "collections/table_dictionary",
                              output_format = "json")
 #> Error in curl::curl_fetch_memory(url, handle = handle): Could not resolve hostname [https]: Could not resolve host: https
@@ -286,6 +298,7 @@ an argument. Otherwise, the function downloads the table using the
 Directus API.
 
 ``` r
+
 ## without pre-downloaded tables:
 yields <- harmonize_yields()
 ## with pre-downloaded tables:
@@ -301,6 +314,7 @@ provides the option to keep crop fractions from the same crop/unit/year
 (e.g. grain and straw) in separate rows, to rearrange them into columns.
 
 ``` r
+
 ## crop fractions in rows
 #crop_yields <- get_db_table("crop_yields")
 yields <- harmonize_yields(db$crop_yields) # could be a separate dataframe or part of a list
@@ -402,6 +416,7 @@ If those are not provided, it fetches those tables from the Directus
 database.
 
 ``` r
+
 ## tables provided
 trt <- harmonize_treatments(db) # db is a named list with 'treatment_id_info' and 'treatment_id_components'
 
@@ -416,6 +431,7 @@ Similar to other harmonization functions, it accepts a named list or
 fetches tables from the database.
 
 ``` r
+
 ## tables provided
 trtunit <- harmonize_treatments_units(db) # db is a named list with 'treatment_id_info', 'treatment_id_components', and 'experimental_unit_treatments'
 
@@ -430,6 +446,7 @@ function is useful for making template cropping sequences. It also
 contains most of the columns from the rotation_phases table.
 
 ``` r
+
 ## tables provided
 trtunitcrop <- harmonize_treatments_units_crops(db) 
 # db is  A named list containing the database tables "treatment_id_info","treatment_id_components","experimental_unit_info",
@@ -448,6 +465,7 @@ The function accepts this table as an argument, or fetches it from the
 database.
 
 ``` r
+
 trt <- harmonize_treatments(db)
 #> Joining with `by = join_by(treatment_id)`
 trtlist <- list_treatments_by_management_practice(db)
@@ -486,6 +504,7 @@ Like other harmonization functions, it can accept the planting_info
 table as an input or fetch it from the database.
 
 ``` r
+
 #planting_info <- get_db_table("planting_info") # can be a separate table or part of a list.
 p1 <- harmonize_planting_info(db$planting_info, replant_dates = "latest",include_component_crops = TRUE)
 dim(p1)
@@ -554,6 +573,7 @@ Like other harmonization functions, it can accept the harvest_dates
 table as an input or fetch it from the database
 
 ``` r
+
 #harvest_dates <- get_db_table("harvest_dates")# can be a separate table or part of a list.
 h1 <- harmonize_harvest_dates(db$harvest_dates, crop_fractions_as_columns = FALSE)
 dim(h1)
@@ -602,6 +622,7 @@ reorganize them into columns. It can operate on a list of pre-downloaded
 tables, or fetch the tables from Directus.
 
 ``` r
+
 # db <- import_db_tables(c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields"),fetch_option = "download.only")
 hyt <- harmonize_yields_treatments(db, crop_fractions_as_columns = TRUE) 
 #> Joining with `by = join_by(treatment_id)`
@@ -657,6 +678,7 @@ separate columns, as in *harmonize_harvest_dates*. Multiple fractions
 per crop are included as separate columns with suffixes \_f1, \_f2, etc.
 
 ``` r
+
 names(db) # full list including yield, planting, and harvest data. 
 #>  [1] "crop_info"                    "crop_variety_info"            "crop_yields"                  "experimental_unit_info"      
 #>  [5] "experimental_unit_treatments" "harvest_dates"                "planting_info"                "rotation_id_info"            
@@ -698,6 +720,7 @@ the database and puts them all together. You can provide a list of
 previously downloaded database tables as an input.
 
 ``` r
+
 monsterdf <- harmonize_yields_planting_harvest_treatments(db)
 #> Joining with `by = join_by(treatment_id)`
 #> Joining with `by = join_by(treatment_id)`

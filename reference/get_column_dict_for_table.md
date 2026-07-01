@@ -14,8 +14,6 @@ get_column_dict_for_table(
 
 ## Arguments
 
-- table_name:
-
 - myurl:
 
   Base url for the Directus database.
