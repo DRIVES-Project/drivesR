@@ -10,3 +10,5 @@ vignettes/images
 ^docs$
 ^pkgdown$
 ^\.github$
+^\.positai$
+^\.claude$
