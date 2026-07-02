@@ -13,7 +13,7 @@
 #' 
 harmonize_yields_planting_harvest_treatments <- function(db = NULL){
   # test input
-  dbtables <- c("crop_yields","harvest_dates","planting_info","treatment_id_info","treatment_id_components","experimental_unit_treatments")
+  dbtables <- c("crop_yields","harvest_dates","planting_info","treatment_id_info","treatment_id_components","experimental_unit_treatments","experimental_unit_info")
   if(!is.null(db)){
     if(any(!dbtables %in% names(db))){
       stop(paste0("List supplied to db must contain data frames named ",paste(dbtables, collapse=", ") ))

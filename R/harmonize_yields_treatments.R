@@ -22,7 +22,7 @@
 harmonize_yields_treatments <- function(
     db = NULL,
     crop_fractions_as_columns = FALSE){
-  ytrttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields")
+  ytrttables <- c("treatment_id_info","treatment_id_components","experimental_unit_treatments","crop_yields","experimental_unit_info")
   if(!is.null(db)){
     if(any(!ytrttables %in% names(db))){
       stop(paste0("List supplied to db must contain data frames named ",paste(ytrttables, collapse=", ") ))
